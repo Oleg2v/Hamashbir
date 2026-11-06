@@ -1,5 +1,6 @@
 import { Num } from '@/components/ui/Num';
 import { NumText } from '@/components/ui/NumText';
+import { ScrollRegion } from '@/components/ui/ScrollRegion';
 import { aerialPhotos, covered, desertEdge, orchard, type AerialPhoto } from '@/data/imagery';
 import { cn } from '@/lib/cn';
 import { Credit, Photo } from './photo';
@@ -73,14 +74,18 @@ export function Gallery() {
         <Photo photo={desertEdge} ratio="21/9" phoneRatio="4/3" slot="full" />
         <Caption photo={desertEdge} wide />
       </figure>
-      <div className="-mx-(--page-margin) flex snap-x snap-mandatory gap-(--gutter) overflow-x-auto px-(--page-margin) pb-2 md:mx-0 md:grid md:grid-cols-2 md:gap-y-12 md:overflow-visible md:px-0 md:pb-0">
+      {/* a swipe row on phones, a two-column grid from md; reachable by keyboard while it scrolls */}
+      <ScrollRegion
+        label="צילומי אוויר: מטע וגידול מכוסה"
+        className="-mx-(--page-margin) flex snap-x snap-mandatory gap-(--gutter) overflow-x-auto px-(--page-margin) pb-2 focus-visible:[outline-offset:calc(-1*var(--focus-w))] md:mx-0 md:grid md:grid-cols-2 md:gap-y-12 md:overflow-visible md:px-0 md:pb-0"
+      >
         {[orchard, covered].map((p) => (
           <figure key={p.id} className="grid w-[82vw] shrink-0 snap-start content-start gap-5 md:w-auto">
             <Photo photo={p} ratio="4/3" slot="duo" />
             <Caption photo={p} />
           </figure>
         ))}
-      </div>
+      </ScrollRegion>
       <Sources />
     </div>
   );
