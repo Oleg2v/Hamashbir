@@ -134,6 +134,21 @@ specimens. Anything that reads as a heading is marked up as one.
 - Targets ≥ 44px (`--target`), 56px in sun mode.
 - Colour is never the only signal — chips pair a dot with words.
 - Decorative SVG: `aria-hidden`. Informative SVG: `role="img"` + Hebrew `aria-label`.
+- Fixed chrome never hides focus: `scroll-padding-block-start` follows the
+  header's measured height (`--header-h`, set by TileHeader, rail included),
+  `scroll-padding-block-end` the toast stack (`--toast-stack-h`). Don't
+  hard-code either.
+- In-page navigation moves focus to the target section's h2 after the jump
+  (the browser's own fragment navigation would leave it on `<body>`). A
+  container that holds focus is never collapsed or made `inert`.
+- A restyle that changes heights above the viewport (sun mode) keeps the
+  reader's place: `holdPlace()` in `src/lib/sun-mode.ts`.
+- Toasts: plain ones live `toastLifetime` (6s); with an action, or an error,
+  they stay until closed. All timers pause while the pointer or focus is in
+  the stack. Escape closes, Alt+T focuses the newest one, and focus returns
+  to the trigger, even from a follow-up toast. A phone shows one at a time.
+- Stepper (`NumberField`): − and + move along the step grid, PageUp/PageDown
+  ×10, no exponent notation; errors wait for blur, except out-of-range.
 
 ## Demo hygiene and safety
 
