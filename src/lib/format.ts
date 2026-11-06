@@ -24,7 +24,7 @@ export function formatMoney(n: number, { decimals = 2 }: { decimals?: number } =
   return `₪ ${formatNumber(n, decimals)}`;
 }
 
-/** 6 Nov 2026 → "06.11.2026" — the Israeli numeric date. */
+/** 6 Nov 2026 → "06.11.2026" – the Israeli numeric date. */
 export function formatDate(d: Date) {
   const p = (x: number) => String(x).padStart(2, '0');
   return `${p(d.getDate())}.${p(d.getMonth() + 1)}.${d.getFullYear()}`;

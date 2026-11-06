@@ -20,12 +20,28 @@ const parts: Record<string, () => React.ReactNode> = {
     </div>
   ),
   ashushit: () => (
-    <div className="wrap grid gap-10 py-16 md:grid-cols-2">
-      <div className="card p-6">
-        <Ashushit variant="assembled" labels className="w-full" />
+    <div className="wrap grid gap-10 py-16">
+      <div className="grid gap-10 md:grid-cols-2">
+        <div className="card p-6">
+          <Ashushit variant="assembled" labels className="w-full" />
+        </div>
+        <div className="card p-6">
+          <Ashushit variant="exploded" labels className="w-full" />
+        </div>
       </div>
-      <div className="card p-6">
-        <Ashushit variant="exploded" labels className="w-full" />
+      {/* product-card composition (labels={false}) at 320 and 420px, paper and soil */}
+      <div className="flex flex-wrap gap-6">
+        {(['paper', 'soil'] as const).map((s) => (
+          <div key={s} data-surface={s} className="flex flex-wrap gap-6 rounded-lg p-6">
+            {[320, 420].map((w) => (
+              <article key={w} className="card" style={{ inlineSize: w }}>
+                <div className="card__media dot-grid">
+                  <Ashushit labels={false} />
+                </div>
+              </article>
+            ))}
+          </div>
+        ))}
       </div>
     </div>
   ),
@@ -57,5 +73,10 @@ export default async function LabPage({ params }: { params: Promise<{ part: stri
   const { part } = await params;
   const render = parts[part];
   if (!render) notFound();
-  return <main id="main">{render()}</main>;
+  return (
+    <main id="main">
+      <h1 className="sr-only">מעבדה · {part}</h1>
+      {render()}
+    </main>
+  );
 }

@@ -1,7 +1,7 @@
 import type { ReactNode, SVGProps } from 'react';
 
 /**
- * UI icon set — 24px grid, 1.75 stroke, round caps, currentColor.
+ * UI icon set – 24px grid, 1.75 stroke, round caps, currentColor.
  * Directional icons are drawn for RTL ("forward" points left) and carry
  * `data-dir-icon` so an LTR context can mirror them.
  * Agronomic/stage icons live in components/illustrations.

@@ -2,7 +2,7 @@ import { Num } from '@/components/ui/Num';
 import { ergonomics, layout, space } from '@/design/tokens';
 import { Block, Section } from './Section';
 
-/** A 1:1 ruler: minor tick every 4px, major tick every 16px — the grid itself. */
+/** A 1:1 ruler: minor tick every 4px, major tick every 16px – the grid itself. */
 const ruler = {
   backgroundImage: [
     'repeating-linear-gradient(to left, var(--ink) 0 1px, transparent 1px 0.25rem)',
@@ -117,7 +117,7 @@ export function SpaceSection() {
       id="space"
       intro={
         <p>
-          רשת של 4 פיקסלים, כמו שורות שתילה: מרווח קבוע, צמיחה צפויה. כל מידה בממשק היא כפולה של 4 — ריפוד, רווח,
+          רשת של 4 פיקסלים, כמו שורות שתילה: מרווח קבוע, צמיחה צפויה. כל מידה בממשק היא כפולה של 4 – ריפוד, רווח,
           גובה שורה, גודל מטרה. הסולם שלמטה מוצג בקנה מידה 1:1.
         </p>
       }

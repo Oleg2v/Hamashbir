@@ -50,7 +50,7 @@ export function TileHeader() {
       )}
     >
       <div className="wrap flex min-h-18 items-center justify-between gap-6">
-        <a href="#hero" className="no-underline" aria-label="המשביר לחקלאי · העונה שלך — לראש העמוד">
+        <a href="#hero" className="no-underline" aria-label="המשביר לחקלאי · העונה שלך – לראש העמוד">
           <Wordmark />
         </a>
         <nav aria-label="סעיפי הסטייל טייל" className="hidden xl:block">

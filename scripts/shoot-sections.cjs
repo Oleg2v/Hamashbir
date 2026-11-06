@@ -72,7 +72,7 @@ const maxH = Number(opt('maxH', 1400));
     const dir = path.join(out, tag);
     fs.mkdirSync(dir, { recursive: true });
     const full = path.join(dir, '_full.png');
-    await page.screenshot({ path: full, fullPage: true });
+    await page.screenshot({ path: full, fullPage: true, animations: 'disabled' });
 
     const jobs = [];
     boxes.forEach((b, n) => {

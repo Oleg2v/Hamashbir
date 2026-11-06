@@ -9,7 +9,7 @@ type FieldProps = Omit<ComponentPropsWithoutRef<'input'>, 'prefix'> & {
   /** Unit shown at inline-end, e.g. "דונם". Announced via aria-describedby. */
   suffix?: ReactNode;
   prefix?: ReactNode;
-  /** Mono, tabular, LTR value — quantities, dunams, prices. */
+  /** Mono, tabular, LTR value – quantities, dunams, prices. */
   numeric?: boolean;
   force?: 'hover' | 'focus';
 };

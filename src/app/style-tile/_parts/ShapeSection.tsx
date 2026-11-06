@@ -2,7 +2,7 @@ import { Num } from '@/components/ui/Num';
 import { elevations, radii } from '@/design/tokens';
 import { Block, Section } from './Section';
 
-/* Static class maps — Tailwind only sees complete class names in source. */
+/* Static class maps – Tailwind only sees complete class names in source. */
 const radiusClass: Record<keyof typeof radii, string> = {
   none: 'rounded-none',
   xs: 'rounded-xs',
@@ -71,7 +71,7 @@ function Glows() {
         </div>
         <figcaption className="text-caption">
           <Num className="font-medium">shadow-glow-sprout</Num>
-          <span className="block text-ink-2">פעולה אחת בכל מסך זוהרת — ורק היא</span>
+          <span className="block text-ink-2">פעולה אחת בכל מסך זוהרת – ורק היא</span>
         </figcaption>
       </figure>
       <figure className="grid gap-4">
@@ -138,7 +138,7 @@ function Lines() {
         <span className="block h-12 border-b-2 border-black" aria-hidden="true" />
         <span className="text-caption">
           <Num className="font-medium">sun · 2px</Num>
-          <span className="block text-ink-2">במצב שמש אין צללים — רק קווים</span>
+          <span className="block text-ink-2">במצב שמש אין צללים – רק קווים</span>
         </span>
       </li>
     </ul>
@@ -152,7 +152,7 @@ export function ShapeSection() {
       intro={
         <p>
           רך לשדה, חד לנתונים: כפתורים וצ׳יפים מעוגלים לגמרי, כרטיסים <Num>20</Num>, שדות <Num>12</Num>, שורות טבלה
-          ישרות. עומק בא מחומר — צללים חמים בגוון אדמה, לא אפור — ובמצב שמש הוא מתחלף בקו.
+          ישרות. עומק בא מחומר – צללים חמים בגוון אדמה, לא אפור – ובמצב שמש הוא מתחלף בקו.
         </p>
       }
     >

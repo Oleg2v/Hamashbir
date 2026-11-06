@@ -100,7 +100,13 @@
     inset: calc(var(--bw) * -1);
     background: var(--bud);
     clip-path: circle(calc(var(--btn-bud) / 2) at var(--fill-x) 50%);
-    transition: clip-path var(--dur-slow) var(--ease-out-quint);
+    /* Opacity 0 at rest: contrast checkers ignore clip-path and would read the
+       hidden fill as the label's background. It becomes opaque instantly when
+       the sprout starts to grow, and clears only after it has shrunk back. */
+    opacity: 0;
+    transition:
+      clip-path var(--dur-slow) var(--ease-out-quint),
+      opacity 0s linear var(--dur-slow);
   }
 
   [dir='ltr'] .btn__fill {
@@ -115,8 +121,13 @@
 
   .btn--primary:hover:not(:disabled, [aria-disabled='true']) .btn__fill,
   .btn--primary:focus-visible .btn__fill,
-  .btn--primary[data-force='hover'] .btn__fill {
+  .btn--primary[data-force='hover'] .btn__fill,
+  .btn--primary[data-force='focus'] .btn__fill {
     clip-path: circle(150% at var(--fill-x) 50%);
+    opacity: 1;
+    transition:
+      clip-path var(--dur-slow) var(--ease-out-quint),
+      opacity 0s;
   }
 
   .btn--primary:hover:not(:disabled, [aria-disabled='true']) .btn__bud svg,
@@ -132,10 +143,6 @@
 
   .btn--primary[data-force='focus'] {
     color: var(--bud-ink);
-  }
-
-  .btn--primary[data-force='focus'] .btn__fill {
-    clip-path: circle(150% at var(--fill-x) 50%);
   }
 
   /* Secondary — outlined, quiet. */

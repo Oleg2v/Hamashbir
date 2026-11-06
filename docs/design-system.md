@@ -50,9 +50,25 @@ Use `.wrap` for the page container (max 1440px, responsive margins).
   (right) and progress toward inline-end (left). "Forward" arrows point left.
 - Every number goes through `<Num>` (a `<bdi>`, mono, tabular). Units stay
   Hebrew and outside: `<Num>40</Num> דונם`.
-- Punctuation: gershayim ״ and geresh ׳ (מ״מ, ק״מ, ג׳) — never straight
-  quotes; en dash with spaces for clauses ( – ); maqaf joins a prefix to a
-  digit (ב־14, ל־5,000). No letter-spacing on Hebrew. Body line-height 1.6.
+- Punctuation: gershayim ״ and geresh ׳ (מ״מ, ק״מ, ג׳) for abbreviations —
+  never straight quotes; quotation marks are „…” (never ״…״); en dash with
+  spaces for clauses, and the space *before* it is non-breaking
+  (`&nbsp;– `) so a dash never opens a line; maqaf joins a prefix to a digit
+  (ב־14, ל־5,000). No letter-spacing on Hebrew. Body line-height 1.6,
+  measure 45–75 characters.
+- A number and its unit or counted noun are joined by a no-break space:
+  `<Num>40</Num>&nbsp;דונם`.
+- Numbers are set in IBM Plex Mono for a functional reason: Assistant's digits
+  are proportional and the font has no `tnum`, so `tabular-nums` does nothing
+  there (measured: 1111 is ~9% narrower than 8888).
+- Bidi: without isolation a frost alert "−2°" renders as "2°−" and a range
+  "40–60" flips to "60–40". That is why every number is a `<bdi>`.
+- **The `<Num>` positioning trap:** `<Num>` renders `<bdi dir="ltr">`, so
+  logical insets, `text-start/end` and self-alignment on the `<Num>` itself
+  resolve against LTR and mirror. Never put positioning or inline-alignment
+  classes on `<Num>` — position a wrapper `<span>` and put `<Num>` inside.
+  (The `--start/--end/--dir-sign` helpers are scoped with `:not(bdi)` so a
+  number keeps the page's direction.)
 - No lorem ipsum, no Latin eyebrows in product UI.
 
 ## Motion
@@ -60,6 +76,8 @@ Use `.wrap` for the page container (max 1440px, responsive margins).
 - UI responses: `ease-out-quint`, ≤ 400ms. Big reveals and count-ups:
   `ease-out-expo`. Camera/scroll scenes: `ease-in-out-quart`. Growth (bars,
   sprouts, NDVI sweeps): `ease-growth`. Exits: `ease-in-quint`, short.
+- Each easing carries its product `pace` (the duration it is paired with) in
+  tokens.ts; the magnetic CTA's tuning is `magnet` in tokens.ts.
 - Stagger rows by 40ms, never more than 480ms in total (`staggerDelay`).
 - `prefers-reduced-motion: reduce` collapses all `--dur-*` to 1ms. JS
   animation must check the media query and jump to the final state.

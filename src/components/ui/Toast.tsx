@@ -34,7 +34,7 @@ const icons: Record<ToastTone, ReactNode> = {
   error: <AlertIcon size={18} strokeWidth={2} />,
 };
 
-/** Presentational toast — used live by the provider and statically on the style tile. */
+/** Presentational toast – used live by the provider and statically on the style tile. */
 export function ToastCard({
   tone,
   title,

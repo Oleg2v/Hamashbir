@@ -12,7 +12,7 @@ import { TypeSection } from './_parts/TypeSection';
 
 export const metadata: Metadata = {
   title: 'סטייל טייל',
-  description: 'שלב 0 — כיוון אמנותי לפורטל החקלאי "העונה שלך": צבע, טיפוגרפיה, מרווח, צורה, תנועה ורכיבים.',
+  description: 'שלב 0 – כיוון אמנותי לפורטל החקלאי "העונה שלך": צבע, טיפוגרפיה, מרווח, צורה, תנועה ורכיבים.',
 };
 
 export default function StyleTilePage() {

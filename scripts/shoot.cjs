@@ -9,6 +9,8 @@
  *
  * --scroll takes percentages of the scrollable height (one shot per value).
  * --selector screenshots just that element (full element, scrolled into view).
+ * Finite CSS animations are jumped to their end state (animations: 'disabled').
+ * Note: under mobile emulation a --full capture briefly reports (pointer: fine).
  * --axe injects axe-core from node_modules if present and prints violations.
  */
 const { chromium } = require('playwright');
@@ -76,7 +78,7 @@ const clean = !!opt('clean', false); // hide fixed chrome (header, badge, skip l
       await el.scrollIntoViewIfNeeded();
       await page.waitForTimeout(wait);
       const file = path.join(out, `${tag}-${String(selector).replace(/[^a-z0-9]+/gi, '')}.png`);
-      await el.screenshot({ path: file });
+      await el.screenshot({ path: file, animations: 'disabled' });
       console.log(file);
     } else if (scroll) {
       const stops = String(scroll).split(',').map(Number);
@@ -87,12 +89,12 @@ const clean = !!opt('clean', false); // hide fixed chrome (header, badge, skip l
         }, pct);
         await page.waitForTimeout(wait);
         const file = path.join(out, `${tag}-s${String(pct).padStart(3, '0')}.png`);
-        await page.screenshot({ path: file });
+        await page.screenshot({ path: file, animations: 'disabled' });
         console.log(file);
       }
     } else {
       const file = path.join(out, `${tag}${full ? '-full' : ''}.png`);
-      await page.screenshot({ path: file, fullPage: full });
+      await page.screenshot({ path: file, fullPage: full, animations: 'disabled' });
       console.log(file);
     }
 
@@ -106,7 +108,6 @@ const clean = !!opt('clean', false); // hide fixed chrome (header, badge, skip l
       if (axePath) {
         await page.addScriptTag({ path: axePath });
         const res = await page.evaluate(async () => {
-          // eslint-disable-next-line no-undef
           const r = await axe.run(document, { resultTypes: ['violations'] });
           return r.violations.map((v) => ({
             id: v.id,

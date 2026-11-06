@@ -16,8 +16,9 @@
     --dir-sign: -1; /* multiply x-translations so "forward" moves toward inline-end */
   }
 
+  /* <Num> is a <bdi dir="ltr"> — it must keep the page's (RTL) helpers. */
   :root:dir(ltr),
-  [dir='ltr'] {
+  [dir='ltr']:not(bdi) {
     --start: left;
     --end: right;
     --dir-sign: 1;

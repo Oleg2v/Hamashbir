@@ -80,7 +80,7 @@ function ButtonsOnSoil() {
         </Button>
       </div>
       <p className="max-w-[60ch] text-caption text-ink-2">
-        הבוטון בקצה הכפתור הוא זרע: בריחוף או בפוקוס הוא נובט וממלא את הכפתור ב־<Num>400ms</Num>. החץ פונה שמאלה —
+        הבוטון בקצה הכפתור הוא זרע: בריחוף או בפוקוס הוא נובט וממלא את הכפתור ב־<Num>400ms</Num>. החץ פונה שמאלה –
         קדימה, בעברית.
       </p>
     </div>
@@ -139,7 +139,7 @@ function ProductCard() {
   return (
     <Card interactive className="max-w-[26rem]">
       <CardMedia className="dot-grid">
-        <Ashushit variant="assembled" labels={false} className="h-[86%] w-auto text-ink" />
+        <Ashushit variant="assembled" labels={false} />
       </CardMedia>
       <CardBody>
         <div className="flex flex-wrap gap-2">
@@ -214,7 +214,9 @@ function StageCard() {
           <div className="flex items-baseline justify-between text-caption">
             <span className="inline-flex items-center gap-2 font-semibold">
               <span className="size-2 rounded-full bg-sprout" aria-hidden="true" />
-              במלאי ב־<Num>14</Num> סניפים
+              <span>
+                במלאי ב־<Num>14</Num>&nbsp;סניפים
+              </span>
             </span>
             <span className="text-ink-2">
               כיסוי <Num>{Math.round(coverage * 100)}%</Num>
@@ -483,7 +485,7 @@ function Toasts() {
         </li>
       </ul>
       <div className="grid gap-3">
-        <p className="text-caption font-bold">נסו בעצמכם — ההודעות האמיתיות של המערכת</p>
+        <p className="text-caption font-bold">נסו בעצמכם – ההודעות האמיתיות של המערכת</p>
         <ToastDemo />
         <p className="max-w-[62ch] text-caption text-ink-2">
           הודעות הצלחה נעלמות אחרי <Num>6</Num> שניות ועוצרות בריחוף או בפוקוס; שגיאות נשארות עד שסוגרים. ההכרזה לקורא
@@ -501,12 +503,12 @@ export function ComponentsSection() {
       intro={
         <p>
           שישה רכיבים שנושאים את כל האפליקציה. כל אחד נבנה מקלדת־תחילה ו־RTL־תחילה, עם מצבי ריחוף, פוקוס, לחיצה,
-          השבתה וטעינה — ועובד על נייר, על אדמה ובמצב שמש.
+          השבתה וטעינה – ועובד על נייר, על אדמה ובמצב שמש.
         </p>
       }
     >
       <div className="grid gap-20 lg:gap-28">
-        <Block title="כפתור" note="ראשי · משני · שקט · אייקון — שישה מצבים">
+        <Block title="כפתור" note="ראשי · משני · שקט · אייקון – שישה מצבים">
           <div className="grid gap-10 lg:grid-cols-12">
             <div className="lg:col-span-7">
               <ButtonMatrix />
@@ -532,7 +534,7 @@ export function ComponentsSection() {
           <Chips />
         </Block>
 
-        <Block title="שורת טבלה" note="נבחרת · בריחוף · דורשת אגרונום · רגילה — ובנייד: כרטיסים">
+        <Block title="שורת טבלה" note="נבחרת · בריחוף · דורשת אגרונום · רגילה – ובנייד: כרטיסים">
           <PlanTable />
         </Block>
 

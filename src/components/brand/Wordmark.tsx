@@ -3,7 +3,7 @@ import { cn } from '@/lib/cn';
 /**
  * Concept mark: a seed split into two cotyledons above the soil line.
  * (Stage 1's preloader morphs a seed into exactly this shape.)
- * Not the client's registered logo — a pitch-concept lockup.
+ * Not the client's registered logo – a pitch-concept lockup.
  */
 export function SproutMark({ size = 32, className }: { size?: number; className?: string }) {
   return (

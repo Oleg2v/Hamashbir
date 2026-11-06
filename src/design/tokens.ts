@@ -1,11 +1,11 @@
 /**
- * העונה שלך — design tokens. Single source of truth.
+ * העונה שלך – design tokens. Single source of truth.
  *
  * `npm run tokens` (scripts/build-tokens.ts) compiles this file into
  * src/styles/tokens.css (Tailwind v4 @theme + semantic surface variables).
  * /style-tile renders its documentation from these same objects, so what the
  * style tile shows is exactly what ships. JS consumers (GSAP, three.js shaders,
- * charts) import from here too — never hard-code a hex or a duration.
+ * charts) import from here too – never hard-code a hex or a duration.
  *
  * Keep this file dependency-free: the build script imports it directly.
  */
@@ -26,7 +26,7 @@ export const palette = {
 export type PaletteKey = keyof typeof palette;
 
 /**
- * Usage proportions — how much of a typical screen each colour may occupy.
+ * Usage proportions – how much of a typical screen each colour may occupy.
  * Sprout is an accent, not a fill: if it covers more than ~5% it stops
  * meaning "act here".
  */
@@ -42,7 +42,7 @@ export const proportions: Array<{ key: PaletteKey; share: number }> = [
 ];
 
 /**
- * NDVI ramp — the data motif. Bare soil → sparse → dense canopy.
+ * NDVI ramp – the data motif. Bare soil → sparse → dense canopy.
  * Interpolated in OKLCH so the mid-tones stay luminous instead of muddy.
  */
 export const ndvi = {
@@ -55,7 +55,7 @@ export const ndvi = {
   ticks: [0, 0.2, 0.4, 0.6, 0.8, 1],
 } as const;
 
-/** The season spine — five stages, one colour each, used everywhere. */
+/** The season spine – five stages, one colour each, used everywhere. */
 export const stages = [
   { id: 'sow', he: 'זריעה', en: 'Sow', color: 'sprout', dept: 'זרעים ושתילים' },
   { id: 'irrigate', he: 'השקיה', en: 'Irrigate', color: 'water', dept: 'השקייה ותשתיות' },
@@ -78,7 +78,7 @@ export type StageId = (typeof stages)[number]['id'];
  * Every component reads semantic variables only. A `data-surface` attribute
  * swaps the whole set locally (nested surfaces just work, because custom
  * properties inherit). Sun mode overrides every surface at once.
- * All text pairs below are ≥ 4.5:1, all `lineStrong` pairs ≥ 3:1 — see the
+ * All text pairs below are ≥ 4.5:1, all `lineStrong` pairs ≥ 3:1 – see the
  * contrast matrix on /style-tile.
  */
 export const surfaces = {
@@ -141,7 +141,7 @@ export const surfaces = {
     elevOverlay: '0 32px 80px -24px rgb(0 0 0 / 0.8)',
     elevInset: 'inset 0 1px 2px rgb(0 0 0 / 0.35)',
   },
-  /** מצב שמש — outdoor, noon, gloves. Max contrast, no shadows, 2px lines. */
+  /** מצב שמש – outdoor, noon, gloves. Max contrast, no shadows, 2px lines. */
   sun: {
     canvas: '#FFFFFF',
     surface: '#FFFFFF',
@@ -301,7 +301,7 @@ export const elevations = [
   { name: 'inset', varName: 'elevInset', he: 'שקוע', use: 'שדות, בארות נתונים' },
 ] as const;
 
-/** Emissive glows — light as information (water = blue light). */
+/** Emissive glows – light as information (water = blue light). */
 export const glows = {
   sprout: '0 0 0 1px rgb(183 224 74 / 0.55), 0 0 28px 2px rgb(183 224 74 / 0.32)',
   water: '0 0 0 1px rgb(63 169 245 / 0.55), 0 0 28px 2px rgb(63 169 245 / 0.42)',
@@ -336,30 +336,35 @@ type Bezier = readonly [number, number, number, number];
 
 export const easings = {
   'out-quint': {
+    pace: 'base' as DurationKey,
     bezier: [0.22, 1, 0.36, 1] as Bezier,
     gsap: 'power4.out',
     he: 'ברירת המחדל של הממשק',
     use: 'תגובות, ריחוף, כניסות',
   },
   'out-expo': {
+    pace: 'season' as DurationKey,
     bezier: [0.16, 1, 0.3, 1] as Bezier,
     gsap: 'expo.out',
     he: 'חשיפה גדולה',
     use: 'כניסת עמוד, ספירת מספרים',
   },
   'in-out-quart': {
+    pace: 'grow' as DurationKey,
     bezier: [0.76, 0, 0.24, 1] as Bezier,
     gsap: 'power3.inOut',
     he: 'תנועת מצלמה',
     use: 'מעברי עמוד, סצנות גלילה',
   },
   'in-quint': {
+    pace: 'fast' as DurationKey,
     bezier: [0.64, 0, 0.78, 0] as Bezier,
     gsap: 'power4.in',
     he: 'יציאה בלבד',
-    use: 'סגירת טוסט, הסתרה — תמיד קצר',
+    use: 'סגירת טוסט, הסתרה – תמיד קצר',
   },
   growth: {
+    pace: 'grow' as DurationKey,
     bezier: [0.6, 0, 0.2, 1] as Bezier,
     gsap: 'CustomEase("growth", "M0,0 C0.6,0 0.2,1 1,1")',
     he: 'עקומת צמיחה',
@@ -391,7 +396,33 @@ export function springLinear({ zeta = 0.55, durationMs = 800, samples = 40 } = {
   return { css: `linear(${pts.join(', ')})`, durationMs };
 }
 
-export const spring = { ...springLinear(), he: 'קפיץ', use: 'חזרת CTA מגנטי למקום' } as const;
+const springSamples = springLinear();
+
+/** GSAP CustomEase path traced from the same samples as the CSS linear(). */
+function springGsapPath(samples = 40) {
+  const { css } = springSamples;
+  const pts = css
+    .slice(7, -1)
+    .split(', ')
+    .map((p, i, all) => {
+      const [v, pct] = p.split(' ');
+      const x = pct ? parseFloat(pct) / 100 : i === 0 ? 0 : i === all.length - 1 ? 1 : i / samples;
+      return `${round(x, 3)},${v}`;
+    });
+  return `M${pts[0]} L${pts.slice(1).join(' ')}`;
+}
+
+export const spring = {
+  ...springSamples,
+  pace: 'spring' as const,
+  gsapPath: springGsapPath(),
+  gsap: 'CustomEase("spring", spring.gsapPath)',
+  he: 'קפיץ',
+  use: 'חזרת CTA מגנטי למקום',
+} as const;
+
+/** Magnetic CTA tuning — what the style tile documents is what <Magnetic> runs. */
+export const magnet = { strength: 0.32, max: 10, reach: 1.6 } as const;
 
 /** Row-by-row growth: 40ms between rows, never more than 480ms in total. */
 export const stagger = { stepMs: 40, maxTotalMs: 480 } as const;

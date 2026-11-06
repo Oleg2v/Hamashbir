@@ -15,15 +15,21 @@ type DocWithVT = Document & {
 };
 
 /**
- * מצב שמש — one tap to the outdoor theme: max contrast, no shadows, 2px lines,
+ * מצב שמש – one tap to the outdoor theme: max contrast, no shadows, 2px lines,
  * 56px targets, larger type floors. The new theme rises from the button as a
  * circular reveal (View Transitions), instantly under reduced motion.
  */
 export function SunModeToggle({ className }: { className?: string }) {
   const [on, setOn] = useState(false);
 
+  // Stay in sync with every other toggle (and the init script) on the page.
   useEffect(() => {
-    setOn(document.documentElement.dataset.theme === 'sun');
+    const root = document.documentElement;
+    const read = () => setOn(root.dataset.theme === 'sun');
+    read();
+    const mo = new MutationObserver(read);
+    mo.observe(root, { attributes: true, attributeFilter: ['data-theme'] });
+    return () => mo.disconnect();
   }, []);
 
   const apply = (next: boolean) => {
@@ -33,7 +39,7 @@ export function SunModeToggle({ className }: { className?: string }) {
     try {
       localStorage.setItem(SUN_STORAGE_KEY, next ? '1' : '0');
     } catch {
-      /* private mode — the toggle still works for this visit */
+      /* private mode – the toggle still works for this visit */
     }
     setOn(next);
   };

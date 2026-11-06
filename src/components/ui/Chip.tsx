@@ -11,7 +11,7 @@ type ChipProps = ComponentPropsWithoutRef<'span'> & {
   icon?: ReactNode;
 };
 
-/** Status chip — never interactive. Colour is always backed by words. */
+/** Status chip – never interactive. Colour is always backed by words. */
 export function Chip({ tone = 'neutral', dot = true, icon, className, children, ...rest }: ChipProps) {
   return (
     <span className={cn('chip', className)} data-tone={tone} {...rest}>
@@ -43,7 +43,7 @@ const stockCopy = {
 } as const;
 
 /**
- * The stock chip — the branch network made visible.
+ * The stock chip – the branch network made visible.
  * "במלאי בסניף עין תמר · 3 ק״מ ממך"
  */
 export function StockChip({

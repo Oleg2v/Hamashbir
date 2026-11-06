@@ -27,8 +27,8 @@ const plexMono = IBM_Plex_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: 'העונה שלך · המשביר לחקלאי — קונספט',
-    template: '%s · העונה שלך — קונספט Kikkey',
+    default: 'העונה שלך · המשביר לחקלאי – קונספט',
+    template: '%s · העונה שלך – קונספט Kikkey',
   },
   description:
     'קונספט של Kikkey לפורטל החקלאי של המשביר לחקלאי: תוכנית עונה, מלאי בסניף הקרוב, הזמנה ואיסוף. לא האתר הרשמי. נתוני דמו ומחירי דמו בלבד.',

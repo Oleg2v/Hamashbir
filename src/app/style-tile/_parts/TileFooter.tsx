@@ -21,7 +21,7 @@ export function TileFooter() {
           </div>
           <div className="grid gap-1">
             <dt className="font-bold text-ink">גופנים</dt>
-            <dd className="text-ink-2">Suez One · Assistant · IBM Plex Mono — רישיון SIL Open Font</dd>
+            <dd className="text-ink-2">Suez One · Assistant · IBM Plex Mono – רישיון SIL Open Font</dd>
           </div>
           <div className="grid gap-1">
             <dt className="font-bold text-ink">הבהרה</dt>

@@ -1,0 +1,114 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import { Num } from '@/components/ui/Num';
+import { layout, typeViewport } from '@/design/tokens';
+import { cn } from '@/lib/cn';
+
+const span = typeViewport.max - typeViewport.min;
+const at = (w: number) => Math.min(1, Math.max(0, (w - typeViewport.min) / span));
+
+/** Breakpoints from the layout grid that fall inside the fluid range. */
+const marks = layout.grid.filter((g) => g.from > typeViewport.min && g.from < typeViewport.max);
+
+/**
+ * The fluid range as a ruler: 360px at inline-start (low values start the
+ * line, like the season), 1440px at inline-end. A live marker shows where this
+ * window sits on it – every "עכשיו" readout below is interpolated from here.
+ */
+export function ViewportGauge({
+  minLabel,
+  maxLabel,
+}: {
+  minLabel: React.ReactNode;
+  maxLabel: React.ReactNode;
+}) {
+  const [w, setW] = useState<number | null>(null);
+
+  useEffect(() => {
+    const on = () => setW(window.innerWidth);
+    on();
+    window.addEventListener('resize', on);
+    return () => window.removeEventListener('resize', on);
+  }, []);
+
+  const t = w == null ? null : at(w);
+  const pct = t == null ? 0 : t * 100;
+  const where =
+    w == null ? null : w < typeViewport.min ? 'מתחת לטווח\u00A0– המינימום נשמר' : w > typeViewport.max ? 'מעל הטווח\u00A0– המקסימום נשמר' : null;
+
+  return (
+    <div className="grid gap-5">
+      <div className="flex items-start justify-between gap-6">
+        <div className="grid gap-1">
+          <Num className="text-title font-medium leading-none">{typeViewport.min}px</Num>
+          {/* ratio on one line, its musical name on the next */}
+          <span className="grid text-caption text-ink-2">{minLabel}</span>
+        </div>
+        <div className="grid justify-items-end gap-1 text-end">
+          <Num className="text-title font-medium leading-none">{typeViewport.max}px</Num>
+          <span className="grid justify-items-end text-caption text-ink-2">{maxLabel}</span>
+        </div>
+      </div>
+
+      <div aria-hidden="true">
+        <div className="relative h-4">
+          {/* track */}
+          <span className="absolute inset-x-0 top-1/2 h-0.5 -translate-y-1/2 rounded-full bg-line-strong" />
+          {/* the part of the range this window has grown through */}
+          <span
+            className="absolute start-0 top-1/2 h-0.5 -translate-y-1/2 rounded-full bg-ink transition-[inline-size] duration-(--dur-slow) ease-out-quint"
+            style={{ inlineSize: `${pct}%` }}
+          />
+          {/* ends and layout breakpoints (grid tokens) */}
+          <span className="absolute start-0 top-0 h-4 w-0.5 bg-ink" />
+          <span className="absolute end-0 top-0 h-4 w-0.5 bg-ink" />
+          {marks.map((m) => (
+            <span
+              key={m.from}
+              className="absolute top-1 h-2 w-px bg-ink-3"
+              style={{ insetInlineStart: `${at(m.from) * 100}%` }}
+            />
+          ))}
+          {/* now */}
+          <span
+            className={cn(
+              'absolute top-0 size-4 rounded-full border-2 border-ink bg-bud transition-[inset-inline-start,opacity] duration-(--dur-slow) ease-out-quint',
+              t == null && 'opacity-0',
+            )}
+            style={{ insetInlineStart: `calc(${pct}% - 0.5rem)` }}
+          />
+        </div>
+        <div className="relative mt-2 h-5">
+          {marks.map((m) => (
+            // positioned wrapper stays RTL; the <bdi> inside is LTR
+            <span
+              key={m.from}
+              className="absolute top-0 -translate-x-1/2 text-micro leading-none text-ink-3 rtl:translate-x-1/2"
+              style={{ insetInlineStart: `${at(m.from) * 100}%` }}
+            >
+              <Num>{m.from}</Num>
+            </span>
+          ))}
+        </div>
+      </div>
+
+      <p className="flex flex-wrap items-baseline gap-x-3 gap-y-1 text-caption" aria-live="off">
+        <span className="font-bold">
+          החלון שלך עכשיו: <Num>{w == null ? '‒‒‒‒' : w}px</Num>
+        </span>
+        <span className="text-ink-2">
+          {w == null ? (
+            'נמדד בדפדפן'
+          ) : where ? (
+            where
+          ) : (
+            <>
+              <Num>{Math.round(pct)}%</Num> מהדרך בין הקצוות
+            </>
+          )}
+        </span>
+      </p>
+    </div>
+  );
+}

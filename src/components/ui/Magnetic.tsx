@@ -1,12 +1,13 @@
 'use client';
 
-import { useEffect, useRef, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { magnet } from '@/design/tokens';
 
 type MagneticProps = {
   children: ReactNode;
   /** Fraction of the pointer offset the element follows. */
   strength?: number;
-  /** Maximum travel in px — magnetism, not chasing. */
+  /** Maximum travel in px – magnetism, not chasing. */
   max?: number;
   /** Activation zone as a multiple of the element's half-size. */
   reach?: number;
@@ -17,15 +18,31 @@ type MagneticProps = {
  * ease, springs home with the spring linear() curve when released.
  * Off for touch, coarse pointers and prefers-reduced-motion.
  */
-export function Magnetic({ children, strength = 0.32, max = 10, reach = 1.6 }: MagneticProps) {
+export function Magnetic({ children, strength = magnet.strength, max = magnet.max, reach = magnet.reach }: MagneticProps) {
   const ref = useRef<HTMLSpanElement>(null);
+  // re-evaluate when the user plugs in a mouse or toggles reduced motion
+  const [env, setEnv] = useState(0);
+
+  useEffect(() => {
+    const queries = [
+      window.matchMedia('(hover: hover) and (pointer: fine)'),
+      window.matchMedia('(prefers-reduced-motion: reduce)'),
+    ];
+    const bump = () => setEnv((n) => n + 1);
+    queries.forEach((q) => q.addEventListener('change', bump));
+    return () => queries.forEach((q) => q.removeEventListener('change', bump));
+  }, []);
 
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
     const fine = window.matchMedia('(hover: hover) and (pointer: fine)');
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
-    if (!fine.matches || reduce.matches) return;
+    if (!fine.matches || reduce.matches) {
+      el.style.setProperty('--mx', '0px');
+      el.style.setProperty('--my', '0px');
+      return;
+    }
 
     let raf = 0;
     let ox = 0;
@@ -72,7 +89,7 @@ export function Magnetic({ children, strength = 0.32, max = 10, reach = 1.6 }: M
       window.removeEventListener('blur', release);
       window.removeEventListener('scroll', release);
     };
-  }, [strength, max, reach]);
+  }, [strength, max, reach, env]);
 
   return (
     <span ref={ref} className="magnetic">
