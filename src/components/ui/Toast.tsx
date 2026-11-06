@@ -46,7 +46,10 @@ export function ToastCard({
   onHoverChange,
   onFocusChange,
   isStatic = false,
+  toastId,
 }: ToastInput & {
+  /** the live toast's id, so a toast opened from inside it can inherit its return focus */
+  toastId?: number;
   onClose?: () => void;
   onAction?: () => void;
   state?: 'open' | 'closing';
@@ -63,6 +66,7 @@ export function ToastCard({
       data-tone={tone}
       data-state={isStatic ? undefined : state}
       data-static={isStatic ? '' : undefined}
+      data-toast-id={toastId}
       onPointerEnter={() => onHoverChange?.(true)}
       onPointerLeave={() => onHoverChange?.(false)}
       onFocus={() => onFocusChange?.(true)}
@@ -109,12 +113,18 @@ export function useToast() {
 }
 
 const plain = (n: ReactNode) => (typeof n === 'string' ? n : '');
+/** a sentence without its closing mark, so joined parts never read „..” */
+const clause = (s: string) => s.trim().replace(/[.!?…]+$/u, '');
 
 /**
  * Toasts announce through two persistent live regions (polite / assertive),
  * so the announcement never depends on a freshly inserted node being picked
- * up. Timers pause while the pointer is over a toast OR focus is inside it.
- * Closing returns focus to where the user was when the toast opened.
+ * up. Every timer pauses while the pointer is over any toast or focus is in
+ * the stack, so nothing expires (and shifts the stack) under the pointer.
+ * Escape closes the toast that has focus, else the newest one. Closing
+ * returns focus to where the user was when the first toast of a chain opened.
+ * The stack's height is published as --toast-stack-h for scroll padding, so a
+ * focused control is never scrolled behind it.
  */
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<ToastItem[]>([]);
@@ -123,6 +133,10 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   const seq = useRef(0);
   const itemsRef = useRef(items);
   itemsRef.current = items;
+  const viewportRef = useRef<HTMLDivElement>(null);
+  const hovered = useRef(false);
+  const focused = useRef(false);
+  const paused = useCallback(() => hovered.current || focused.current, []);
 
   const dismiss = useCallback((id: number, restoreFocus = false) => {
     const item = itemsRef.current.find((t) => t.id === id);
@@ -137,11 +151,16 @@ export function ToastProvider({ children }: { children: ReactNode }) {
 
   const toast = useCallback((t: ToastInput) => {
     const id = ++seq.current;
-    const returnFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const active = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    // opened from a toast's own action: that button is about to go, so return
+    // to wherever the parent toast would have returned
+    const host = active?.closest<HTMLElement>('[data-toast-id]');
+    const parent = host ? itemsRef.current.find((x) => String(x.id) === host.dataset.toastId) : undefined;
+    const returnFocus = parent ? parent.returnFocus : active;
     setItems((list) => [...list.slice(-2), { ...t, id, state: 'open', returnFocus }]);
-    const text =
-      (t.announce ?? [plain(t.title), plain(t.body)].filter(Boolean).join('. ')) +
-      (t.action ? `. פעולה זמינה: ${t.action.label}` : '');
+    const parts = t.announce ? [t.announce] : [plain(t.title), plain(t.body)];
+    if (t.action) parts.push(`פעולה זמינה: ${t.action.label}`);
+    const text = `${parts.filter(Boolean).map(clause).join('. ')}.`;
     const set = t.tone === 'error' ? setAssertive : setPolite;
     set('');
     window.setTimeout(() => set(text), durations.instant.ms);
@@ -150,12 +169,54 @@ export function ToastProvider({ children }: { children: ReactNode }) {
 
   const value = useMemo(() => ({ toast, dismiss }), [toast, dismiss]);
 
+  // Escape: the toast that holds focus (focus returns), else the newest one
+  // (focus stays where it is)
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape' || e.defaultPrevented) return;
+      const open = itemsRef.current.filter((t) => t.state === 'open');
+      if (!open.length) return;
+      const host = (document.activeElement as HTMLElement | null)?.closest<HTMLElement>('[data-toast-id]');
+      const own = host ? open.find((t) => String(t.id) === host.dataset.toastId) : undefined;
+      dismiss((own ?? open[open.length - 1]).id, own != null);
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [dismiss]);
+
+  // the stack's footprint from the bottom edge, for scroll-padding-block-end
+  useEffect(() => {
+    const vp = viewportRef.current;
+    if (!vp) return;
+    const root = document.documentElement;
+    const ro = new ResizeObserver(() => {
+      const h = vp.offsetHeight;
+      if (!h) return root.style.removeProperty('--toast-stack-h');
+      const fromBottom = window.innerHeight - vp.getBoundingClientRect().bottom;
+      root.style.setProperty('--toast-stack-h', `${Math.ceil(h + fromBottom)}px`);
+    });
+    ro.observe(vp);
+    return () => {
+      ro.disconnect();
+      root.style.removeProperty('--toast-stack-h');
+    };
+  }, []);
+
   return (
     <ToastContext.Provider value={value}>
       {children}
-      <div className="toast-viewport">
+      <div
+        ref={viewportRef}
+        className="toast-viewport"
+        onPointerEnter={() => (hovered.current = true)}
+        onPointerLeave={() => (hovered.current = false)}
+        onFocus={() => (focused.current = true)}
+        onBlur={(e) => {
+          if (!e.currentTarget.contains(e.relatedTarget as Node | null)) focused.current = false;
+        }}
+      >
         {items.map((t) => (
-          <LiveToast key={t.id} item={t} onDismiss={(restore) => dismiss(t.id, restore)} />
+          <LiveToast key={t.id} item={t} paused={paused} onDismiss={(restore) => dismiss(t.id, restore)} />
         ))}
       </div>
       <div className="sr-only" aria-live="polite" aria-atomic="true">
@@ -168,12 +229,18 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   );
 }
 
-function LiveToast({ item, onDismiss }: { item: ToastItem; onDismiss: (restoreFocus: boolean) => void }) {
+function LiveToast({
+  item,
+  paused,
+  onDismiss,
+}: {
+  item: ToastItem;
+  paused: () => boolean;
+  onDismiss: (restoreFocus: boolean) => void;
+}) {
   const sticky = item.tone === 'error' || item.action != null;
   const duration = item.duration === undefined ? (sticky ? null : toastLifetime) : item.duration;
   const timer = useRef<HTMLSpanElement>(null);
-  const hovering = useRef(false);
-  const focused = useRef(false);
   const elapsed = useRef(0);
   const dismissRef = useRef(onDismiss);
   dismissRef.current = onDismiss;
@@ -183,7 +250,7 @@ function LiveToast({ item, onDismiss }: { item: ToastItem; onDismiss: (restoreFo
     let raf = 0;
     let last = performance.now();
     const tick = (now: number) => {
-      if (!hovering.current && !focused.current) elapsed.current += now - last;
+      if (!paused()) elapsed.current += now - last;
       last = now;
       const p = Math.max(0, 1 - elapsed.current / duration);
       timer.current?.style.setProperty('--progress', String(p));
@@ -195,19 +262,18 @@ function LiveToast({ item, onDismiss }: { item: ToastItem; onDismiss: (restoreFo
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, [duration]);
+  }, [duration, paused]);
 
   return (
     <ToastCard
       {...item}
+      toastId={item.id}
       onClose={() => onDismiss(true)}
       onAction={() => {
         item.action?.onClick?.();
         onDismiss(true);
       }}
       timerRef={duration == null ? undefined : timer}
-      onHoverChange={(h) => (hovering.current = h)}
-      onFocusChange={(f) => (focused.current = f)}
     />
   );
 }

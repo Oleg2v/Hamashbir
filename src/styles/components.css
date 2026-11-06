@@ -187,6 +187,7 @@
   /* Icon-only — always round, always a full target. */
   .btn--icon {
     --btn-px: 0px;
+    flex: none; /* never squeezed below its target size in a flex row */
     inline-size: var(--btn-h);
     border-color: var(--line-strong);
   }
@@ -250,9 +251,10 @@
     animation-delay: calc(var(--stagger-step) * 6);
   }
 
-  /* Specimens on documentation pages stop after ≤ 5s (WCAG 2.2.2). */
+  /* Specimens on documentation pages stop well before 5s (WCAG 2.2.2):
+     3 × 1200ms plus the stagger. */
   [data-specimen] .btn__loader i {
-    animation-iteration-count: 4;
+    animation-iteration-count: 3;
   }
 
   /* Resting state = fully grown dots, so reduced motion shows them clearly. */
@@ -332,7 +334,9 @@
     border-color: var(--ink-2);
   }
 
-  .field__control:focus-within,
+  /* the ring belongs to the text input; a focused stepper button shows its
+     own ring instead of merging with this one */
+  .field__control:has(.field__input:focus-visible),
   .field__control[data-force='focus'] {
     border-color: var(--ink);
     outline: var(--focus-w) solid var(--focus);
@@ -434,7 +438,7 @@
     transition: background-color var(--dur-fast) var(--ease-out-quint);
   }
 
-  .stepper__btn:hover:not(:disabled) {
+  .stepper__btn:hover:not(:disabled, [aria-disabled='true']) {
     background: var(--tint-hover);
   }
 
@@ -585,7 +589,8 @@
      changes the width. */
   .chip--filter {
     --chip-h: 2.25rem;
-    min-inline-size: var(--chip-h);
+    /* a one-digit chip („8”) still gets a full 44px (56px sun) hit area */
+    min-inline-size: max(var(--chip-h), var(--target));
     padding-inline: 0.75rem 1rem;
     border-color: var(--line-strong);
     background: transparent;
@@ -921,6 +926,14 @@
     }
   }
 
+  /* A phone shows one toast at a time: the newest. Older sticky ones wait
+     their turn instead of stacking over half the screen. */
+  @media (max-width: 39.99rem) {
+    .toast-viewport > .toast:not(:last-child) {
+      display: none;
+    }
+  }
+
   .toast {
     position: relative;
     display: grid;
@@ -1217,6 +1230,10 @@
     background: var(--inverse);
     border-color: var(--inverse);
     color: var(--inverse-ink);
+  }
+
+  .section-rail .num {
+    color: var(--ink-2);
   }
 
   .section-rail a[aria-current='true'] .num {

@@ -37,7 +37,7 @@
        at the top – its measured height, set by TileHeader, plus room for a
        focus ring – and the fixed demo badge at the bottom */
     scroll-padding-block-start: calc(var(--header-h, 7.75rem) + 0.75rem);
-    scroll-padding-block-end: 5rem;
+    scroll-padding-block-end: max(5rem, calc(var(--toast-stack-h, 0px) + 1rem));
   }
 
   body {
@@ -174,13 +174,6 @@
   /* Sun mode turns soil panels white — give them a frame so they keep their shape. */
   :root[data-theme='sun'] :where(div, figure, article)[data-surface='soil']:not(.card, .toast) {
     box-shadow: inset 0 0 0 var(--bw) var(--ink);
-  }
-
-  /* Off-screen sections skip layout and paint until they are near the
-     viewport: faster first paint and a faster sun-mode restyle. */
-  .defer-render {
-    content-visibility: auto;
-    contain-intrinsic-size: auto 2400px;
   }
 
   .wrap {

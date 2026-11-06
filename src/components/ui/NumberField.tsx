@@ -22,6 +22,8 @@ type NumberFieldProps = {
   disabled?: boolean;
   /** Error copy; {min} and {max} are replaced. Serializable, so server pages can pass it. */
   rangeMessage?: string;
+  /** Error copy for a value off the step grid (40.5 with step 1); {step} is replaced. */
+  stepMessage?: string;
 };
 
 const fmt = (n: number) => n.toLocaleString('he-IL');
@@ -31,8 +33,11 @@ const fmt = (n: number) => n.toLocaleString('he-IL');
  * A native number input underneath (spinbutton semantics, ArrowUp/ArrowDown;
  * PageUp/PageDown jump ×10), mono LTR digits, unit announced with the value.
  * The step buttons never disable themselves while focused (focus would fall
- * to <body>): at a bound they become aria-disabled and do nothing. Errors
- * wait for the user to leave the field, so clearing it to retype is quiet.
+ * to <body>): at a bound they become aria-disabled and do nothing. − and +
+ * move along the step grid like ArrowUp/ArrowDown do (40.5 → 41, not 41.5).
+ * An out-of-range value is flagged at once; an empty or off-grid one only once
+ * the user leaves the field, and returning to it is quiet again, so clearing
+ * it to retype never sets off the alert. Exponent notation (1e3) is refused.
  */
 export function NumberField({
   label,
@@ -48,6 +53,7 @@ export function NumberField({
   step = 1,
   disabled = false,
   rangeMessage = 'הזינו ערך בין {min} ל־{max}',
+  stepMessage = step === 1 ? 'הזינו מספר שלם' : 'הזינו ערך בקפיצות של {step}',
 }: NumberFieldProps) {
   const auto = useId();
   const id = idProp ?? auto;
@@ -57,20 +63,29 @@ export function NumberField({
   const value = Number(raw);
   const empty = raw.trim() === '';
   const outOfRange = !empty && (Number.isNaN(value) || value < min || value > max);
-  const invalid = outOfRange || (touched && empty);
+  // position on the step grid, counted from min
+  const gridPos = (v: number) => (v - min) / step;
+  const onGrid = (v: number) => Math.abs(gridPos(v) - Math.round(gridPos(v))) < 1e-9;
+  const offStep = !empty && !outOfRange && !onGrid(value);
+  const error = outOfRange || (touched && empty) ? 'range' : touched && offStep ? 'step' : null;
+  const invalid = error != null;
 
   const commit = (next: string) => {
+    if (/[eE+]/.test(next)) return; // no exponent notation in a quantity
     if (controlled === undefined) setOwn(next);
     const n = Number(next);
     if (next.trim() !== '' && !Number.isNaN(n)) onValueChange?.(n);
   };
 
   const clamp = (v: number) => Math.min(max, Math.max(min, v));
-  const nudge = (delta: number) => {
+  // round to the step's precision so 0.1 + 0.2 never shows 0.30000000004
+  const precision = (String(step).split('.')[1] ?? '').length;
+  /** k steps along the grid; from an off-grid value the first step lands on the grid */
+  const nudge = (dir: 1 | -1, k = 1) => {
     const base = Number.isNaN(value) || empty ? min : value;
-    // round to the step's precision so 0.1 + 0.2 never shows 0.30000000004
-    const precision = (String(step).split('.')[1] ?? '').length;
-    commit(clamp(Number((base + delta).toFixed(precision))).toString());
+    const n = gridPos(base);
+    const idx = onGrid(base) ? Math.round(n) + dir * k : dir > 0 ? Math.ceil(n) + k - 1 : Math.floor(n) - k + 1;
+    commit(clamp(Number((min + idx * step).toFixed(precision))).toString());
   };
 
   const atMin = !Number.isNaN(value) && !empty && value <= min;
@@ -93,7 +108,7 @@ export function NumberField({
           aria-label={`הפחתה: ${stepWords}`}
           aria-controls={id}
           aria-disabled={disabled || atMin || undefined}
-          onClick={() => !disabled && !atMin && nudge(-step)}
+          onClick={() => !disabled && !atMin && nudge(-1)}
         >
           <MinusIcon size={20} strokeWidth={2} />
         </button>
@@ -103,18 +118,20 @@ export function NumberField({
           type="number"
           className="field__input"
           data-numeric=""
-          inputMode="decimal"
+          inputMode={Number.isInteger(step) && Number.isInteger(min) ? 'numeric' : 'decimal'}
           min={min}
           max={max}
           step={step}
           value={raw}
           disabled={disabled}
           onChange={(e) => commit(e.target.value)}
+          onFocus={() => setTouched(false)}
           onBlur={() => setTouched(true)}
           onKeyDown={(e) => {
+            if (e.key === 'e' || e.key === 'E' || e.key === '+') e.preventDefault();
             if (e.key === 'PageUp' || e.key === 'PageDown') {
               e.preventDefault();
-              nudge((e.key === 'PageUp' ? 1 : -1) * step * 10);
+              nudge(e.key === 'PageUp' ? 1 : -1, 10);
             }
           }}
           aria-invalid={invalid || undefined}
@@ -129,7 +146,7 @@ export function NumberField({
           aria-label={`הוספה: ${stepWords}`}
           aria-controls={id}
           aria-disabled={disabled || atMax || undefined}
-          onClick={() => !disabled && !atMax && nudge(step)}
+          onClick={() => !disabled && !atMax && nudge(1)}
         >
           <PlusIcon size={20} strokeWidth={2} />
         </button>
@@ -142,7 +159,11 @@ export function NumberField({
       {invalid ? (
         <p className="field__error" id={errId} role="alert">
           <span>
-            <NumText>{rangeMessage.replace('{min}', fmt(min)).replace('{max}', fmt(max))}</NumText>
+            <NumText>
+              {error === 'step'
+                ? stepMessage.replace('{step}', fmt(step))
+                : rangeMessage.replace('{min}', fmt(min)).replace('{max}', fmt(max))}
+            </NumText>
           </span>
         </p>
       ) : null}

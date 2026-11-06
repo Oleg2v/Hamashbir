@@ -10,6 +10,22 @@ import { route, sectionTitles, type RouteKey } from './Section';
 const keys = Object.keys(route) as RouteKey[];
 
 /**
+ * In-page navigation moves focus with the view: the section's own h2 takes
+ * focus (without a second scroll), so the next Tab continues inside the
+ * section and a screen reader announces where the jump landed. It runs after
+ * the browser's own fragment navigation, whose focusing steps would otherwise
+ * move focus to the viewport (activeElement = body).
+ */
+function focusSection(k: RouteKey) {
+  window.setTimeout(() => {
+    const h = document.getElementById(`${k}-title`);
+    if (!h) return;
+    if (!h.hasAttribute('tabindex')) h.setAttribute('tabindex', '-1');
+    h.focus({ preventScroll: true });
+  }, 0);
+}
+
+/**
  * Fixed header. Transparent soil while it floats over the opening, paper with
  * a hairline once content passes under it (an instant flip — every part
  * changes together). Scroll-spy marks the current section; below xl the same
@@ -54,24 +70,26 @@ export function TileHeader() {
 
   useEffect(() => {
     const hero = document.getElementById('hero');
-    const ioHero = new IntersectionObserver(
-      ([e]) => {
-        setOverHero(e.isIntersecting);
-        if (e.isIntersecting && e.intersectionRatio > 0.35) setActive(null);
-      },
-      { rootMargin: '-72px 0px 0px 0px', threshold: [0, 0.35, 1] },
-    );
+    const ioHero = new IntersectionObserver(([e]) => setOverHero(e.isIntersecting), {
+      rootMargin: '-72px 0px 0px 0px',
+    });
     if (hero) ioHero.observe(hero);
 
+    // One band for every section, the opening included: while the band is in
+    // the hero no section is current (the hero is taller than any threshold
+    // ratio could catch on a phone).
     const ioSpy = new IntersectionObserver(
       (entries) => {
         const visible = entries
           .filter((e) => e.isIntersecting)
           .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
-        if (visible[0]) setActive(visible[0].target.id as RouteKey);
+        if (!visible[0]) return;
+        const id = visible[0].target.id;
+        setActive(id === 'hero' ? null : (id as RouteKey));
       },
       { rootMargin: '-35% 0px -60% 0px' },
     );
+    if (hero) ioSpy.observe(hero);
     keys.forEach((k) => {
       const el = document.getElementById(k);
       if (el) ioSpy.observe(el);
@@ -84,7 +102,9 @@ export function TileHeader() {
       raf = requestAnimationFrame(() => {
         const y = window.scrollY;
         if (Math.abs(y - last) > 8) {
-          setRailHidden(y > last && y > 320);
+          // never tuck the rail away (and make it inert) while it holds focus
+          const holdsFocus = railRef.current?.contains(document.activeElement) ?? false;
+          setRailHidden(y > last && y > 320 && !holdsFocus);
           last = y;
         }
       });
@@ -127,6 +147,7 @@ export function TileHeader() {
                 <a
                   href={`#${k}`}
                   aria-current={active === k ? 'true' : undefined}
+                  onClick={() => focusSection(k)}
                   className={cn(
                     'inline-flex min-h-(--target) items-center gap-2 rounded-full px-3 text-caption font-semibold text-ink no-underline hover:bg-tint-hover',
                     active === k && 'bg-tint-hover',
@@ -156,13 +177,21 @@ export function TileHeader() {
             // Chrome scrolls a focused chip into view only when it is fully
             // hidden; a half-visible one stayed half off-screen
             onFocus={(e) => {
+              setRailHidden(false);
               const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
               e.target.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: reduce ? 'auto' : 'smooth' });
             }}
           >
             {keys.map((k) => (
-              <a key={k} data-key={k} href={`#${k}`} aria-current={active === k ? 'true' : undefined}>
-                <Num className="text-micro text-ink-2">{route[k].num}</Num>
+              <a
+                key={k}
+                data-key={k}
+                href={`#${k}`}
+                aria-current={active === k ? 'true' : undefined}
+                onClick={() => focusSection(k)}
+              >
+                {/* colour from components.css, so the current chip's numeral can invert with it */}
+                <Num className="text-micro">{route[k].num}</Num>
                 {sectionTitles[k]}
               </a>
             ))}

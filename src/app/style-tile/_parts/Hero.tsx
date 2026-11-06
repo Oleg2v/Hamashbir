@@ -30,7 +30,10 @@ export function Hero() {
       id="hero"
       data-surface="soil"
       aria-labelledby="hero-title"
-      className="relative overflow-hidden pb-20 pt-28 lg:pb-28 lg:pt-24"
+      // clears the fixed header: bar (4rem, 4.5rem at lg) + section rail
+      // (1.25rem + one target, so sun mode grows with it) + 1.75rem air;
+      // from xl the rail is gone and only the bar remains
+      className="relative overflow-hidden pb-20 pt-[calc(7rem+var(--target))] lg:pb-28 lg:pt-[calc(7.5rem+var(--target))] xl:pt-24"
     >
       <div className="wrap">
         <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2 border-t border-line pt-4">
@@ -67,11 +70,11 @@ export function Hero() {
               <Num className="text-caption text-sprout-ink" aria-hidden="true">
                 {c.num}
               </Num>
-              <p className="font-display text-title leading-[1.12]">
+              <h3 className="text-title leading-[1.12]">
                 {c.line[0]}
                 <br />
                 {c.line[1]}
-              </p>
+              </h3>
               <p className="text-body text-ink-2">
                 <NumText>{c.sub}</NumText>
               </p>

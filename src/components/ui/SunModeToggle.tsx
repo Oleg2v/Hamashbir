@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { flushSync } from 'react-dom';
 import { bezierCss, durations, easings } from '@/design/tokens';
-import { setThemeColor, SUN_STORAGE_KEY } from '@/lib/sun-mode';
+import { holdPlace, setThemeColor, SUN_STORAGE_KEY } from '@/lib/sun-mode';
 import { SunIcon } from './icons';
 
 /**
@@ -20,7 +20,9 @@ type DocWithVT = Document & {
 /**
  * מצב שמש – one tap to the outdoor theme: max contrast, no shadows, 2px lines,
  * 56px targets, larger type floors. The new theme rises from the button as a
- * circular reveal (View Transitions), instantly under reduced motion.
+ * circular reveal (View Transitions), instantly under reduced motion. The
+ * reader keeps their place: the content under the header stays put while the
+ * page above it grows or shrinks.
  */
 export function SunModeToggle({ className }: { className?: string }) {
   const [on, setOn] = useState(false);
@@ -56,15 +58,23 @@ export function SunModeToggle({ className }: { className?: string }) {
     const next = !on;
     const doc = document as DocWithVT;
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const place = holdPlace();
     if (!doc.startViewTransition || reduce) {
       apply(next);
+      place.restore();
+      place.follow();
       return;
     }
     const r = e.currentTarget.getBoundingClientRect();
     const x = r.left + r.width / 2;
     const y = r.top + r.height / 2;
     const radius = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y));
-    const vt = doc.startViewTransition(() => flushSync(() => apply(next)));
+    const vt = doc.startViewTransition(() => {
+      flushSync(() => apply(next));
+      // inside the update, so the new snapshot is taken at the kept place
+      place.restore();
+    });
+    place.follow();
     vt.ready.then(() => {
       document.documentElement.animate(
         { clipPath: [`circle(0px at ${x}px ${y}px)`, `circle(${radius}px at ${x}px ${y}px)`] },
