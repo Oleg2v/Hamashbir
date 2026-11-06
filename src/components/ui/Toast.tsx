@@ -121,7 +121,9 @@ const clause = (s: string) => s.trim().replace(/[.!?…]+$/u, '');
  * so the announcement never depends on a freshly inserted node being picked
  * up. Every timer pauses while the pointer is over any toast or focus is in
  * the stack, so nothing expires (and shifts the stack) under the pointer.
- * Escape closes the toast that has focus, else the newest one. Closing
+ * Escape closes the toast that has focus, else the newest one; Alt+T moves
+ * focus into the newest one (the stack renders after the page, so Tab alone
+ * would cross the footer first). Closing
  * returns focus to where the user was when the first toast of a chain opened.
  * The stack's height is published as --toast-stack-h for scroll padding, so a
  * focused control is never scrolled behind it.
@@ -170,12 +172,23 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   const value = useMemo(() => ({ toast, dismiss }), [toast, dismiss]);
 
   // Escape: the toast that holds focus (focus returns), else the newest one
-  // (focus stays where it is)
+  // (focus stays where it is). Alt+T (by key position, any layout): focus the
+  // newest toast's first control.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key !== 'Escape' || e.defaultPrevented) return;
+      if (e.defaultPrevented) return;
       const open = itemsRef.current.filter((t) => t.state === 'open');
       if (!open.length) return;
+      if (e.altKey && e.code === 'KeyT') {
+        const newest = open[open.length - 1];
+        const first = viewportRef.current?.querySelector<HTMLElement>(`[data-toast-id="${newest.id}"] button`);
+        if (first) {
+          e.preventDefault();
+          first.focus();
+        }
+        return;
+      }
+      if (e.key !== 'Escape') return;
       const host = (document.activeElement as HTMLElement | null)?.closest<HTMLElement>('[data-toast-id]');
       const own = host ? open.find((t) => String(t.id) === host.dataset.toastId) : undefined;
       dismiss((own ?? open[open.length - 1]).id, own != null);
