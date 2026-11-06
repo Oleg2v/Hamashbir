@@ -23,9 +23,9 @@ const phone = { width: 390, height: 844 };
 
 const moments = [
   ['01-hero', desktop, null, 0, false],
-  ['02-hero-parcels', desktop, '#hero figure, #hero [role="img"]', -120, false],
+  ['02-hero-parcels', desktop, '#hero figure, #hero [role="img"]', -100, false],
   ['03-palette', desktop, '#palette', 0, false],
-  ['04-imagery', desktop, '#imagery', 180, false],
+  ['04-imagery', desktop, '#imagery h3', -150, false],
   ['05-type', desktop, '#type', 320, false],
   ['06-motion', desktop, '#motion', 520, false],
   ['07-components-buttons', desktop, '#components h3', -140, false],
