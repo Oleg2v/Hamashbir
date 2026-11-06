@@ -16,7 +16,20 @@ import { cn } from '@/lib/cn';
 const ROLE_NUMERIC = /(\d+(?:\s*\/\s*\d+)+|\d[\d.,]*(?:px)?\+?)/;
 
 export function RoleText({ children }: { children: string }) {
-  return <>{children.split(ROLE_NUMERIC).map((p, i) => (i % 2 ? <Num key={i}>{p}</Num> : p))}</>;
+  return (
+    <>
+      {children.split(ROLE_NUMERIC).map((p, i) =>
+        i % 2 ? (
+          // a list is one token: it never breaks across lines
+          <Num key={i} className="whitespace-nowrap">
+            {p}
+          </Num>
+        ) : (
+          p
+        ),
+      )}
+    </>
+  );
 }
 
 /** "13–14px": a range is one LTR run with an en dash – never an arrow. */

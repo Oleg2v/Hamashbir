@@ -48,7 +48,7 @@ function SpecHeader({
   );
 }
 
-const card = 'rounded-xl border-(length:--bw) border-line p-4 sm:p-8 xl:p-10';
+const card = 'rounded-xl border-(length:--bw) border-line p-4 sm:p-6 xl:p-8';
 
 /* ───────────────────────── א׳ Suez One ───────────────────────── */
 
@@ -66,17 +66,20 @@ function DisplaySpecimen() {
           </>
         }
       />
-      {/* the product's own opening line (the brief, verbatim), at the top step of the scale */}
-      <p className="mt-8 font-display text-display text-balance">
-        העונה <span className="text-sprout-ink">שלך</span> מתחילה כאן
-      </p>
-      <p className="mt-4 flex flex-wrap items-baseline gap-x-3 gap-y-1 text-caption text-ink-2">
-        <span>הכותרת הראשית של מסך הפתיחה, בשלב העליון של הסולם</span>
-        <span aria-hidden="true">·</span>
-        <Code>text-display</Code>
-      </p>
-      <div className="mt-8 border-t-(length:--bw) border-line pt-8">
-        <GlyphInspector />
+      <div className="mt-8">
+        <GlyphInspector
+          lead={
+            <>
+              {/* the product's own opening line (the brief, verbatim), at the top step of the scale */}
+              <p className="font-display text-display text-balance">
+                העונה <span className="text-sprout-ink">שלך</span> מתחילה כאן
+              </p>
+              <p className="mt-4 text-caption text-ink-2">
+                הכותרת הראשית של מסך הפתיחה, בשלב העליון של הסולם&nbsp;· <Code>text-display</Code>
+              </p>
+            </>
+          }
+        />
       </div>
     </article>
   );
@@ -202,7 +205,8 @@ const tiles: Array<{ label: string; value: ReactNode; span: string }> = [
   { label: 'טפטוף לחלקה', value: <Num>{formatMoney(dripCost)}</Num>, span: 'col-span-2 lg:col-span-4' },
   { label: 'מדד צמחייה', value: <Num>0.78</Num>, span: 'lg:col-span-2' },
   { label: 'ממטיר העשושית', value: <Num>AR044</Num>, span: 'lg:col-span-2' },
-  { label: 'מסנן דיסקים', value: <Num>2״ × 2</Num>, span: 'lg:col-span-2' },
+  // ״ is a strong RTL character: the LRM after it keeps "× 2" on its LTR side
+  { label: 'מסנן דיסקים', value: <Num>{'2״\u200E × 2'}</Num>, span: 'lg:col-span-2' },
   { label: 'סניף עמק יזרעאל', value: <Num>32.67°N 35.24°E</Num>, span: 'col-span-2 lg:col-span-5' },
   { label: 'איסוף מהסניף', value: <Num>{formatDate(new Date(2026, 10, 6))}</Num>, span: 'col-span-2 lg:col-span-3' },
 ];
@@ -242,23 +246,23 @@ function OrderTable() {
       <tbody>
         {order.map((l) => (
           <tr key={l.id} className="border-t-(length:--bw) border-line">
-            <th scope="row" className="py-3 pe-3 text-start font-semibold">
+            <th scope="row" className="py-2 pe-3 text-start font-semibold">
               <NumText>{l.product}</NumText>
             </th>
-            <td className={cn('w-[1%] whitespace-nowrap py-3 ps-2 text-start', guide)}>
+            <td className={cn('w-[1%] whitespace-nowrap py-2 ps-2 text-start', guide)}>
               <span className="font-medium">
                 <Num>{formatNumber(l.qty!)}</Num>
               </span>
               {/* narrow figure: the unit sits under its number instead of in its own column */}
               <span className="block text-micro text-ink-2 @sm:hidden">{l.unit}</span>
             </td>
-            <td className={cn('w-[1%] whitespace-nowrap py-3 ps-2 pe-3 text-start text-ink-2', unitCol)}>
+            <td className={cn('w-[1%] whitespace-nowrap py-2 ps-2 pe-3 text-start text-ink-2', unitCol)}>
               {l.unit}
             </td>
-            <td className={cn('w-[1%] whitespace-nowrap py-3 ps-2 pe-3 text-start text-ink-2', guide, unitPriceCol)}>
+            <td className={cn('w-[1%] whitespace-nowrap py-2 ps-2 pe-3 text-start text-ink-2', guide, unitPriceCol)}>
               <Num>{formatMoney(l.unitPrice!)}</Num>
             </td>
-            <td className={cn('w-[1%] whitespace-nowrap py-3 ps-2 text-start', guide)}>
+            <td className={cn('w-[1%] whitespace-nowrap py-2 ps-2 text-start', guide)}>
               <span className="font-medium">
                 <Num>{formatMoney(lineTotal(l)!)}</Num>
               </span>
@@ -305,9 +309,9 @@ function MonoSpecimen() {
       />
 
       <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
-        <p className="max-w-[60ch] text-caption text-ink-2">
-          הספרות במונו, היחידות בעברית ומחוץ ל־<Code>&lt;Num&gt;</Code>&nbsp;– כך כל מספר מבודד, כל יחידה נשארת
-          באסיסטנט, ורווח בלתי שביר מחבר ביניהם: <Num>{demoFarm.area}</Num>&nbsp;דונם לא נפרדים בסוף שורה.
+        <p className="max-w-[64ch] text-caption text-ink-2">
+          ספרות במונו ויחידות בעברית, מחוץ ל־<Code>&lt;Num&gt;</Code>, ורווח בלתי שביר ביניהן:{' '}
+          <Num>{demoFarm.area}</Num>&nbsp;דונם לא נפרדים בסוף שורה.
         </p>
         <span className="flex flex-wrap gap-2">
           <DemoTag />
@@ -317,7 +321,7 @@ function MonoSpecimen() {
 
       <dl className="mt-4 grid grid-flow-row-dense grid-cols-2 gap-(--bw) overflow-hidden rounded-lg border-(length:--bw) border-line bg-line lg:grid-cols-12">
         {tiles.map((t) => (
-          <div key={t.label} className={cn('grid min-w-0 content-between gap-4 bg-surface p-4', t.span)}>
+          <div key={t.label} className={cn('grid min-w-0 content-between gap-3 bg-surface p-4', t.span)}>
             <dt className="text-caption text-ink-2">{t.label}</dt>
             <dd className="whitespace-nowrap text-title">{t.value}</dd>
           </div>
@@ -329,8 +333,7 @@ function MonoSpecimen() {
           <figcaption className="grid gap-1">
             <span className="text-caption font-bold">יישור טבלאי: אחדות מתחת לאחדות, נקודה מתחת לנקודה</span>
             <span className="text-micro text-ink-2">
-              הקו הירוק הוא קו היישור. ספרות ברוחב קבוע, מספרים מיושרים לקצה ההתחלה&nbsp;– סדר הגודל נקרא עוד לפני
-              שקוראים. השורות הן תוכנית העונה של החלקה.
+              הקו הירוק הוא קו היישור: ספרות ברוחב קבוע, מיושרות לקצה ההתחלה&nbsp;– סדר הגודל נקרא עוד לפני שקוראים.
             </span>
           </figcaption>
           <div className="min-w-0 overflow-x-auto">
@@ -342,7 +345,7 @@ function MonoSpecimen() {
           <figcaption className="grid gap-1">
             <span className="text-caption font-bold">למה מונו: אותם מספרים, שני גופנים</span>
             <span className="text-micro text-ink-2">
-              באסיסטנט הספרות פרופורציונליות&nbsp;– במדידה <Num>1111</Num> צר בכ־<Num>8%</Num> מ־<Num>8888</Num>,
+              באסיסטנט הספרות פרופורציונליות&nbsp;– במדידה <Num>1111</Num>&nbsp;צר בכ־<Num>8%</Num>&nbsp;מ־<Num>8888</Num>,
               ו־<Code>tabular-nums</Code> לא משנה דבר: אין לגופן ספרות טבלאיות. לכן כל מספר עובר לפלקס מונו.
             </span>
           </figcaption>
@@ -380,7 +383,7 @@ function MonoSpecimen() {
 
 export function Specimens() {
   return (
-    <div className="grid gap-6">
+    <div className="grid gap-4">
       <DisplaySpecimen />
       <SansSpecimen />
       <MonoSpecimen />

@@ -176,7 +176,7 @@ const rules: Rule[] = [
     coda: (
       <p className="text-caption text-ink-2">
         <span className="font-bold text-ink">בהתראת קרה, סימן המינוס הוא כל ההבדל.</span> בלי בידוד המינוס נראה
-        כמו קו מפריד, <Num>−2°</Num> נקרא כמו <Num>2°</Num>&nbsp;– והתראה שאמורה להציל יבול נקראת כמו עוד לילה
+        כמו קו מפריד, <Num>−2°</Num>&nbsp;נקרא כמו <Num>2°</Num>&nbsp;– והתראה שאמורה להציל יבול נקראת כמו עוד לילה
         רגיל.
       </p>
     ),
@@ -242,7 +242,7 @@ const rules: Rule[] = [
     ),
     why: (
       <>
-        גוף טקסט נקרא בגובה שורה <Num>1.6</Num> ובשורות של <Num>45–75</Num>&nbsp;תווים. שורה ארוכה מדי מאבדת את
+        גוף טקסט נקרא בגובה שורה <Num>1.6</Num>&nbsp;ובשורות של <Num>45–75</Num>&nbsp;תווים. שורה ארוכה מדי מאבדת את
         העין בדרך חזרה לתחילת השורה; שורה צפופה נדבקת לשכנה שלה.
       </>
     ),
@@ -266,7 +266,7 @@ function Pane({ ok, note, children }: { ok: boolean; note: ReactNode; children: 
   return (
     <figure
       className={cn(
-        'grid min-w-0 content-start gap-3 rounded-md border-(length:--bw) border-line bg-canvas p-3 sm:p-4',
+        'grid min-w-0 content-start gap-2 rounded-md border-(length:--bw) border-line bg-canvas p-3',
         'border-t-[length:calc(var(--bw)*3)]',
         ok ? 'border-t-sprout-ink' : 'border-t-harvest-ink',
       )}
@@ -328,7 +328,7 @@ export function Rules() {
             )}
           >
             {/* room at inline-end for the "למה" summary */}
-            <h4 className="flex items-baseline gap-3 pe-24 font-sans text-lead font-extrabold">
+            <h4 className="flex items-baseline gap-3 pe-20 font-sans text-lead font-extrabold">
               <span className="text-caption font-medium text-ink-3">
                 <Num>{String(i + 1).padStart(2, '0')}</Num>
               </span>

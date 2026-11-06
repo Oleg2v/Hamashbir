@@ -1,24 +1,35 @@
 import type { CSSProperties, ReactNode } from 'react';
 import { DemoTag } from '@/components/ui/Chip';
 import { Num } from '@/components/ui/Num';
-import { ndvi, palette, stages, staggerDelay, surfaces, type StageId } from '@/design/tokens';
+import { demoFarm, planLines, season as farm } from '@/data/demo-farm';
+import { mixOklab, sampleRamp } from '@/design/color';
+import { durations, ndvi, palette, stages, staggerDelay, surfaces, type StageId } from '@/design/tokens';
 import { cn } from '@/lib/cn';
 import { formatNumber } from '@/lib/format';
 import css from './SeasonParcels.module.css';
 
 /**
- * העונה מלמעלה – the season, seen from above.
+ * העונה מלמעלה – the season, seen from above.
  *
- * A survey drawing of five adjacent parcels, one per stage, read in time order
- * from inline-start: זריעה → השקיה → הגנה → קטיף → אריזה. One generator feeds
- * two compositions – a wide strip (five parcels side by side) and a 2–2–1
- * block for phones – switched by a container query on the figure's own width.
+ * The demo farm's one field (src/data/demo-farm.ts: 40 dunam of pepper in a
+ * net house in the Arava) drawn at five moments of a single season, side by
+ * side in time order from inline-start: שתילה → השקיה → הגנה → קטיף → אריזה.
+ * One generator feeds two compositions – a wide strip and a 2–2–1 block for
+ * phones – switched by a container query on the figure's own width.
+ *
+ * Each composition is two layers with the same viewBox:
+ *  - the ground (soil, tracks, parcels, terrain, beds, stubble, survey
+ *    vertices) is static, so it ships as one <img> of an SVG data URI: a
+ *    single DOM node that the browser rasterises once;
+ *  - the season (plants, drip, fruit, cartons) is inline SVG on top, so it
+ *    can open with CSS keyframes – opacity and transform only, plus the
+ *    dash-offset draw of the drip lines – after <html data-ready> (set once
+ *    the page has loaded and gone idle), never while it is still hydrating.
  *
  * Plants use the dot trick (round caps + stroke-dasharray "0 N"), so one
  * <path> is one row of plants. Geometry comes from a seeded PRNG at module
- * load: the markup is identical on every render. Server component, no JS –
- * the opening motion is CSS keyframes and collapses to the final state under
- * prefers-reduced-motion.
+ * load: the markup is identical on every render. Server component, no JS.
+ * Under prefers-reduced-motion the finished season shows immediately.
  */
 
 /* ───────────────────────────── randomness ───────────────────────────── */
@@ -35,78 +46,32 @@ function prng(seed: number) {
 }
 
 /* ───────────────────────────── colour ───────────────────────────── */
-/* SVG gradients interpolate in sRGB; sampling the ramp in OKLCH keeps the
-   drawing in step with the CSS ramp (--ndvi-inline is `in oklch`). */
 
-type Lch = readonly [number, number, number];
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
-const toLinear = (c: number) => (c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4);
-const toGamma = (c: number) => (c <= 0.0031308 ? 12.92 * c : 1.055 * c ** (1 / 2.4) - 0.055);
-const channel = (hex: string, i: number) => parseInt(hex.slice(1 + 2 * i, 3 + 2 * i), 16);
-const toHex = (rgb: number[]) => `#${rgb.map((c) => Math.round(c).toString(16).padStart(2, '0')).join('')}`;
 
-function hexToLch(hex: string): Lch {
-  const [r, g, b] = [0, 1, 2].map((i) => toLinear(channel(hex, i) / 255));
-  const l = Math.cbrt(0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b);
-  const m = Math.cbrt(0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b);
-  const s = Math.cbrt(0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * b);
-  const A = 1.9779984951 * l - 2.428592205 * m + 0.4505937099 * s;
-  const B = 0.0259040371 * l + 0.7827717662 * m - 0.808675766 * s;
-  return [0.2104542553 * l + 0.793617785 * m - 0.0040720468 * s, Math.hypot(A, B), Math.atan2(B, A)];
-}
-
-function lchToHex([L, Ch, H]: Lch) {
-  const A = Ch * Math.cos(H);
-  const B = Ch * Math.sin(H);
-  const l = (L + 0.3963377774 * A + 0.2158037573 * B) ** 3;
-  const m = (L - 0.1055613458 * A - 0.0638541728 * B) ** 3;
-  const s = (L - 0.0894841775 * A - 1.291485548 * B) ** 3;
-  const rgb = [
-    4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s,
-    -1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s,
-    -0.0041960863 * l - 0.7034186147 * m + 1.707614701 * s,
-  ];
-  return toHex(rgb.map((c) => Math.min(1, Math.max(0, toGamma(c))) * 255));
-}
-
-const ramp = ndvi.stops.map((s) => ({ at: s.at, lch: hexToLch(s.hex) }));
-
-function ndviColor(value: number) {
-  const v = Math.min(1, Math.max(0, value));
-  let i = 0;
-  while (i < ramp.length - 2 && v > ramp[i + 1].at) i++;
-  const a = ramp[i];
-  const b = ramp[i + 1];
-  const t = (v - a.at) / (b.at - a.at);
-  let dh = b.lch[2] - a.lch[2];
-  if (dh > Math.PI) dh -= 2 * Math.PI;
-  if (dh < -Math.PI) dh += 2 * Math.PI;
-  return lchToHex([lerp(a.lch[0], b.lch[0], t), lerp(a.lch[1], b.lch[1], t), a.lch[2] + dh * t]);
-}
+/** The NDVI ramp sampled in OKLCH (design/color.ts) – the same space as the CSS ramp. */
+const ndviColor = (v: number) => sampleRamp(ndvi.stops, v);
 
 const ndviStops = (from: number, to: number, n: number) =>
   Array.from({ length: n }, (_, i) => ({ o: i / (n - 1), c: ndviColor(lerp(from, to, i / (n - 1))) }));
-
-/** `over` laid on `base` at opacity `t` – flattened, so a parcel is one element. */
-const blend = (base: string, over: string, t: number) =>
-  toHex([0, 1, 2].map((i) => lerp(channel(base, i), channel(over, i), t)));
 
 const C = {
   soil: palette.soil.hex,
   loam: palette.loam.hex,
   paper: palette.paper.hex,
+  sprout: palette.sprout.hex,
   water: palette.water.hex,
   wheat: palette.wheat.hex,
   harvest: palette.harvest.hex,
 };
 
-/** Ground tone per stage: fresh tilth, wet soil, bare loam, shade under canopy, straw. */
+/** Ground tone per moment: fresh beds, wet soil, bare loam, shade under canopy, straw. */
 const TONES = [
-  blend(C.loam, C.paper, 0.03),
-  blend(blend(C.loam, C.soil, 0.2), C.water, 0.03),
+  mixOklab(C.loam, C.paper, 0.03),
+  mixOklab(mixOklab(C.loam, C.soil, 0.2), C.water, 0.03),
   C.loam,
-  blend(C.loam, C.soil, 0.3),
-  blend(C.loam, C.wheat, 0.09),
+  mixOklab(C.loam, C.soil, 0.3),
+  mixOklab(C.loam, C.wheat, 0.09),
 ];
 
 /* ───────────────────────────── plane geometry ───────────────────────────── */
@@ -129,7 +94,7 @@ function meet(l1: Line, l2: Line): P {
   return [l1.p[0] + t * l1.d[0], l1.p[1] + t * l1.d[1]];
 }
 
-/** Shrink a convex quad by `d` on every side – the dirt track between parcels. */
+/** Shrink a convex quad by `d` on every side – the dirt track between parcels. */
 function inset(q: Quad, d: number): Quad {
   const cx = (q[0][0] + q[1][0] + q[2][0] + q[3][0]) / 4;
   const cy = (q[0][1] + q[1][1] + q[2][1] + q[3][1]) / 4;
@@ -147,6 +112,10 @@ function inset(q: Quad, d: number): Quad {
   const v = (i: number) => meet(edges[(i + 3) % 4], edges[i]);
   return [v(0), v(1), v(2), v(3)];
 }
+
+/** Shoelace area of a quad, in drawing units². */
+const area = (q: Quad) =>
+  Math.abs(q.reduce((s, a, i) => s + a[0] * q[(i + 1) % 4][1] - q[(i + 1) % 4][0] * a[1], 0)) / 2;
 
 /** Attribute numbers (stroke widths, dashes): one decimal. */
 const n1 = (x: number) => `${Math.round(x * 10) / 10}`;
@@ -185,7 +154,7 @@ type RowOpts = {
   trim: readonly [number, number] | ((j: number) => readonly [number, number]);
   /** terrain contour: an S-bend shared by every row, so the spacing stays even */
   bend: number;
-  /** rows stop short of this box (the crate yard) */
+  /** rows stop short of this box (the carton yard) */
   avoid?: Box;
   minLen?: number;
 };
@@ -248,7 +217,7 @@ type Spec = {
   seed: number;
 };
 
-/** Wide: five parcels side by side, stage 1 at the right. 1 unit ≈ 0.5 m. */
+/** Wide: the five moments side by side, the first at the right. */
 const WT: P[] = [[1590, 18], [1262, 10], [950, 22], [644, 12], [316, 24], [10, 14]];
 const WB: P[] = [[1584, 626], [1278, 632], [934, 620], [662, 630], [298, 618], [16, 628]];
 
@@ -274,17 +243,20 @@ const wideSpec: Spec = {
   seed: 1993,
 };
 
-/** Narrow: 2–2–1, read right-to-left, then down. 1 unit ≈ 0.9 m. */
+/**
+ * Narrow: 2–2–1, read right-to-left, then down. Row heights 2 : 2 : 1, so the
+ * full-width fifth parcel has the same area as the four half-width ones.
+ */
 const narrowSpec: Spec = (() => {
   const H0 = line([356, 6], [4, 10]);
-  const H1 = line([356, 236], [4, 228]);
-  const H2 = line([356, 460], [4, 466]);
+  const H1 = line([356, 262], [4, 254]);
+  const H2 = line([356, 512], [4, 518]);
   const H3 = line([356, 640], [4, 636]);
   const R = line([356, 0], [356, 1]);
   const L = line([4, 0], [4, 1]);
   /* field lines rarely meet across a road: the two mid boundaries are offset */
-  const A = line([188, 0], [180, 240]);
-  const B = line([164, 230], [176, 470]);
+  const A = line([188, 0], [180, 266]);
+  const B = line([164, 256], [176, 522]);
   const [a0, a1, a2] = [meet(H0, R), meet(H0, A), meet(H0, L)];
   const [b0, b1, b2, b3] = [meet(H1, R), meet(H1, A), meet(H1, B), meet(H1, L)];
   const [c0, c1, c2] = [meet(H2, R), meet(H2, B), meet(H2, L)];
@@ -316,17 +288,41 @@ const narrowSpec: Spec = (() => {
     mottles: [
       { c: [270, 330], r: [150, 120], tone: 'dark' },
       { c: [80, 120], r: [140, 90], tone: 'dark' },
-      { c: [150, 560], r: [170, 80], tone: 'light' },
+      { c: [150, 580], r: [170, 70], tone: 'light' },
       { c: [300, 80], r: [90, 70], tone: 'light' },
     ],
     seed: 2026,
   };
 })();
 
-/* ───────────────────────────── the season ───────────────────────────── */
+/* ───────────────────────────── the opening ───────────────────────────── */
 
-/** Opening timeline (ms). Everything lands inside 2.4 s. */
-const T = { seeds: 0, main: 0, laterals: 160, emitters: 1200, protect: 520, canopy: 820, fruit: 1500, crates: 1700 };
+/**
+ * The opening, in ms, from tokens only: each moment of the season opens one
+ * `base` beat after the one before it; rows inside a moment follow
+ * staggerDelay (40ms apart, 480ms at most).
+ */
+const beat = durations.base.ms;
+const T = {
+  seedlings: 0,
+  main: beat,
+  laterals: beat + durations.fast.ms,
+  protect: 2 * beat,
+  canopy: 3 * beat,
+  fruit: 3 * beat + durations.grow.ms,
+  cartons: 3 * beat + durations.grow.ms + durations.fast.ms,
+};
+
+/** Each animated mark's motion, so the opening's length is computed, never typed. */
+const MOVES = {
+  pop: durations.slow.ms,
+  draw: durations.grow.ms,
+  fade: durations.grow.ms,
+  grow: durations.grow.ms,
+  glow: durations.slow.ms,
+  stack: durations.slow.ms,
+} as const;
+type Move = keyof typeof MOVES;
 
 function build(spec: Spec) {
   const rnd = prng(spec.seed);
@@ -339,18 +335,24 @@ function build(spec: Spec) {
   const merge = (cs: Curve[], dx = 0) => cs.map((c) => d.curve(c, dx)).join('');
   const down = (bend: number): RowOpts => ({ axis: 'down', pad: [side, side], trim: [top, end], bend });
   const across = (bend: number): RowOpts => ({ axis: 'across', pad: [top, end], trim: [side, side], bend });
+  let ends = 0;
+  const at = (ms: number, move: Move) => {
+    ends = Math.max(ends, ms + MOVES[move]);
+    return ms;
+  };
 
-  /* 01 זריעה – ploughed across the field, sparse seed on the ridges */
+  /* 01 שתילה – beds across the field, young seedlings set out along them */
   const q1 = inner[0];
   const o1 = across(spec.bend[0]);
   const n1Rows = rowCount(q1, o1, 11.6 * u);
   const sow = {
     troughs: merge(rows(q1, spread(n1Rows), o1)),
     ridges: merge(rows(q1, between(n1Rows), o1)),
-    seeds: merge(rows(q1, between(n1Rows), { ...o1, trim: () => [side + rnd() * 22 * u, side] })),
+    seedlings: merge(rows(q1, between(n1Rows), { ...o1, trim: () => [side + rnd() * 22 * u, side] })),
+    delay: at(T.seedlings, 'pop'),
   };
 
-  /* 02 השקיה – a sub-main along the headland, laterals down every other ridge */
+  /* 02 השקיה – a sub-main along the headland, laterals down every other bed */
   const q2 = inner[1];
   const o2 = down(spec.bend[1]);
   const n2Rows = rowCount(q2, o2, 11.6 * u);
@@ -367,15 +369,22 @@ function build(spec: Spec) {
     first[0] + ((first[0] - last[0]) / along) * reach,
     first[1] + ((first[1] - last[1]) / along) * reach,
   ];
+  const lateralDelays = laterals.map((_, j) => at(T.laterals + staggerDelay(j, laterals.length), 'draw'));
+  const drawn = Math.max(...lateralDelays) + MOVES.draw;
   const irrigate = {
     furrows: merge(rows(q2, spread(n2Rows), o2)),
     main: d.seg(supply, last),
+    mainDelay: at(T.main, 'draw'),
     valve: d.rect(supply[0] - 3.5 * u, supply[1] - 3.5 * u, 7 * u, 7 * u),
-    laterals: laterals.map((c, j) => ({ d: d.curve(c), delay: T.laterals + staggerDelay(j, laterals.length) })),
+    laterals: laterals.map((c, j) => ({ d: d.curve(c), delay: lateralDelays[j] })),
     emitters: merge(laterals),
+    emittersDelay: at(T.laterals + MOVES.draw, 'fade'),
+    /* light as information: the wet lines glow once the water has reached their ends */
+    glow: d.seg(supply, last) + merge(laterals),
+    glowDelay: at(drawn, 'glow'),
   };
 
-  /* 03 הגנה – young to dense canopy, coloured by NDVI */
+  /* 03 הגנה – young to dense canopy, coloured by NDVI (mean ≈ the label's reading) */
   const q3 = inner[2];
   const o3 = down(spec.bend[2]);
   const protectCurves = rows(q3, spread(rowCount(q3, o3, 13.4 * u)), o3);
@@ -386,7 +395,7 @@ function build(spec: Spec) {
         d: d.curve(c),
         w: lerp(2.3, 7.4, t * t) * u,
         dash: `0 ${n1(lerp(11.5, 6.4, t) * u)}`,
-        delay: T.protect + staggerDelay(j, all.length),
+        delay: at(T.protect + staggerDelay(j, all.length), 'grow'),
       };
     }),
     grad: {
@@ -394,11 +403,12 @@ function build(spec: Spec) {
       y1: (q3[0][1] + q3[3][1]) / 2 - 30 * u,
       x2: (q3[1][0] + q3[2][0]) / 2,
       y2: (q3[1][1] + q3[2][1]) / 2 + 30 * u,
-      stops: ndviStops(0.36, 0.9, 6),
+      /* sparse young rows to the first dense ones: wheat → sprout → green on the ramp */
+      stops: ndviStops(0.28, 0.7, 6),
     },
   };
 
-  /* 04 קטיף – full canopy; fruit set on both sides of each row, in bands of three rows */
+  /* 04 קטיף – near-full canopy; peppers set on both sides of each row, in bands of three rows */
   const q4 = inner[3];
   const o4: RowOpts = { ...down(spec.bend[3]), pad: [side + 2 * u, side + 2 * u] };
   const fr4 = spread(rowCount(q4, o4, 14.6 * u));
@@ -410,29 +420,29 @@ function build(spec: Spec) {
     Array.from({ length: bands }, (_, g) => ({
       d: merge(fruitRows.slice(g * 3, g * 3 + 3), dx),
       dash: fruitDash(),
-      delay: start + staggerDelay(g, bands),
+      delay: at(start + staggerDelay(g, bands), 'pop'),
     }));
   const harvest = {
     canopy: canopy.map((c, j) => ({
       d: d.curve(c),
       w: (9 + (rnd() - 0.5) * 1.6) * u,
-      delay: T.canopy + staggerDelay(j, canopy.length),
+      delay: at(T.canopy + staggerDelay(j, canopy.length), 'grow'),
     })),
     red: fruit(2.6 * u, T.fruit),
-    yellow: fruit(-2.6 * u, T.fruit + 60),
+    yellow: fruit(-2.6 * u, T.fruit + staggerDelay(1, 2)),
     grad: {
       cx: (q4[0][0] + q4[1][0] + q4[2][0] + q4[3][0]) / 4,
       cy: (q4[0][1] + q4[1][1] + q4[2][1] + q4[3][1]) / 4,
       r: dist(q4[0], q4[2]) * 0.6,
-      stops: ndviStops(0.97, 0.74, 4),
+      stops: ndviStops(0.84, 0.72, 4),
     },
   };
 
-  /* 05 אריזה – stubble after the harvest, crates stacked at the field edge */
+  /* 05 אריזה – the rows after the harvest, carton pallets at the field edge */
   const q5 = inner[4];
-  /* a pallet seen from above: 2 × 3 crates, tight; aisles between pallets */
-  const crate = { w: 12 * u, h: 8 * u };
-  const pallet = { w: 2 * crate.w, h: 3 * crate.h };
+  /* a pallet seen from above: 2 × 3 cartons, tight; aisles between pallets */
+  const carton = { w: 12 * u, h: 8 * u };
+  const pallet = { w: 2 * carton.w, h: 3 * carton.h };
   const pitch = { x: pallet.w + 5 * u, y: pallet.h + 6 * u };
   const yardW = spec.yard.cols * pitch.x - 5 * u;
   const yardH = spec.yard.rows * pitch.y - 6 * u;
@@ -463,17 +473,17 @@ function build(spec: Spec) {
       /* some stacks are still being built: the layer below shows through */
       const missing = rnd() < 0.34 ? 1 + Math.floor(rnd() * 3) : 0;
       for (let k = 0; k < 6; k++) {
-        const cell = d.rect(x + (k % 2) * crate.w, y + Math.floor(k / 2) * crate.h, crate.w, crate.h);
+        const cell = d.rect(x + (k % 2) * carton.w, y + Math.floor(k / 2) * carton.h, carton.w, carton.h);
         if (k < missing) lower += cell;
         else tops += cell;
       }
       grid +=
         d.rect(x, y, pallet.w, pallet.h) +
-        d.seg([x + crate.w, y], [x + crate.w, y + pallet.h]) +
-        d.seg([x, y + crate.h], [x + pallet.w, y + crate.h]) +
-        d.seg([x, y + 2 * crate.h], [x + pallet.w, y + 2 * crate.h]);
+        d.seg([x + carton.w, y], [x + carton.w, y + pallet.h]) +
+        d.seg([x, y + carton.h], [x + pallet.w, y + carton.h]) +
+        d.seg([x, y + 2 * carton.h], [x + pallet.w, y + 2 * carton.h]);
     }
-    return { shadow, tops, lower, grid, delay: T.crates + staggerDelay(r, spec.yard.rows) };
+    return { shadow, tops, lower, grid, delay: at(T.cartons + staggerDelay(r, spec.yard.rows), 'stack') };
   });
   const pack = {
     stubble: merge(stubble),
@@ -510,6 +520,10 @@ function build(spec: Spec) {
     plateW: (q[0][0] - q[1][0] - 2 * pad) / W,
   }));
 
+  /* scale: one parcel is the demo farm's field, so the mean parcel area is that many dunams */
+  const meanArea = inner.reduce((s, q) => s + area(q), 0) / inner.length;
+  const metresPerUnit = Math.sqrt((demoFarm.area * 1000) / meanArea);
+
   return {
     key: spec.key,
     W,
@@ -530,6 +544,10 @@ function build(spec: Spec) {
     harvest,
     pack,
     anchors,
+    /** 100 m on the drawing, as a fraction of its width */
+    scale100m: 100 / metresPerUnit / W,
+    /** when the last mark of the opening has landed */
+    ends,
   };
 }
 
@@ -538,86 +556,200 @@ type Built = ReturnType<typeof build>;
 const WIDE = build(wideSpec);
 const NARROW = build(narrowSpec);
 
+/** The opening's full length (ms), computed from the token timeline. */
+export const seasonOpeningMs = Math.max(WIDE.ends, NARROW.ends);
+
+/* ───────────────────────────── the ground, as an image ───────────────────────────── */
+
+type Attrs = Record<string, string | number | undefined>;
+
+const tag = (name: string, attrs: Attrs, children = '') => {
+  const a = Object.entries(attrs)
+    .filter(([, v]) => v !== undefined)
+    .map(([k, v]) => ` ${k}='${v}'`)
+    .join('');
+  return children ? `<${name}${a}>${children}</${name}>` : `<${name}${a}/>`;
+};
+
+/** The static layer as SVG markup (fills from palette tokens), then a compact data URI. */
+function groundUri(b: Built) {
+  const w = (x: number) => n1(x * b.u);
+  const { soil, paper, wheat } = C;
+  const defs =
+    tag('clipPath', { id: 'f' }, tag('path', { d: b.fields })) +
+    tag(
+      'radialGradient',
+      { id: 'dk' },
+      tag('stop', { offset: 0, 'stop-color': soil, 'stop-opacity': 0.55 }) +
+        tag('stop', { offset: 1, 'stop-color': soil, 'stop-opacity': 0 }),
+    ) +
+    tag(
+      'radialGradient',
+      { id: 'lt' },
+      tag('stop', { offset: 0, 'stop-color': paper, 'stop-opacity': 0.09 }) +
+        tag('stop', { offset: 1, 'stop-color': paper, 'stop-opacity': 0 }),
+    ) +
+    tag(
+      'pattern',
+      { id: 'g', width: n1(b.grain.tile), height: n1(b.grain.tile), patternUnits: 'userSpaceOnUse' },
+      tag('path', {
+        d: b.grain.dark,
+        stroke: soil,
+        'stroke-opacity': 0.45,
+        'stroke-width': w(1.6),
+        'stroke-linecap': 'round',
+      }) +
+        tag('path', {
+          d: b.grain.light,
+          stroke: paper,
+          'stroke-opacity': 0.07,
+          'stroke-width': w(1.2),
+          'stroke-linecap': 'round',
+        }),
+    );
+
+  const body = [
+    /* soil, then compacted dirt tracks – paler than the fields – with wheel ruts */
+    tag('rect', { width: b.W, height: b.H, fill: soil }),
+    tag('path', { d: b.tracks, fill: 'none', stroke: paper, 'stroke-opacity': 0.12, 'stroke-width': n1(b.trackWidth) }),
+    tag('path', { d: b.ruts, fill: 'none', stroke: paper, 'stroke-opacity': 0.16, 'stroke-width': w(0.9) }),
+    /* the parcels, toned per moment */
+    ...b.parcels.map((p) => tag('path', { d: p.d, fill: p.fill })),
+    /* terrain: soil variation that crosses parcel lines, and grain */
+    tag(
+      'g',
+      { 'clip-path': 'url(#f)' },
+      b.mottles
+        .map((m) =>
+          tag('ellipse', {
+            cx: m.c[0],
+            cy: m.c[1],
+            rx: m.r[0],
+            ry: m.r[1],
+            fill: `url(#${m.tone === 'dark' ? 'dk' : 'lt'})`,
+          }),
+        )
+        .join('') + tag('rect', { width: b.W, height: b.H, fill: 'url(#g)' }),
+    ),
+    /* 01 beds, 02 furrows, 05 stubble and the pallet pad */
+    tag(
+      'g',
+      { fill: 'none', 'stroke-linecap': 'round' },
+      tag('path', { d: b.sow.troughs, stroke: soil, 'stroke-opacity': 0.55, 'stroke-width': w(4.6) }) +
+        tag('path', { d: b.sow.ridges, stroke: paper, 'stroke-opacity': 0.11, 'stroke-width': w(1.8) }) +
+        tag('path', { d: b.irrigate.furrows, stroke: soil, 'stroke-opacity': 0.42, 'stroke-width': w(4.2) }) +
+        tag('path', { d: b.pack.windrows, stroke: wheat, 'stroke-opacity': 0.12, 'stroke-width': w(6) }),
+    ),
+    tag('path', {
+      d: b.pack.stubble,
+      fill: 'none',
+      stroke: wheat,
+      'stroke-opacity': 0.5,
+      'stroke-width': w(1.4),
+      'stroke-dasharray': `${w(1.3)} ${w(3.3)}`,
+    }),
+    tag('path', { d: b.pack.yard, fill: paper, 'fill-opacity': 0.035 }),
+    /* survey: cadastral vertices */
+    tag('path', { d: b.vertices, fill: 'none', stroke: paper, 'stroke-opacity': 0.55, 'stroke-width': w(1) }),
+  ].join('');
+
+  const svg = tag(
+    'svg',
+    { xmlns: 'http://www.w3.org/2000/svg', viewBox: `0 0 ${b.W} ${b.H}`, width: b.W, height: b.H },
+    tag('defs', {}, defs) + body,
+  );
+  return `data:image/svg+xml,${svg.replace(/%/g, '%25').replace(/#/g, '%23').replace(/</g, '%3C').replace(/>/g, '%3E')}`;
+}
+
+const GROUND = { w: groundUri(WIDE), n: groundUri(NARROW) };
+
 /* ───────────────────────────── data & copy ───────────────────────────── */
 
 type Datum = { kind: 'ndvi'; value: number } | { kind: 'qty'; value: number; unit: string };
 
+/** What the field reads at each moment. Quantities come from the demo farm; NDVI is a plausible reading. */
 const DATA: Record<StageId, Datum> = {
   sow: { kind: 'ndvi', value: 0.12 },
-  irrigate: { kind: 'qty', value: 12000, unit: 'מ׳ טפטוף' },
+  irrigate: { kind: 'qty', value: farm.dripMeters, unit: 'מ׳ טפטוף' },
   protect: { kind: 'ndvi', value: 0.46 },
   harvest: { kind: 'ndvi', value: 0.78 },
-  pack: { kind: 'qty', value: 1850, unit: 'ארגזים' },
+  pack: { kind: 'qty', value: farm.cartons, unit: 'קרטונים' },
 };
 
-/** What each parcel shows, for the figure's accessible name. */
+/** What each moment shows, for the figure's accessible name. */
 const LOOK: Record<StageId, string> = {
-  sow: 'תלמים חרושים וזרעים דלילים',
-  irrigate: 'קווי טפטוף כחולים לאורך השורות',
+  sow: 'ערוגות שתולות ושתילים צעירים לאורכן',
+  irrigate: 'שלוחות טפטוף כחולות לאורך הערוגות, עם קו מחלק ומגוף',
   protect: 'חופה צעירה עד צפופה בצבעי מדד הצמחייה',
-  harvest: 'חופה מלאה עם פירות אדומים וצהובים',
-  pack: 'שורות שלף אחרי הקטיף וערימות ארגזים בשולי החלקה',
+  harvest: 'חופה כמעט מלאה עם פלפלים אדומים וצהובים',
+  pack: 'השורות אחרי הקטיף ומשטחי קרטונים בשולי החלקה',
 };
 
-const STAGE_COLOR: Record<StageId, string> = {
-  sow: 'var(--color-sprout)',
-  irrigate: 'var(--color-water)',
-  protect: 'var(--color-field)',
-  harvest: 'var(--color-harvest)',
-  pack: 'var(--color-wheat)',
+/** Stage colour as a fill on the drawing's own soil, and its ink variant on a light surface. */
+const STAGE_COLOR: Record<StageId, { fill: string; ink: string }> = {
+  sow: { fill: 'var(--color-sprout)', ink: 'var(--sprout-ink)' },
+  irrigate: { fill: 'var(--color-water)', ink: 'var(--water-ink)' },
+  protect: { fill: 'var(--color-field)', ink: 'var(--sprout-ink)' },
+  harvest: { fill: 'var(--color-harvest)', ink: 'var(--harvest-ink)' },
+  pack: { fill: 'var(--color-wheat)', ink: 'var(--wheat-ink)' },
 };
 
-const season = stages.map((s, i) => ({ ...s, num: String(i + 1).padStart(2, '0'), datum: DATA[s.id] }));
+/** The farm's own word for each moment: pepper is transplanted, so stage 1 reads שתילה. */
+const momentName = (id: StageId, fallback: string) => planLines.find((l) => l.stage === id)?.stageLabel ?? fallback;
+
+const season = stages.map((s, i) => ({
+  ...s,
+  name: momentName(s.id, s.he),
+  num: String(i + 1).padStart(2, '0'),
+  datum: DATA[s.id],
+}));
+
+const NB = ' ';
+const coords = `${demoFarm.coords.lat.toFixed(2)}°N ${demoFarm.coords.lon.toFixed(2)}°E`;
+const field = `${demoFarm.area}${NB}דונם ${demoFarm.crop} ב${demoFarm.method} ב${demoFarm.region}`;
 
 const datumText = (d: Datum) =>
-  d.kind === 'ndvi' ? `NDVI ${formatNumber(d.value, 2)}` : `${formatNumber(d.value)} ${d.unit}`;
+  d.kind === 'ndvi' ? `NDVI ${formatNumber(d.value, 2)}` : `${formatNumber(d.value)}${NB}${d.unit}`;
 
 function DatumLine({ d }: { d: Datum }) {
   if (d.kind === 'ndvi') return <Num>NDVI {formatNumber(d.value, 2)}</Num>;
   return (
     <>
-      <Num>{formatNumber(d.value)}</Num> {d.unit}
+      <Num>{formatNumber(d.value)}</Num>
+      {NB}
+      {d.unit}
     </>
   );
 }
 
 function ariaLabel(withData: boolean) {
-  const parts = season.map((s) => `${s.he} – ${LOOK[s.id]}${withData ? `, ${datumText(s.datum)}` : ''}`);
-  return `העונה מלמעלה: איור אווירי של חמש חלקות סמוכות, חלקה לכל שלב, לפי סדר העונה. ${parts.join('; ')}.${withData ? ' נתוני דמו.' : ''}`;
+  const parts = season.map(
+    (s) => `${s.num} ${s.name}${NB}– ${LOOK[s.id]}${withData ? `, ${datumText(s.datum)}` : ''}`,
+  );
+  return `העונה מלמעלה: איור אווירי סכמטי של אותה חלקה, ${field}, בחמישה רגעים של עונה אחת, זה לצד זה לפי סדר העונה. ${parts.join('; ')}.${withData ? ' נתוני דמו.' : ''}`;
 }
 
 const vars = (o: Record<string, string>) => o as CSSProperties;
 const pct = (f: number) => `${Math.round(f * 10000) / 100}%`;
 
-/* ───────────────────────────── drawing ───────────────────────────── */
+/* ───────────────────────────── the season layer ───────────────────────────── */
 
-function Scene({ b, animate }: { b: Built; animate: boolean }) {
+function Season({ b, animate }: { b: Built; animate: boolean }) {
   const id = (k: string) => `sp-${b.key}-${k}`;
   const url = (k: string) => `url(#${id(k)})`;
   const at = (ms: number) => (animate ? vars({ '--d': `${ms}ms` }) : undefined);
   const w = (x: number) => n1(x * b.u);
-  const { soil, loam, paper, water, wheat } = C;
+  const { soil, loam, water, wheat, sprout } = C;
 
   return (
     <svg
-      className={css.svg}
+      className={css.season}
       viewBox={`0 0 ${b.W} ${b.H}`}
       aria-hidden="true"
       focusable="false"
       preserveAspectRatio="xMidYMid meet"
     >
       <defs>
-        <clipPath id={id('fields')}>
-          <path d={b.fields} />
-        </clipPath>
-        <radialGradient id={id('dark')}>
-          <stop offset="0" stopColor={soil} stopOpacity="0.55" />
-          <stop offset="1" stopColor={soil} stopOpacity="0" />
-        </radialGradient>
-        <radialGradient id={id('light')}>
-          <stop offset="0" stopColor={paper} stopOpacity="0.09" />
-          <stop offset="1" stopColor={paper} stopOpacity="0" />
-        </radialGradient>
         <linearGradient
           id={id('ndvi3')}
           gradientUnits="userSpaceOnUse"
@@ -641,129 +773,116 @@ function Scene({ b, animate }: { b: Built; animate: boolean }) {
             <stop key={s.o} offset={n1(s.o)} stopColor={s.c} />
           ))}
         </radialGradient>
-        <pattern id={id('grain')} width={n1(b.grain.tile)} height={n1(b.grain.tile)} patternUnits="userSpaceOnUse">
-          <path d={b.grain.dark} stroke={soil} strokeOpacity="0.45" strokeWidth={w(1.6)} strokeLinecap="round" />
-          <path d={b.grain.light} stroke={paper} strokeOpacity="0.07" strokeWidth={w(1.2)} strokeLinecap="round" />
-        </pattern>
-        <filter id={id('glow')} x="-10%" y="-5%" width="120%" height="110%" colorInterpolationFilters="sRGB">
-          <feGaussianBlur in="SourceGraphic" stdDeviation={w(2.8)} result="b" />
-          <feMerge>
-            <feMergeNode in="b" />
-            <feMergeNode in="SourceGraphic" />
-          </feMerge>
-        </filter>
       </defs>
 
-      {/* ground: soil, then compacted dirt tracks – paler than the fields – with wheel ruts */}
-      <rect width={b.W} height={b.H} fill={soil} />
-      <g fill="none" stroke={paper}>
-        <path d={b.tracks} strokeOpacity="0.12" strokeWidth={n1(b.trackWidth)} />
-        <path d={b.ruts} strokeOpacity="0.16" strokeWidth={w(0.9)} />
-      </g>
+      {/* 01 שתילה */}
+      <path
+        className={css.pop}
+        style={at(b.sow.delay)}
+        d={b.sow.seedlings}
+        fill="none"
+        stroke={sprout}
+        strokeLinecap="round"
+        strokeWidth={w(2.4)}
+        strokeDasharray={`0 ${w(22)}`}
+      />
 
-      {/* parcels, toned per stage */}
-      {b.parcels.map((p, i) => (
-        <path key={i} d={p.d} fill={p.fill} />
-      ))}
-
-      {/* terrain: soil variation that crosses parcel lines, and grain */}
-      <g clipPath={url('fields')}>
-        {b.mottles.map((m, i) => (
-          <ellipse key={i} cx={m.c[0]} cy={m.c[1]} rx={m.r[0]} ry={m.r[1]} fill={url(m.tone)} />
-        ))}
-        <rect width={b.W} height={b.H} fill={url('grain')} />
-      </g>
-
-      {/* 01 זריעה */}
-      <g fill="none" strokeLinecap="round">
-        <path d={b.sow.troughs} stroke={soil} strokeOpacity="0.55" strokeWidth={w(4.6)} />
-        <path d={b.sow.ridges} stroke={paper} strokeOpacity="0.11" strokeWidth={w(1.8)} />
+      {/* 02 השקיה – the glow is a wide, faint copy of the wet lines (no blur filter) */}
+      <g fill="none" strokeLinecap="round" stroke={water}>
         <path
-          className={css.pop}
-          style={at(T.seeds)}
-          d={b.sow.seeds}
-          stroke={wheat}
-          strokeWidth={w(2.4)}
-          strokeDasharray={`0 ${w(22)}`}
+          className={css.glow}
+          style={at(b.irrigate.glowDelay)}
+          d={b.irrigate.glow}
+          strokeOpacity="0.1"
+          strokeWidth={w(7)}
+        />
+        <path
+          className={css.glow}
+          style={at(b.irrigate.glowDelay)}
+          d={b.irrigate.glow}
+          strokeOpacity="0.18"
+          strokeWidth={w(3.6)}
+        />
+        <path
+          className={css.draw}
+          style={at(b.irrigate.mainDelay)}
+          pathLength={1}
+          d={b.irrigate.main}
+          strokeWidth={w(2.2)}
+        />
+        {b.irrigate.laterals.map((l, j) => (
+          <path key={j} className={css.draw} style={at(l.delay)} pathLength={1} d={l.d} strokeWidth={w(1.1)} />
+        ))}
+        <path
+          className={css.fade}
+          style={at(b.irrigate.emittersDelay)}
+          d={b.irrigate.emitters}
+          strokeWidth={w(2.6)}
+          strokeDasharray={`0 ${w(16)}`}
+          strokeDashoffset={w(8)}
         />
       </g>
-
-      {/* 02 השקיה */}
-      <g fill="none" strokeLinecap="round">
-        <path d={b.irrigate.furrows} stroke={soil} strokeOpacity="0.42" strokeWidth={w(4.2)} />
-        <g filter={url('glow')} stroke={water}>
-          <g className={css.draw}>
-            <path style={at(T.main)} pathLength={1} d={b.irrigate.main} strokeWidth={w(2.2)} />
-            {b.irrigate.laterals.map((l, j) => (
-              <path key={j} style={at(l.delay)} pathLength={1} d={l.d} strokeWidth={w(1.1)} />
-            ))}
-          </g>
-          <path
-            className={css.fade}
-            style={at(T.emitters)}
-            d={b.irrigate.emitters}
-            strokeWidth={w(2.6)}
-            strokeDasharray={`0 ${w(16)}`}
-            strokeDashoffset={w(8)}
-          />
-        </g>
-        <path d={b.irrigate.valve} fill={soil} stroke={water} strokeWidth={w(1.4)} />
-      </g>
+      <path d={b.irrigate.valve} fill={soil} stroke={water} strokeWidth={w(1.4)} />
 
       {/* 03 הגנה */}
-      <g className={css.grow} fill="none" strokeLinecap="round" stroke={url('ndvi3')}>
+      <g fill="none" strokeLinecap="round" stroke={url('ndvi3')}>
         {b.protect.rows.map((r, j) => (
-          <path key={j} style={at(r.delay)} d={r.d} strokeWidth={n1(r.w)} strokeDasharray={r.dash} />
+          <path
+            key={j}
+            className={css.grow}
+            style={at(r.delay)}
+            d={r.d}
+            strokeWidth={n1(r.w)}
+            strokeDasharray={r.dash}
+          />
         ))}
       </g>
 
       {/* 04 קטיף */}
       <g fill="none" strokeLinecap="round">
-        <g className={css.grow} stroke={url('ndvi4')} strokeDasharray={`0 ${w(5)}`}>
+        <g stroke={url('ndvi4')} strokeDasharray={`0 ${w(5)}`}>
           {b.harvest.canopy.map((r, j) => (
-            <path key={j} style={at(r.delay)} d={r.d} strokeWidth={n1(r.w)} />
+            <path key={j} className={css.grow} style={at(r.delay)} d={r.d} strokeWidth={n1(r.w)} />
           ))}
         </g>
-        <g className={css.pops} stroke={C.harvest} strokeWidth={w(3.8)}>
+        <g stroke={C.harvest} strokeWidth={w(3.8)}>
           {b.harvest.red.map((r, j) => (
-            <path key={j} style={at(r.delay)} d={r.d} strokeDasharray={r.dash} />
+            <path key={j} className={css.pop} style={at(r.delay)} d={r.d} strokeDasharray={r.dash} />
           ))}
         </g>
-        <g className={css.pops} stroke={wheat} strokeWidth={w(3.3)}>
+        <g stroke={wheat} strokeWidth={w(3.3)}>
           {b.harvest.yellow.map((r, j) => (
-            <path key={j} style={at(r.delay)} d={r.d} strokeDasharray={r.dash} />
+            <path key={j} className={css.pop} style={at(r.delay)} d={r.d} strokeDasharray={r.dash} />
           ))}
         </g>
       </g>
 
       {/* 05 אריזה */}
-      <g fill="none">
-        <path d={b.pack.windrows} stroke={wheat} strokeOpacity="0.12" strokeWidth={w(6)} strokeLinecap="round" />
-        <path
-          d={b.pack.stubble}
-          stroke={wheat}
-          strokeOpacity="0.5"
-          strokeWidth={w(1.4)}
-          strokeDasharray={`${w(1.3)} ${w(3.3)}`}
-        />
-        <path d={b.pack.yard} fill={paper} fillOpacity="0.035" />
-        {b.pack.pallets.map((p, r) => (
-          <g key={r} className={css.stack} style={at(p.delay)}>
-            <path d={p.shadow} fill={soil} fillOpacity="0.6" />
-            <path d={p.tops} fill={wheat} />
-            <path d={p.lower} fill={wheat} fillOpacity="0.5" />
-            <path d={p.grid} stroke={loam} strokeOpacity="0.85" strokeWidth={w(0.9)} />
-          </g>
-        ))}
-      </g>
-
-      {/* survey: cadastral vertices */}
-      <path d={b.vertices} fill="none" stroke={paper} strokeOpacity="0.55" strokeWidth={w(1)} />
+      {b.pack.pallets.map((p, r) => (
+        <g key={r} className={css.stack} style={at(p.delay)}>
+          <path d={p.shadow} fill={soil} fillOpacity="0.6" />
+          <path d={p.tops} fill={wheat} />
+          <path d={p.lower} fill={wheat} fillOpacity="0.5" />
+          <path d={p.grid} fill="none" stroke={loam} strokeOpacity="0.85" strokeWidth={w(0.9)} />
+        </g>
+      ))}
     </svg>
   );
 }
 
+function Scene({ b, animate }: { b: Built; animate: boolean }) {
+  return (
+    <div className={css.scene}>
+      {/* eslint-disable-next-line @next/next/no-img-element -- a data-URI SVG: nothing to optimise */}
+      <img className={css.ground} src={GROUND[b.key]} width={b.W} height={b.H} alt="" decoding="async" />
+      <Season b={b} animate={animate} />
+    </div>
+  );
+}
+
 /* ───────────────────────────── labels & legend ───────────────────────────── */
+
+const stageVars = (id: StageId) => vars({ '--stage': STAGE_COLOR[id].fill, '--stage-ink': STAGE_COLOR[id].ink });
 
 function WideLabels() {
   return (
@@ -771,14 +890,10 @@ function WideLabels() {
       {season.map((s, i) => {
         const a = WIDE.anchors[i];
         return (
-          <div
-            key={s.id}
-            className={css.label}
-            style={vars({ '--x': pct(a.x), '--w': pct(a.w), '--stage': STAGE_COLOR[s.id] })}
-          >
+          <div key={s.id} className={css.label} style={{ ...vars({ '--x': pct(a.x), '--w': pct(a.w) }), ...stageVars(s.id) }}>
             <p className={css.labelHead}>
               <Num className="text-caption text-ink-2">{s.num}</Num>
-              <span className="text-lead font-bold">{s.he}</span>
+              <span className="text-lead font-bold">{s.name}</span>
             </p>
             <p className="text-caption text-ink-2">
               <DatumLine d={s.datum} />
@@ -799,16 +914,14 @@ function NarrowPlates() {
           <div
             key={s.id}
             className={css.plate}
-            style={vars({
-              '--x': pct(a.plateX),
-              '--y': pct(a.plateY),
-              '--w': pct(a.plateW),
-              '--stage': STAGE_COLOR[s.id],
-            })}
+            style={{
+              ...vars({ '--x': pct(a.plateX), '--y': pct(a.plateY), '--w': pct(a.plateW) }),
+              ...stageVars(s.id),
+            }}
           >
             <p className={css.plateHead}>
               <Num className={cn(css.plateNum, 'text-micro')}>{s.num}</Num>
-              <span className="text-caption font-bold">{s.he}</span>
+              <span className="text-caption font-bold">{s.name}</span>
             </p>
             <p className={cn(css.plateData, 'text-micro')}>
               <DatumLine d={s.datum} />
@@ -822,9 +935,9 @@ function NarrowPlates() {
 
 function NorthArrow() {
   return (
-    <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true" focusable="false">
-      <path d="M7 1.5 11 12 7 9.5 3 12Z" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round" />
-      <path d="M7 1.5V9.5L3 12Z" fill="currentColor" />
+    <svg className={css.northIcon} viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+      <path d="M8 1.5 12.5 14 8 11 3.5 14Z" fill="none" stroke="currentColor" strokeWidth="1.25" strokeLinejoin="round" />
+      <path d="M8 1.5V11L3.5 14Z" fill="currentColor" />
     </svg>
   );
 }
@@ -832,7 +945,22 @@ function NorthArrow() {
 function Legend() {
   const marks = season.filter((s) => s.datum.kind === 'ndvi');
   return (
-    <div className={css.legend} aria-hidden="true">
+    <div
+      className={css.legend}
+      aria-hidden="true"
+      style={vars({ '--scale-w': `${WIDE.scale100m}`, '--scale-n': `${NARROW.scale100m}` })}
+    >
+      <div className={css.caption}>
+        <p className="text-caption font-bold text-ink">אותה חלקה, חמישה רגעים</p>
+        <p className="text-caption text-ink-2">
+          <Num>{demoFarm.area}</Num>
+          {NB}דונם {demoFarm.crop} ב{demoFarm.method} · עונה אחת, משתילה ועד אריזה
+        </p>
+        <p className="text-micro text-ink-2">
+          {demoFarm.region} · <Num>{demoFarm.branch.km}</Num>
+          {NB}ק״מ מ{demoFarm.branch.name} · <Num>{coords}</Num>
+        </p>
+      </div>
       <div className={css.ndvi}>
         <p className="text-micro text-ink-2">
           מדד צמחייה <Num>NDVI</Num> · מאדמה חשופה לחופה מלאה
@@ -857,15 +985,13 @@ function Legend() {
         <span className={css.scale}>
           <span className={css.scaleBar} />
           <span>
-            <Num>100</Num> מ׳
+            <Num>100</Num>
+            {NB}מ׳
           </span>
         </span>
         <span className={css.north}>
           <NorthArrow />
           צפון
-        </span>
-        <span>
-          עמק יזרעאל · <Num>32.68°N 35.24°E</Num>
         </span>
         <DemoTag />
       </div>

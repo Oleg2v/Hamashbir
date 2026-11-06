@@ -112,5 +112,24 @@
       text-decoration-line: underline;
       text-decoration-thickness: 2px;
     }
+
+    /* SVG paint is not forced: the drawing takes system colours itself.
+       !important because the fill/stroke utilities sit in a later layer. */
+    .anatomy text,
+    .anatomy tspan {
+      fill: CanvasText !important;
+    }
+
+    .anatomy line {
+      stroke: GrayText !important;
+    }
+
+    .anatomy line[data-hot] {
+      stroke: Highlight !important;
+    }
+
+    .anatomy rect {
+      fill: transparent !important;
+    }
   }
 }

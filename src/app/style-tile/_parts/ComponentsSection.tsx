@@ -61,7 +61,7 @@ function ButtonMatrix() {
             <span>{v.he}</span>
             <Num className="text-micro font-normal text-ink-3">btn--{v.key}</Num>
           </p>
-          <ul className="grid grid-cols-2 items-start gap-x-6 gap-y-5 sm:grid-cols-3 xl:grid-cols-6">
+          <ul className="grid grid-cols-1 items-start gap-x-6 gap-y-5 min-[26rem]:grid-cols-2 sm:grid-cols-3 xl:grid-cols-6">
             {states.map((s) => (
               <li key={s.key} className="grid justify-items-start gap-2" inert={s.key !== 'rest' || undefined}>
                 <Button

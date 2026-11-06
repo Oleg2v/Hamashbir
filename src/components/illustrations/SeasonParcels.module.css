@@ -1,301 +1,364 @@
 /*
  * SeasonParcels — composition switch, label typesetting and the season's
  * opening motion. Semantic variables only; the drawing's own colours are
- * token values passed in by the component.
+ * token values passed in by the component. Everything sits in
+ * @layer components, so a Tailwind utility on the same element still wins.
  */
 
-.root {
-  container-type: inline-size;
-  position: relative;
-}
-
-.svg {
-  display: block;
-  inline-size: 100%;
-  block-size: auto;
-}
-
-/* The drawing is laid out right-to-left (stage 1 at inline-start). Should the
-   page ever run LTR, mirror it so it keeps agreeing with the labels. */
-.svg:dir(ltr) {
-  transform: scaleX(-1);
-}
-
-/* ───────────── composition switch (container, not viewport) ───────────── */
-
-.wide {
-  display: none;
-}
-
-/* Phones get the 2–2–1 block; between phone and strip widths it stays a
-   poster-sized column instead of growing ever taller. */
-.narrow,
-.legend {
-  max-inline-size: 28rem;
-  margin-inline: auto;
-}
-
-@container (min-width: 35rem) {
-  .wide {
-    display: block;
+@layer components {
+  .root {
+    container-type: inline-size;
+    position: relative;
   }
 
-  .narrow {
+  /*
+   * Full-bleed aware: when the figure runs edge to edge, its labels and legend
+   * still line up with the page column (.wrap); inside .wrap or a card the
+   * inset resolves to 0. (cqi here is the figure's own width.)
+   */
+  .labels,
+  .legend {
+    --wrap-inset: max(var(--page-margin), (100vw - var(--max-w)) / 2 + var(--page-margin));
+    --edge: max(0px, var(--wrap-inset) - (100vw - 100cqi) / 2);
+  }
+
+  /* ───────────── the two layers: ground image + season svg ───────────── */
+
+  .scene {
+    position: relative;
+  }
+
+  .ground,
+  .season {
+    display: block;
+    inline-size: 100%;
+    block-size: auto;
+  }
+
+  .season {
+    position: absolute;
+    inset: 0;
+    block-size: 100%;
+    overflow: visible;
+  }
+
+  /* The drawing is laid out right-to-left (moment 1 at inline-start). Should
+     the page ever run LTR, mirror it so it keeps agreeing with the labels. */
+  .scene:dir(ltr) {
+    transform: scaleX(-1);
+  }
+
+  /* ───────────── composition switch (container, not viewport) ───────────── */
+
+  .wide {
     display: none;
   }
-}
 
-/* ───────────── wide: one label column per parcel, above the drawing ───────────── */
+  /* Phones get the 2–2–1 block; between phone and strip widths it stays a
+     poster-sized column instead of growing ever taller. */
+  .narrow {
+    position: relative;
+    max-inline-size: 28rem;
+    margin-inline: auto;
+  }
 
-.labels {
-  display: grid;
-  align-items: start;
-  margin-block-end: 1rem;
-}
+  @container (min-width: 35rem) {
+    .wide {
+      display: block;
+    }
 
-.label {
-  grid-area: 1 / 1;
-  position: relative;
-  display: grid;
-  align-content: start;
-  gap: 0.25rem;
-  min-inline-size: 0;
-  inline-size: var(--w);
-  margin-inline-start: var(--x);
-  padding-block-start: 0.75rem;
-  padding-inline-end: 0.75rem;
-  border-block-start: var(--bw) solid var(--line);
-}
+    .narrow {
+      display: none;
+    }
+  }
 
-/* the season spine: each stage keeps its colour everywhere */
-.label::before {
-  content: '';
-  position: absolute;
-  inset-block-start: calc(var(--bw) * -1);
-  inset-inline-start: 0;
-  inline-size: 2rem;
-  block-size: 3px;
-  background: var(--stage);
-}
+  /* ───────────── wide: one label column per parcel, above the drawing ───────────── */
 
-.labelHead {
-  display: flex;
-  align-items: baseline;
-  gap: 0.625rem;
-}
+  .labels {
+    display: grid;
+    align-items: start;
+    margin-block-end: 1rem;
+  }
 
-/* ───────────── narrow: plates on each parcel's headland ───────────── */
+  .label {
+    --from: max(var(--x), var(--edge));
+    grid-area: 1 / 1;
+    position: relative;
+    display: grid;
+    align-content: start;
+    gap: 0.25rem;
+    min-inline-size: 0;
+    inline-size: min(calc(var(--x) + var(--w) - var(--from)), calc(100% - var(--edge) - var(--from)));
+    margin-inline-start: var(--from);
+    padding-block-start: 0.75rem;
+    padding-inline-end: 0.75rem;
+    border-block-start: var(--bw) solid var(--line);
+  }
 
-.narrow {
-  position: relative;
-}
+  /* the season spine: each moment keeps its stage colour everywhere */
+  .label::before {
+    content: '';
+    position: absolute;
+    inset-block-start: calc(var(--bw) * -1);
+    inset-inline-start: 0;
+    inline-size: 2rem;
+    block-size: 0.25rem;
+    background: var(--stage);
+  }
 
-.plates {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  /* the drawing keeps its soil ground in every theme, so its inks are fixed */
-  color: var(--img-ink);
-}
+  /* under a noon sky (white page) the raw fill is too faint: its ink variant */
+  :root[data-theme='sun'] .label::before {
+    background: var(--stage-ink);
+  }
 
-.plate {
-  position: absolute;
-  inset-block-start: var(--y);
-  inset-inline-start: var(--x);
-  display: grid;
-  max-inline-size: var(--w);
-}
+  .labelHead {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+  }
 
-.plate::before {
-  content: '';
-  inline-size: 1.25rem;
-  block-size: 2px;
-  margin-block-end: 0.25rem;
-  background: var(--stage);
-}
+  /* ───────────── narrow: plates on each parcel's headland ───────────── */
 
-.plateHead {
-  display: flex;
-  align-items: baseline;
-  gap: 0.5rem;
-}
+  .plates {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    /* the drawing keeps its soil ground in every theme, so its inks are fixed */
+    color: var(--img-ink);
+  }
 
-.plateNum,
-.plateData {
-  color: var(--img-ink-2);
-}
+  .plate {
+    position: absolute;
+    inset-block-start: var(--y);
+    inset-inline-start: var(--x);
+    display: grid;
+    max-inline-size: var(--w);
+  }
 
-/* ───────────── legend: NDVI ramp + survey metadata ───────────── */
+  .plate::before {
+    content: '';
+    inline-size: 1.25rem;
+    block-size: 0.25rem;
+    margin-block-end: 0.25rem;
+    background: var(--stage);
+  }
 
-.legend {
-  /* 100 m on the drawing: 111 of 360 units narrow, 200 of 1600 units wide */
-  --scale-100m: calc(min(100cqi, 28rem) * 0.309);
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 1.5rem 2.5rem;
-  margin-block-start: 1.5rem;
-}
+  .plateHead {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+  }
 
-@container (min-width: 35rem) {
+  .plateNum,
+  .plateData {
+    color: var(--img-ink-2);
+  }
+
+  /* ───────────── legend: the one field, NDVI ramp, survey metadata ───────────── */
+
+  /* the title (what and where), the key, the map furniture */
   .legend {
-    --scale-100m: 12.5cqi;
-    max-inline-size: none;
-  }
-}
-
-.ndvi {
-  display: grid;
-  gap: 0.5rem;
-  inline-size: min(100%, 22rem);
-}
-
-.gauge {
-  position: relative;
-  padding-block-start: 2rem;
-}
-
-.bar {
-  position: relative;
-  block-size: 0.375rem;
-  background: var(--ndvi-inline);
-}
-
-.mark {
-  position: absolute;
-  inset-block-end: 0;
-  inset-inline-start: var(--at);
-  translate: calc(var(--dir-sign) * -50%) 0;
-  display: grid;
-  justify-items: center;
-  gap: 0.25rem;
-  color: var(--ink-2);
-}
-
-/* the stem crosses the bar: 4px above it, then its full height */
-.mark::after {
-  content: '';
-  inline-size: var(--bw);
-  block-size: 0.625rem;
-  background: var(--ink-2);
-}
-
-.ticks {
-  position: relative;
-  block-size: 1.5rem;
-  margin-block-start: 0.25rem;
-}
-
-.tick {
-  position: absolute;
-  inset-block-start: 0;
-  inset-inline-start: var(--at);
-  translate: calc(var(--dir-sign) * -50%) 0;
-  color: var(--ink-2);
-}
-
-.tick:first-child {
-  translate: none;
-}
-
-.tick:last-child {
-  inset-inline-start: auto;
-  inset-inline-end: 0;
-  translate: none;
-}
-
-.meta {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.75rem 1.5rem;
-  color: var(--ink-2);
-}
-
-.scale {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.scaleBar {
-  inline-size: var(--scale-100m);
-  block-size: 0.375rem;
-  border: var(--bw) solid var(--ink-2);
-  background: linear-gradient(to var(--end), var(--ink-2) 50%, transparent 50%);
-}
-
-.north {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-}
-
-/* ───────────── motion: the season opens once, on load ───────────── */
-
-@keyframes draw {
-  from {
-    stroke-dashoffset: 1.05;
+    /* 100 m on the drawing, from the parcel area (one parcel = the farm's dunams) */
+    --scale-100m: calc(var(--scale-n) * min(100cqi, 28rem));
+    display: grid;
+    gap: 1.5rem;
+    max-inline-size: 28rem;
+    margin-block-start: 1.5rem;
+    margin-inline: auto;
+    padding-inline: var(--edge);
   }
 
-  to {
-    stroke-dashoffset: 0;
+  @container (min-width: 35rem) {
+    .legend {
+      --scale-100m: calc(var(--scale-w) * 100cqi);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 1.5rem 3rem;
+      max-inline-size: none;
+    }
   }
-}
 
-@keyframes grow {
-  from {
-    stroke-width: 0;
-    opacity: 0;
+  .caption {
+    display: grid;
+    gap: 0.25rem;
+    max-inline-size: 26rem;
   }
-}
 
-@keyframes fade {
-  from {
-    opacity: 0;
+  .ndvi {
+    display: grid;
+    gap: 0.5rem;
+    inline-size: min(100%, 22rem);
   }
-}
 
-@keyframes stack {
-  from {
-    opacity: 0;
-    transform: translateY(-6px);
+  .gauge {
+    position: relative;
+    padding-block-start: 2rem;
   }
-}
 
-.animate .draw > * {
-  stroke-dasharray: 1 2;
-  animation: draw var(--dur-season) var(--ease-out-quint) both;
-  animation-delay: var(--d, 0ms);
-}
+  .bar {
+    position: relative;
+    block-size: 0.5rem;
+    background: var(--ndvi-inline);
+  }
 
-.animate .grow > * {
-  animation: grow var(--dur-grow) var(--ease-growth) both;
-  animation-delay: var(--d, 0ms);
-}
+  .mark {
+    position: absolute;
+    inset-block-end: 0;
+    inset-inline-start: var(--at);
+    translate: calc(var(--dir-sign) * -50%) 0;
+    display: grid;
+    justify-items: center;
+    gap: 0.25rem;
+    color: var(--ink-2);
+  }
 
-.animate .pop,
-.animate .pops > * {
-  animation: grow var(--dur-slow) var(--ease-growth) both;
-  animation-delay: var(--d, 0ms);
-}
+  /* the stem crosses the bar: 4px above it, then its full height */
+  .mark::after {
+    content: '';
+    inline-size: var(--bw);
+    block-size: 0.75rem;
+    background: var(--ink-2);
+  }
 
-.animate .fade {
-  animation: fade var(--dur-grow) var(--ease-out-quint) both;
-  animation-delay: var(--d, 0ms);
-}
+  .ticks {
+    position: relative;
+    block-size: 1.5rem;
+    margin-block-start: 0.25rem;
+  }
 
-.animate .stack {
-  animation: stack var(--dur-slow) var(--ease-out-quint) both;
-  animation-delay: var(--d, 0ms);
-}
+  .tick {
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline-start: var(--at);
+    translate: calc(var(--dir-sign) * -50%) 0;
+    color: var(--ink-2);
+  }
 
-/* Reduced motion: the finished season, immediately. No travel, no delays. */
-@media (prefers-reduced-motion: reduce) {
-  .animate *,
-  .animate *::before,
-  .animate *::after {
-    animation: none !important;
+  .tick:first-child {
+    translate: none;
+  }
+
+  .tick:last-child {
+    inset-inline-start: auto;
+    inset-inline-end: 0;
+    translate: none;
+  }
+
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem 1.5rem;
+    color: var(--ink-2);
+  }
+
+  .scale {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .scaleBar {
+    inline-size: var(--scale-100m);
+    block-size: 0.5rem;
+    border: var(--bw) solid var(--ink-2);
+    background: linear-gradient(to var(--end), var(--ink-2) 50%, transparent 50%);
+  }
+
+  .north {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .northIcon {
+    inline-size: 1rem;
+    block-size: 1rem;
+  }
+
+  /* ───────────── motion: the season opens once, after the page is ready ───────────── */
+
+  @keyframes draw {
+    from {
+      stroke-dashoffset: 1.05;
+    }
+
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+
+  @keyframes fade {
+    from {
+      opacity: 0;
+    }
+  }
+
+  /* plants: a row appears and settles onto the bed */
+  @keyframes grow {
+    from {
+      opacity: 0;
+      transform: scale(0.96);
+    }
+  }
+
+  @keyframes stack {
+    from {
+      opacity: 0;
+      transform: translateY(-8px);
+    }
+  }
+
+  .animate .draw {
+    stroke-dasharray: 1 2;
+    animation: draw var(--dur-grow) var(--ease-out-quint) both;
+  }
+
+  .animate .grow {
+    transform-box: fill-box;
+    transform-origin: 50% 0;
+    animation: grow var(--dur-grow) var(--ease-growth) both;
+  }
+
+  .animate .pop {
+    animation: fade var(--dur-slow) var(--ease-growth) both;
+  }
+
+  .animate .fade {
+    animation: fade var(--dur-grow) var(--ease-out-quint) both;
+  }
+
+  .animate .glow {
+    animation: fade var(--dur-slow) var(--ease-out-quint) both;
+  }
+
+  .animate .stack {
+    animation: stack var(--dur-slow) var(--ease-out-quint) both;
+  }
+
+  /* after the shorthands: the delay, and the wait for <html data-ready> */
+  .animate :is(.draw, .grow, .pop, .fade, .glow, .stack) {
+    animation-delay: var(--d, 0ms);
+  }
+
+  /* Hold the first frame until the page is ready (only when scripts run:
+     without JS nothing would ever set data-ready, so it plays at once). */
+  @media (scripting: enabled) {
+    .animate :is(.draw, .grow, .pop, .fade, .glow, .stack) {
+      animation-play-state: paused;
+    }
+  }
+
+  :global(html[data-ready]) .animate :is(.draw, .grow, .pop, .fade, .glow, .stack) {
+    animation-play-state: running;
+  }
+
+  /* Reduced motion: the finished season, immediately. No travel, no delays. */
+  @media (prefers-reduced-motion: reduce) {
+    .animate :is(.draw, .grow, .pop, .fade, .glow, .stack) {
+      animation: none;
+    }
   }
 }

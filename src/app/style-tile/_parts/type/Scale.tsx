@@ -7,7 +7,6 @@ import {
   posterType,
   sunTypeFloor,
   typeScale,
-  typeViewport,
   type TypeStepName,
 } from '@/design/tokens';
 import { formatDate } from '@/lib/format';
@@ -54,12 +53,7 @@ const sample: Record<TypeStepName, ReactNode> = {
       במלאי בסניף {demoFarm.branch.name}&nbsp;· <Num>{demoFarm.branch.km}</Num>&nbsp;ק״מ ממך
     </>
   ),
-  body: (
-    <>
-      הזינו את הגידול, הדונמים ותאריך השתילה&nbsp;– ונבנה לך סל לכל שלב בעונה, עם כמויות, מחיר ומלאי בסניף הקרוב
-      אליך.
-    </>
-  ),
+  body: <>הזינו את הגידול, הדונמים ותאריך השתילה&nbsp;– ונבנה לך סל לכל שלב בעונה.</>,
   lead: <>זרעים, השקיה, דשנים ואריזה&nbsp;– בתוכנית אחת.</>,
   title: <>חקלאים לא קונים מוצרים. הם מנהלים עונות.</>,
   h3: <>מה צריך לשבוע הבא</>,
@@ -123,6 +117,19 @@ function Spec({
   );
 }
 
+/** The step's role and its clamp(): one line on desktop, two on a phone (the formula never splits from its role mid-line). */
+function UseLine({ use, clamp }: { use: string; clamp: string }) {
+  return (
+    <p className="text-micro text-ink-3">
+      {use}
+      <span className="hidden lg:inline">&nbsp;· </span>
+      <span className="block lg:inline">
+        <Num>{clamp}</Num>
+      </span>
+    </p>
+  );
+}
+
 const row =
   'grid gap-x-(--gutter) gap-y-2 border-t-(length:--bw) py-4 lg:grid-cols-12 lg:items-baseline lg:gap-y-1 lg:py-3';
 
@@ -143,9 +150,7 @@ function StepRow({ s }: { s: (typeof typeScale)[number] }) {
         <Spec min={s.min} max={s.max} sun={sunTypeFloor[s.name]} leading={s.leading} tracking={s.tracking} />
       </div>
       <div className="grid min-w-0 gap-1 lg:col-span-8">
-        <p className="text-micro text-ink-3 [overflow-wrap:anywhere]">
-          {s.use}&nbsp;· <Num>{fluidClamp(s.min, s.max)}</Num>
-        </p>
+        <UseLine use={s.use} clamp={fluidClamp(s.min, s.max)} />
         <p id={id} className={cn(utility[s.name], 'text-pretty')}>
           {sample[s.name]}
         </p>
@@ -172,9 +177,7 @@ function PosterRow() {
         <Spec min={posterType.min} max={posterType.max} leading={posterType.leading} tracking={posterType.tracking} />
       </div>
       <div className="grid min-w-0 gap-1 lg:col-span-8">
-        <p className="text-micro text-ink-3 [overflow-wrap:anywhere]">
-          מחוץ לסולם&nbsp;· <Num>{fluidClamp(posterType.min, posterType.max)}</Num>
-        </p>
+        <UseLine use="מחוץ לסולם" clamp={fluidClamp(posterType.min, posterType.max)} />
         <p className="max-w-[64ch] text-caption text-ink-2">
           {/* a probe for the live reading: the poster size itself, invisible */}
           <span id={id} className="text-poster sr-only" aria-hidden="true">
@@ -196,16 +199,16 @@ export function Scale() {
           <h4 className="font-display text-title">סולם אחד ושני קצוות.</h4>
           <p className="text-body text-ink-2">ביניהם כל שלב גדל בקו ישר, כך שאין קפיצות בין נייד לדסקטופ.</p>
           <ul className="grid border-b-(length:--bw) border-line text-caption text-ink-2">
-            <li className="border-t-(length:--bw) border-line py-3">
+            <li className="border-t-(length:--bw) border-line py-2">
               <Code className="text-ink">clamp()</Code> אחד לכל שלב, ב־<Code className="text-ink">rem + vw</Code>, והיחס
-              בין הקצוות לכל היותר <Num>{MAX_RATIO}</Num>&nbsp;– כך שזום <Num>200%</Num> עדיין מגדיל טקסט (
+              בין הקצוות לכל היותר <Num>{MAX_RATIO}</Num>&nbsp;– כך שזום <Num>200%</Num>&nbsp;עדיין מגדיל טקסט (
               <Num lang="en">WCAG 1.4.4</Num>).
             </li>
-            <li className="border-t-(length:--bw) border-line py-3">
-              גובה השורה יורד ככל שהאות גדלה: <Num>{base.leading}</Num> בגוף טקסט, <Num>{titleStep.leading}</Num> בשלב{' '}
-              <Code>title</Code>, <Num>{top.leading}</Num> בתצוגה.
+            <li className="border-t-(length:--bw) border-line py-2">
+              גובה השורה יורד ככל שהאות גדלה: <Num>{base.leading}</Num>&nbsp;בגוף טקסט, <Num>{titleStep.leading}</Num>&nbsp;בשלב{' '}
+              <Code>title</Code>, <Num>{top.leading}</Num>&nbsp;בתצוגה.
             </li>
-            <li className="border-t-(length:--bw) border-line py-3">
+            <li className="border-t-(length:--bw) border-line py-2">
               שני השלבים הקטנים מוגבהים לרצפת קריאוּת:{' '}
               {floored.map((s, i) => (
                 <span key={s.name}>
@@ -268,10 +271,10 @@ export function Scale() {
       {/* sun mode, folded into the ladder above ("בשמש"); one statement here */}
       <div className="grid gap-x-(--gutter) gap-y-3 rounded-lg border-(length:--bw) border-line bg-surface p-4 sm:p-6 lg:grid-cols-12 lg:items-baseline">
         <h4 className="font-display text-title lg:col-span-5">
-          אין טקסט קטן מ־<Num mono={false}>{SUN_FLOOR}px</Num> תחת שמש של צהריים.
+          אין טקסט קטן מ־<Num mono={false}>{SUN_FLOOR}px</Num>&nbsp;תחת שמש של צהריים.
         </h4>
         <p className="text-body text-ink-2 lg:col-span-7">
-          במצב שמש המסך עובר ללבן ולדיו שחור, הקווים מתעבים ל־<Num>{ergonomics.sun.borderWidth}px</Num> והצללים
+          במצב שמש המסך עובר ללבן ולדיו שחור, הקווים מתעבים ל־<Num>{ergonomics.sun.borderWidth}px</Num>&nbsp;והצללים
           נעלמים. ארבעת השלבים הקטנים עולים לרצפות שבעמודת „בשמש”, ומשקל גוף הטקסט עולה מ־<Num>400</Num>{' '}
           ל־<Num>500</Num>. נסו: הפעילו „מצב שמש” בכותרת העליונה, וערכי „עכשיו” בסולם יקפצו לרצפות.
         </p>

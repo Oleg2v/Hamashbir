@@ -20,7 +20,7 @@ export function TypeSection() {
         </p>
       }
     >
-      <div className="grid gap-16 lg:gap-20">
+      <div className="grid gap-16">
         <Block title="שלוש משפחות" note="תפקיד אחד לכל משפחה · אין רביעית">
           <Specimens />
         </Block>

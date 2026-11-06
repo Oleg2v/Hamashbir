@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import { Num } from '@/components/ui/Num';
 import { cn } from '@/lib/cn';
 import { CodePoint } from './bits';
@@ -17,9 +17,9 @@ const METRICS = { asc: 0.766, top: 0.594, desc: 0.156 } as const;
 /* SVG drawing space. The glyph is centred a little toward inline-end, so the
    line labels at inline-start (right) never collide with the word. */
 const W = 720;
-const H = 300;
+const H = 270;
 const FS = 250;
-const BASE = 230;
+const BASE = 225;
 const CX = 316;
 
 const Y = {
@@ -98,8 +98,11 @@ const WORD = 'word';
  * from a top line, one letter ascends and five descend. Pick any of the 27
  * forms (native radios: Tab in, arrows move) and it is drawn on the measured
  * metric lines; the default is the brand word שלך, which touches all four.
+ *
+ * `lead` is the specimen line it sits beside: on wide screens the line and the
+ * drawing share a row and the alphabet runs underneath as one strip.
  */
-export function GlyphInspector() {
+export function GlyphInspector({ lead }: { lead?: ReactNode }) {
   const [sel, setSel] = useState<string>(WORD);
   const letter = letters.find((l) => l.ch === sel);
   const zone = letter?.zone;
@@ -109,16 +112,23 @@ export function GlyphInspector() {
   const caption = letter
     ? zoneCopy[letter.zone]
     : // no-break spaces keep each one-letter word with the word that follows it
-      'שלוש אותיות, שלושה אזורים: ש\u00A0בגוף האות, ל\u00A0עולה מעל הקו העליון, ך\u00A0יורדת מתחת לקו הבסיס.';
+      'שלוש אותיות, שלושה אזורים: ש בגוף האות, ל עולה מעל הקו העליון, ך יורדת מתחת לקו הבסיס.';
 
   return (
-    <div className="grid gap-x-(--gutter) gap-y-8 xl:grid-cols-12">
+    <div className="grid gap-x-(--gutter) gap-y-6 lg:grid-cols-12">
+      {lead ? <div className="min-w-0 lg:col-span-12 xl:col-span-7">{lead}</div> : null}
+
       {/* ── anatomy ── */}
-      <figure className="grid content-start gap-4 xl:col-span-7">
+      <figure
+        className={cn(
+          'grid min-w-0 content-start gap-4 lg:col-span-7 xl:col-span-5',
+          lead != null && 'border-t-(length:--bw) border-line pt-6 xl:border-t-0 xl:pt-0',
+        )}
+      >
         <div className="relative">
           <svg
             viewBox={`0 0 ${W} ${H}`}
-            className="block h-auto w-full overflow-visible"
+            className={cn(styles.anatomy, 'block h-auto w-full overflow-visible')}
             role="img"
             aria-label={`אנטומיה של ${letter ? `האות ${letter.name}` : 'המילה שלך'} על ארבעה קווים מנחים: עולה, קו עליון, קו בסיס ויורדת.`}
           >
@@ -135,6 +145,7 @@ export function GlyphInspector() {
                   'transition-[stroke] duration-(--dur-fast) ease-out-quint',
                   hot.includes(l.key) ? 'stroke-sprout-ink' : 'stroke-line-strong',
                 )}
+                data-hot={hot.includes(l.key) ? '' : undefined}
                 strokeDasharray={l.dash ? '6 6' : undefined}
                 vectorEffect="non-scaling-stroke"
                 style={{ strokeWidth: l.strong ? 'calc(var(--bw) * 2)' : 'var(--bw)' }}
@@ -179,7 +190,7 @@ export function GlyphInspector() {
           })}
         </div>
 
-        <figcaption className="grid gap-2 border-t-(length:--bw) border-line pt-4">
+        <figcaption className="grid gap-1 border-t-(length:--bw) border-line pt-3">
           <p className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
             <span className="text-body font-extrabold">{letter ? letter.name : 'המילה „שלך”'}</span>
             {letter ? (
@@ -190,18 +201,27 @@ export function GlyphInspector() {
               </span>
             )}
           </p>
-          <p className="max-w-[52ch] text-body text-ink-2" aria-live="polite">
+          <p className="max-w-[60ch] text-caption text-ink-2" aria-live="polite">
             {caption}
           </p>
         </figcaption>
       </figure>
 
-      {/* ── the 27 forms ── */}
-      <div role="radiogroup" aria-labelledby="type-glyph-legend" className="grid content-start gap-4 xl:col-span-5">
+      {/* ── the 27 forms: a column beside the drawing, or one strip under the row on wide screens ── */}
+      <div
+        role="radiogroup"
+        aria-labelledby="type-glyph-legend"
+        className="grid min-w-0 content-start gap-3 border-t-(length:--bw) border-line pt-6 lg:col-span-5 xl:col-span-12"
+      >
         <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
-          <p id="type-glyph-legend" className="text-caption font-bold">
-            האלף־בית: <Num>22</Num> אותיות ו־<Num>5</Num> סופיות
-          </p>
+          <div className="grid gap-1">
+            <p id="type-glyph-legend" className="text-caption font-bold">
+              האלף־בית: <Num>22</Num>&nbsp;אותיות ו־<Num>5</Num>&nbsp;סופיות
+            </p>
+            <p className="text-micro text-ink-2">
+              בחרו אות&nbsp;– בעכבר, במגע או בחצים במקלדת. השם של אות סופית מסומן בקו תחתון.
+            </p>
+          </div>
           <label className={cn(styles.cell, 'grid-flow-col items-center gap-3 px-4 py-2')}>
             <input
               type="radio"
@@ -221,7 +241,8 @@ export function GlyphInspector() {
           </label>
         </div>
 
-        <div className={styles.grid}>
+        {/* auto-fill at the target width (44px, 56px in sun mode); 14 + 13 on wide screens */}
+        <div className={cn(styles.grid, 'xl:grid-cols-14')}>
           {letters.map((l) => (
             <label key={l.ch} className={cn(styles.cell, l.final && styles.cellFinal)}>
               <input
@@ -242,9 +263,6 @@ export function GlyphInspector() {
             </label>
           ))}
         </div>
-        <p className="text-micro text-ink-2">
-          בחרו אות&nbsp;– בעכבר, במגע או בחצים במקלדת. השם של אות סופית מסומן בקו תחתון.
-        </p>
       </div>
     </div>
   );
