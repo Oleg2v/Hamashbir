@@ -510,6 +510,24 @@
 
   /* Shape = stock level, in ink — never a stage colour, so a dot has one
      meaning: ● in stock · ◐ low · ○ out. Always paired with words. */
+  /* Standalone legend marks — the same shapes as the stock chip dots. */
+  .level-dot {
+    display: inline-block;
+    flex: none;
+    inline-size: 0.625rem;
+    block-size: 0.625rem;
+    border-radius: 50%;
+    box-shadow: inset 0 0 0 1.5px var(--ink);
+  }
+
+  .level-dot[data-level='in'] {
+    background: var(--ink);
+  }
+
+  .level-dot[data-level='low'] {
+    background: conic-gradient(var(--ink) 0 50%, transparent 0);
+  }
+
   .chip[data-tone='in'] .chip__dot,
   .chip[data-tone='low'] .chip__dot,
   .chip[data-tone='out'] .chip__dot {

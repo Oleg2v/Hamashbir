@@ -337,7 +337,16 @@ function Chips() {
     <div className="grid gap-8">
       <div className="grid gap-3">
         <p className="flex flex-wrap items-center gap-3 text-caption font-bold">
-          <span>מלאי בסניף · צורה, לא צבע: ● במלאי · ◐ נמוך · ○ אזל</span>
+          <span className="inline-flex flex-wrap items-center gap-x-2 gap-y-1">
+            <span>מלאי בסניף · צורה, לא צבע:</span>
+            {(['in', 'low', 'out'] as const).map((l, i) => (
+              <span key={l} className="inline-flex items-center gap-1.5">
+                {i > 0 ? <span aria-hidden="true">·</span> : null}
+                <span className="level-dot" data-level={l} aria-hidden="true" />
+                {l === 'in' ? 'במלאי' : l === 'low' ? 'נמוך' : 'אזל'}
+              </span>
+            ))}
+          </span>
           <DemoTag />
         </p>
         <div className="flex flex-wrap gap-3">
