@@ -330,7 +330,7 @@ function Matrix({ surface }: { surface: SurfaceKey }) {
         </caption>
         <thead>
           <tr>
-            <th scope="col" className="w-16 pb-2 text-start font-semibold text-ink-2 sm:w-20">
+            <th scope="col" className="pb-2 text-start font-semibold text-ink-2">
               <span className="sr-only">צבע טקסט</span>
             </th>
             {bgCols.map((c) => (
@@ -352,7 +352,7 @@ function Matrix({ surface }: { surface: SurfaceKey }) {
                 return (
                   <td key={c.key} className="p-0.5">
                     <span
-                      className="flex min-h-11 items-center justify-between gap-1 rounded-sm px-2"
+                      className="flex min-h-11 items-center justify-between gap-1 rounded-sm px-1.5"
                       style={{
                         backgroundColor: set[c.key],
                         color: set[r.key],
@@ -456,7 +456,8 @@ export function PaletteSection() {
         </Block>
 
         <Block title="מטריצת ניגודיות" note={<NumText>{'כל זוג טקסט לפחות 4.5:1 על המשטח שלו · WCAG 2.0 AA'}</NumText>}>
-          <div className="grid gap-x-(--gutter) gap-y-12 lg:grid-cols-3">
+          {/* three across only from xl: below it a matrix needs the full measure for its ratios */}
+          <div className="grid gap-x-(--gutter) gap-y-12 xl:grid-cols-3">
             <div className="min-w-0 rounded-lg border border-line p-4" data-surface="paper">
               <Matrix surface="paper" />
             </div>
