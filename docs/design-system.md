@@ -1,0 +1,81 @@
+# העונה שלך — design-system conventions
+
+Read this before touching UI code. The style tile (`/style-tile`) is the
+living version of this document.
+
+## Source of truth
+
+- `src/design/tokens.ts` holds every token (palette, surfaces, type scale,
+  space, radii, elevation, motion). `npm run tokens` compiles it into
+  `src/styles/tokens.css` (Tailwind v4 `@theme` + runtime CSS variables).
+  Never edit `tokens.css` by hand; never hard-code a hex, size or duration.
+- JS that needs a token (GSAP, three.js, charts) imports from `@/design/tokens`.
+- `src/styles/components.css` holds the component primitives (`.btn`,
+  `.field`, `.chip`, `.card`, `.table`, `.toast`). React wrappers live in
+  `src/components/ui/*`.
+
+## The closed scales (Tailwind defaults are reset)
+
+| Kind | Utilities |
+| --- | --- |
+| Type | `text-micro` `text-caption` `text-body` `text-lead` `text-title` `text-h3` `text-h2` `text-h1` `text-display` (fluid `clamp()`, line-height built in) |
+| Fonts | `font-display` (Suez One — h3 and larger only), `font-sans` (Assistant), `font-mono` / `.num` (IBM Plex Mono) |
+| Semantic colour | `bg-canvas` `bg-surface` `bg-sunken` `bg-input` `text-ink` `text-ink-2` `text-ink-3` `border-line` `border-line-strong` `bg-tint-hover` `bg-tint-press` `text-link` `text-sprout-ink` `text-water-ink` `text-harvest-ink` `text-wheat-ink` `bg-cta` `text-cta-ink` `bg-bud` `bg-inverse` `text-inverse-ink` |
+| Raw brand colour (fills, data marks only) | `soil` `loam` `paper` `field` `sprout` `water` `harvest` `wheat` `white` `black` |
+| Radius | `rounded-none` `-xs` (4) `-sm` (8) `-md` (12) `-lg` (20) `-xl` (32) `-full` |
+| Shadow | `shadow-raised` `shadow-float` `shadow-overlay` `shadow-inset` `shadow-glow-sprout` `shadow-glow-water` |
+| Easing | `ease-out-quint` (UI default) `ease-out-expo` `ease-in-out-quart` `ease-in-quint` (exits) `ease-growth` `ease-spring` |
+| Duration | `duration-(--dur-instant|fast|base|slow|grow|season)` — 80/160/240/400/720/1200 ms |
+| Space | Tailwind integer steps only (`p-1` = 4px … `p-40` = 160px). Layout vars: `--page-margin`, `--gutter`, `--section-y`, `--target`, `--target-lg` |
+
+Use `.wrap` for the page container (max 1440px, responsive margins).
+
+## Surfaces and sun mode
+
+- Put `data-surface="soil"` (dark) or `data-surface="paper"` (light) on a
+  section; every semantic colour inside re-themes. Nest freely.
+- `html[data-theme="sun"]` (מצב שמש) overrides every surface: white, black
+  ink, 2px lines, no shadows, 56px targets, bigger type floors. Never rely on
+  a shadow or a subtle tint alone to carry meaning — sun mode removes them.
+- Text colours on a surface: `ink` / `ink-2` / `ink-3` and the `*-ink`
+  accents are all ≥ 4.5:1 on their own surface. Raw `sprout`, `water`,
+  `wheat`, `harvest` are fills and marks, not text on paper.
+
+## RTL and Hebrew
+
+- `<html lang="he" dir="rtl">`. Logical properties only: `ms-/me-/ps-/pe-`,
+  `start-/end-`, `text-start/end`, `border-s/e`, `rounded-s/e`, `inset-inline`.
+  Never `ml/mr/pl/pr/left/right/text-left/text-right` (SVG coordinates exempt).
+- Reading flow = time flow: stage 1 / week 1 / low values sit at inline-start
+  (right) and progress toward inline-end (left). "Forward" arrows point left.
+- Every number goes through `<Num>` (a `<bdi>`, mono, tabular). Units stay
+  Hebrew and outside: `<Num>40</Num> דונם`.
+- Punctuation: gershayim ״ and geresh ׳ (מ״מ, ק״מ, ג׳) — never straight
+  quotes; en dash with spaces for clauses ( – ); maqaf joins a prefix to a
+  digit (ב־14, ל־5,000). No letter-spacing on Hebrew. Body line-height 1.6.
+- No lorem ipsum, no Latin eyebrows in product UI.
+
+## Motion
+
+- UI responses: `ease-out-quint`, ≤ 400ms. Big reveals and count-ups:
+  `ease-out-expo`. Camera/scroll scenes: `ease-in-out-quart`. Growth (bars,
+  sprouts, NDVI sweeps): `ease-growth`. Exits: `ease-in-quint`, short.
+- Stagger rows by 40ms, never more than 480ms in total (`staggerDelay`).
+- `prefers-reduced-motion: reduce` collapses all `--dur-*` to 1ms. JS
+  animation must check the media query and jump to the final state.
+
+## Accessibility (WCAG 2.0 AA / IS 5568)
+
+- Semantic HTML first; one h1 per page; headings in order.
+- Visible focus everywhere (global `:focus-visible` ring uses `--focus`).
+- Targets ≥ 44px (`--target`), 56px in sun mode.
+- Colour is never the only signal — chips pair a dot with words.
+- Decorative SVG: `aria-hidden`. Informative SVG: `role="img"` + Hebrew `aria-label`.
+
+## Demo hygiene and safety
+
+- Every demo quantity, coefficient or price carries `<DemoTag />`
+  ("נתוני דמו") or `<DemoTag>מחירי דמו</DemoTag>`.
+- Crop protection: never a pesticide name, dosage or spraying advice.
+  Generic placeholders only ("קוטל פטריות – לפי המלצת אגרונום") plus
+  `<AgroChip />`; ordering requires agronomist approval.

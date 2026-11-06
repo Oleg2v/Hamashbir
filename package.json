@@ -1,0 +1,37 @@
+{
+  "name": "hamashbir-season-portal",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "tokens": "tsx scripts/build-tokens.ts",
+    "predev": "npm run tokens",
+    "prebuild": "npm run tokens",
+    "typecheck": "tsc --noEmit",
+    "lint:rtl": "node scripts/check-rtl.mjs"
+  },
+  "dependencies": {
+    "next": "15.5.29",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3",
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^22.20.5",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "axe-core": "^4.14.0",
+    "eslint": "^9",
+    "eslint-config-next": "15.5.29",
+    "tailwindcss": "^4",
+    "tsx": "^4.23.15",
+    "typescript": "^5"
+  },
+  "overrides": {
+    "postcss": "^8.5.23"
+  }
+}
