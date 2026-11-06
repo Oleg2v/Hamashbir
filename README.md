@@ -10,13 +10,13 @@ in stock at the nearest branch.
 
 ## Status
 
-| Stage | Scope | State |
-| --- | --- | --- |
-| 0 | Art direction — `/style-tile` | in review |
-| 1 | Signature moment — `/hero-lab` (R3F season field) | waiting for OK |
-| 2 | App flows (planner, catalogue, branches, account, reorder, greenhouse, demand forecast) | — |
-| 3 | Polish pass | — |
-| 4 | QA (Lighthouse, axe, RTL) and the 30-second demo path | — |
+| Stage | Scope                                                                                   | State          |
+| ----- | --------------------------------------------------------------------------------------- | -------------- |
+| 0     | Art direction — `/style-tile`                                                           | in review      |
+| 1     | Signature moment — `/hero-lab` (R3F season field)                                       | waiting for OK |
+| 2     | App flows (planner, catalogue, branches, account, reorder, greenhouse, demand forecast) | —              |
+| 3     | Polish pass                                                                             | —              |
+| 4     | QA (Lighthouse, axe, RTL) and the 30-second demo path                                   | —              |
 
 ## Run
 

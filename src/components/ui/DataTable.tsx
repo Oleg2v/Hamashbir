@@ -58,17 +58,14 @@ export function DataTable<T>({
           {rows.map((row) => {
             const st = rowState?.(row);
             return (
-              <tr
-                key={rowKey(row)}
-                role="row"
-                data-selected={st?.selected ? '' : undefined}
-                data-force={st?.force}
-              >
+              <tr key={rowKey(row)} role="row" data-selected={st?.selected ? '' : undefined} data-force={st?.force}>
                 {columns.map((c) => (
                   <td
                     key={c.key}
                     role="cell"
-                    data-label={c.primary ? undefined : (c.label ?? (typeof c.header === 'string' ? c.header : undefined))}
+                    data-label={
+                      c.primary ? undefined : (c.label ?? (typeof c.header === 'string' ? c.header : undefined))
+                    }
                     data-primary={c.primary ? '' : undefined}
                     className={cn(c.numeric && 'cell-value', c.primary && 'cell-strong', c.className)}
                   >

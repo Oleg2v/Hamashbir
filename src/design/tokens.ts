@@ -110,8 +110,7 @@ export const surfaces = {
     budInk: '#1D1813',
     inverse: '#1D1813',
     inverseInk: '#F5F1E8',
-    elevRaised:
-      '0 1px 0 rgb(29 24 19 / 0.04), 0 1px 2px rgb(29 24 19 / 0.06), 0 6px 16px -6px rgb(29 24 19 / 0.12)',
+    elevRaised: '0 1px 0 rgb(29 24 19 / 0.04), 0 1px 2px rgb(29 24 19 / 0.06), 0 6px 16px -6px rgb(29 24 19 / 0.12)',
     elevFloat: '0 2px 4px rgb(29 24 19 / 0.06), 0 16px 40px -12px rgb(29 24 19 / 0.28)',
     elevOverlay: '0 32px 80px -24px rgb(29 24 19 / 0.45)',
     elevInset: 'inset 0 1px 2px rgb(29 24 19 / 0.08)',

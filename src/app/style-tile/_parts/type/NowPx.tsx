@@ -5,7 +5,7 @@ import { Num } from '@/components/ui/Num';
 import { formatPx } from './bits';
 
 /**
- * "עכשיו: 18px" – the computed font-size of the element with id `target`,
+ * "עכשיו: 18px" – the computed font-size of the element with id `target`,
  * read with getComputedStyle. Re-reads when the element resizes (viewport,
  * fonts) and when <html> changes (sun mode swaps the type floors).
  * The server renders a fixed-width placeholder, so nothing shifts on hydration.

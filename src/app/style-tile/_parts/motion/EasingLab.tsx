@@ -1,14 +1,17 @@
 'use client';
 
-import { useCallback, useEffect, useId, useRef, useState, type CSSProperties } from 'react';
+import { useCallback, useEffect, useId, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { Button } from '@/components/ui/Button';
 import { PlayIcon } from '@/components/ui/icons';
 import { Num } from '@/components/ui/Num';
+import { SegmentedControl } from '@/components/ui/SegmentedControl';
+import { Verdict } from '@/components/ui/Verdict';
 import { durations, easings, spring, type EasingKey } from '@/design/tokens';
 import { cn } from '@/lib/cn';
-import { PlayButton, ReducedNote, ToggleChip } from './controls';
+import { Block } from '../Section';
+import { PlayButton, ReducedNote } from './controls';
 import { PLOT_H, PLOT_W, coord, curves, px, py, springInfo, type CurveSpec } from './curves';
-import { cancelAll, dirSign, prefersReducedMotion } from './hooks';
+import { cancelAll, prefersReducedMotion } from './hooks';
 import s from './motion.module.css';
 
 type Pace = 'uniform' | 'real';
@@ -25,7 +28,10 @@ const realPace = Object.fromEntries([
 
 const msFor = (key: EasingKey, pace: Pace) => (pace === 'uniform' ? UNIFORM_MS : realPace[key].ms);
 
-/** Spoken shape of each curve – the plot's accessible description. */
+/** Hover, focus and click within one base beat are one gesture: play once. */
+const GESTURE_MS = durations.base.ms;
+
+/** Spoken shape of each curve – the plot's accessible description. */
 const shape: Record<EasingKey, string> = {
   'out-quint': 'יציאה מהירה ונחיתה רכה',
   'out-expo': 'זינוק חד ונחיתה ארוכה מאוד',
@@ -38,17 +44,21 @@ const shape: Record<EasingKey, string> = {
 const pct = (v: number) => Math.round(v * 100);
 const overshoot = Number(((springInfo.peak.y - 1) * 100).toFixed(1));
 
+/** The x tracer and the track dot start at inline-start: right in RTL. */
+const FROM_START = 'translateX(calc(var(--dir-sign) * -100%))';
+
 function Readout({ c, id }: { c: CurveSpec; id: string }) {
   return (
     <p id={id} className="text-caption">
       {c.mark.kind === 'p90' ? (
         <>
-          <Num className="font-medium">90%</Num> מהדרך ב־<Num className="font-medium">{pct(c.mark.at.x)}%</Num> מהזמן
+          <Num className="font-medium">90%</Num>&nbsp;מהדרך ב־<Num className="font-medium">{pct(c.mark.at.x)}%</Num>
+          &nbsp;מהזמן
         </>
       ) : (
         <>
-          שיא <Num className="font-medium">+{overshoot}%</Num> מעל היעד, ב־<Num className="font-medium">{pct(c.mark.at.x)}%</Num>{' '}
-          מהזמן
+          שיא <Num className="font-medium">+{overshoot}%</Num>&nbsp;מעל היעד, ב־
+          <Num className="font-medium">{pct(c.mark.at.x)}%</Num>&nbsp;מהזמן
         </>
       )}
     </p>
@@ -75,8 +85,20 @@ function Plot({ c }: { c: CurveSpec }) {
 
       {c.handles ? (
         <g>
-          <line x1={px(0)} y1={py(0)} x2={coord(px(c.handles[0].x))} y2={coord(py(c.handles[0].y))} className={s.handle} />
-          <line x1={px(1)} y1={py(1)} x2={coord(px(c.handles[1].x))} y2={coord(py(c.handles[1].y))} className={s.handle} />
+          <line
+            x1={px(0)}
+            y1={py(0)}
+            x2={coord(px(c.handles[0].x))}
+            y2={coord(py(c.handles[0].y))}
+            className={s.handle}
+          />
+          <line
+            x1={px(1)}
+            y1={py(1)}
+            x2={coord(px(c.handles[1].x))}
+            y2={coord(py(c.handles[1].y))}
+            className={s.handle}
+          />
           {c.handles.map((h, i) => (
             <circle key={i} cx={coord(px(h.x))} cy={coord(py(h.y))} r="2.25" className={s.handlePoint} />
           ))}
@@ -93,9 +115,21 @@ function Plot({ c }: { c: CurveSpec }) {
       )}
 
       <path d={c.path} className={s.curve} />
-      {c.stops?.map((p, i) => <circle key={i} cx={coord(px(p.x))} cy={coord(py(p.y))} r="0.9" className={s.stop} />)}
+      {/* the linear() samples: one path of round-capped dots, not 41 circles */}
+      {c.stops ? (
+        <path d={c.stops.map((p) => `M${coord(px(p.x))} ${coord(py(p.y))}h0`).join('')} className={s.stops} />
+      ) : null}
       <circle cx={coord(px(m.x))} cy={coord(py(m.y))} r="2.5" className={s.markRing} />
     </svg>
+  );
+}
+
+/** An LTR code value: a shrink-wrapped box at inline-start whose wrapped lines read left to right. */
+function CodeValue({ children, title }: { children: ReactNode; title?: string }) {
+  return (
+    <code dir="ltr" className="inline-block max-w-full break-words text-micro" title={title}>
+      <Num>{children}</Num>
+    </code>
   );
 }
 
@@ -118,16 +152,21 @@ function CurveCard({ c, signal, pace }: { c: CurveSpec; signal: Signal; pace: Pa
       if (!el || !tx.current || !ty.current || !rail.current) return;
       if (prefersReducedMotion()) return;
       const now = performance.now();
-      if (!force && now - last.current < 240) return; // hover + focus + click are one gesture
+      if (!force && now - last.current < GESTURE_MS) return;
       last.current = now;
       cancelAll(anims.current);
-      const from = `translateX(${-dirSign(el) * 100}%)`;
-      const x = tx.current.animate([{ transform: from }, { transform: 'none' }], { duration: ms, easing: 'linear' });
+      const x = tx.current.animate([{ transform: FROM_START }, { transform: 'none' }], {
+        duration: ms,
+        easing: 'linear',
+      });
       const y = ty.current.animate([{ transform: 'translateY(100%)' }, { transform: 'none' }], {
         duration: ms,
         easing: c.css,
       });
-      const d = rail.current.animate([{ transform: from }, { transform: 'none' }], { duration: ms, easing: c.css });
+      const d = rail.current.animate([{ transform: FROM_START }, { transform: 'none' }], {
+        duration: ms,
+        easing: c.css,
+      });
       anims.current.push(x, y, d);
       el.dataset.playing = '';
       x.finished.then(
@@ -166,11 +205,14 @@ function CurveCard({ c, signal, pace }: { c: CurveSpec; signal: Signal; pace: Pa
       }}
     >
       <header className="flex items-start justify-between gap-4 px-5 pt-5">
+        {/* the Hebrew name leads; the token is its code caption, never a Latin eyebrow */}
         <div className="grid min-w-0 gap-1">
-          <Num className="text-caption font-medium text-ink-2">{c.token}</Num>
-          <h4 id={`${id}-title`} className="text-lead">
+          <h4 id={`${id}-title`} className="text-lead font-extrabold">
             {c.he}
           </h4>
+          <code className="text-caption font-medium text-ink-2">
+            <Num>{c.token}</Num>
+          </code>
         </div>
         <Button
           variant="icon"
@@ -187,16 +229,16 @@ function CurveCard({ c, signal, pace }: { c: CurveSpec; signal: Signal; pace: Pa
         <div className={s.screen} onClick={() => play(ms)}>
           <span className={s.plot}>
             <Plot c={c} />
-            <span className={`${s.axisLabel} text-micro`} data-pos="y1" aria-hidden="true">
+            <span className={`${s.axisLabel} text-micro leading-none`} data-pos="y1" aria-hidden="true">
               <Num>1</Num>
             </span>
-            <span className={`${s.axisLabel} text-micro`} data-pos="origin" aria-hidden="true">
+            <span className={`${s.axisLabel} text-micro leading-none`} data-pos="origin" aria-hidden="true">
               <Num>0</Num>
             </span>
-            <span className={`${s.axisLabel} text-micro`} data-pos="x1" aria-hidden="true">
+            <span className={`${s.axisLabel} text-micro leading-none`} data-pos="x1" aria-hidden="true">
               <Num>1</Num>
             </span>
-            <span className={`${s.axisLabel} text-micro`} data-pos="time" aria-hidden="true">
+            <span className={`${s.axisLabel} text-micro leading-none`} data-pos="time" aria-hidden="true">
               זמן ←
             </span>
             <span ref={tx} className={s.tracerX} aria-hidden="true">
@@ -231,21 +273,19 @@ function CurveCard({ c, signal, pace }: { c: CurveSpec; signal: Signal; pace: Pa
         <Readout c={c} id={`${id}-readout`} />
       </div>
 
-      <dl className="grid grid-cols-[3.5rem_minmax(0,1fr)] content-start items-baseline gap-x-4 gap-y-2 px-5 pb-6 pt-4 text-caption">
+      <dl className="grid grid-cols-[3.5rem_minmax(0,1fr)] content-start items-baseline gap-x-4 gap-y-2 px-5 pt-4 pb-6 text-caption">
         {/* code rows stack: the value gets the card's full width and never breaks mid-expression */}
         <div className="col-span-2 grid gap-1">
           <dt className="text-micro text-ink-3">CSS</dt>
           <dd className="min-w-0">
             {isSpring ? (
               <>
-                <code>
-                  <Num className="block truncate text-micro" title={c.css}>
-                    {c.css}
-                  </Num>
+                <code className="block truncate text-micro" dir="ltr" title={c.css}>
+                  <Num>{c.css}</Num>
                 </code>
                 <details className={s.fullValue}>
                   <summary>
-                    הערך המלא · <Num>{springInfo.stops}</Num> נקודות
+                    הערך המלא · <Num>{springInfo.stops}</Num>&nbsp;נקודות
                   </summary>
                   <pre dir="ltr" className="text-micro">
                     <Num>{c.css}</Num>
@@ -253,9 +293,7 @@ function CurveCard({ c, signal, pace }: { c: CurveSpec; signal: Signal; pace: Pa
                 </details>
               </>
             ) : (
-              <code>
-                <Num className="inline-flex max-w-full break-words text-start text-micro">{c.css}</Num>
-              </code>
+              <CodeValue>{c.css}</CodeValue>
             )}
           </dd>
         </div>
@@ -263,12 +301,13 @@ function CurveCard({ c, signal, pace }: { c: CurveSpec; signal: Signal; pace: Pa
           <dt className="text-micro text-ink-3">GSAP</dt>
           <dd className="min-w-0">
             {c.gsap ? (
-              <code>
-                <Num className="inline-flex max-w-full break-words text-start text-micro">{c.gsap}</Num>
-              </code>
+              <CodeValue>{c.gsap}</CodeValue>
             ) : (
               <>
-                <Num className="text-micro">CustomEase</Num> מאותן <Num>{springInfo.stops}</Num> נקודות
+                <code className="text-micro">
+                  <Num>CustomEase</Num>
+                </code>
+                &nbsp;מאותן <Num>{springInfo.stops}</Num>&nbsp;נקודות
               </>
             )}
           </dd>
@@ -276,14 +315,21 @@ function CurveCard({ c, signal, pace }: { c: CurveSpec; signal: Signal; pace: Pa
         <div className="contents">
           <dt className="text-ink-3">משך</dt>
           <dd>
-            <Num className="font-medium">{real.ms}ms</Num> <Num className="text-micro text-ink-3">{real.token}</Num>
+            <Num className="font-medium">{real.ms}ms</Num>{' '}
+            <code className="text-micro text-ink-3">
+              <Num>{real.token}</Num>
+            </code>
           </dd>
         </div>
         <div className="contents">
           <dt className="text-ink-3">שימוש</dt>
           <dd className="text-ink-2">
             {c.use}
-            {isSpring ? <span className="mt-1 block font-semibold text-harvest-ink">לעולם לא על נתונים.</span> : null}
+            {isSpring ? (
+              <div className="mt-2">
+                <Verdict ok={false} label="לעולם לא על נתונים" />
+              </div>
+            ) : null}
           </dd>
         </div>
       </dl>
@@ -291,46 +337,81 @@ function CurveCard({ c, signal, pace }: { c: CurveSpec; signal: Signal; pace: Pa
   );
 }
 
+const PACES = [
+  {
+    value: 'uniform',
+    label: (
+      <>
+        אחיד&nbsp;· <Num>{UNIFORM_MS}ms</Num>
+      </>
+    ),
+  },
+  { value: 'real', label: 'אמיתי · לפי הטוקן' },
+] as const;
+
 /**
  * Six easing cards. One play control runs them all at once; each card also
  * plays on hover, keyboard focus or its own button. "Uniform" pace runs every
  * curve over 1200ms so the shapes compare; "real" uses each one's own token.
+ * Below desktop the cards are one swipeable row, so the block stays one
+ * screen tall on a phone instead of six.
  */
-export function EasingLab() {
+export function EasingLab({ title, note }: { title: string; note?: ReactNode }) {
   const [pace, setPace] = useState<Pace>('uniform');
   const [signal, setSignal] = useState<Signal>({ n: 0, pace: 'uniform' });
   const playAll = (p: Pace) => setSignal((prev) => ({ n: prev.n + 1, pace: p }));
-  const choose = (p: Pace) => {
-    setPace(p);
-    playAll(p);
-  };
 
   return (
-    <div className="grid gap-8">
-      <div className="flex flex-wrap items-center gap-x-6 gap-y-4">
-        <PlayButton onClick={() => playAll(pace)} context="שש העקומות" />
-        <div className="flex flex-wrap items-center gap-2" role="group" aria-labelledby="motion-pace-label">
-          <span id="motion-pace-label" className="me-1 text-caption font-semibold">
-            קצב
-          </span>
-          <ToggleChip pressed={pace === 'uniform'} onClick={() => choose('uniform')}>
-            אחיד · <Num>{UNIFORM_MS}ms</Num>
-          </ToggleChip>
-          <ToggleChip pressed={pace === 'real'} onClick={() => choose('real')}>
-            אמיתי · לפי הטוקן
-          </ToggleChip>
+    <Block
+      title={title}
+      note={note}
+      action={
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-4">
+          <PlayButton onClick={() => playAll(pace)} context="שש העקומות" />
+          {/* a one-line toolbar: the visible word mirrors the group's (hidden) legend */}
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="text-caption font-bold" aria-hidden="true">
+              קצב
+            </span>
+            <SegmentedControl
+              label="קצב"
+              hideLabel
+              options={PACES}
+              value={pace}
+              onChange={(p) => {
+                setPace(p);
+                playAll(p);
+              }}
+            />
+          </div>
         </div>
-        <p className="max-w-[48ch] text-caption text-ink-2">
-          רחפו מעל כרטיס או הגיעו אליו במקלדת כדי להפעיל עקומה אחת. <ReducedNote />
+      }
+    >
+      <div className={cn(s.curveRail, 'grid gap-4')}>
+        <ul
+          className={cn(
+            s.curveList,
+            // phones and tablets: one swipeable row, bleeding to the page edges
+            'grid snap-x snap-mandatory auto-cols-[min(85%,22rem)] grid-flow-col gap-(--gutter) overflow-x-auto overscroll-x-contain',
+            '-mx-(--page-margin) px-(--page-margin) scroll-px-(--page-margin) pb-2',
+            // desktop: three columns
+            'lg:mx-0 lg:grid-flow-row lg:grid-cols-3 lg:overflow-visible lg:px-0 lg:pb-0',
+          )}
+        >
+          {curves.map((c) => (
+            <li key={c.key} className="row-span-4 grid min-w-0 snap-start grid-rows-subgrid gap-y-0">
+              <CurveCard c={c} signal={signal} pace={pace} />
+            </li>
+          ))}
+        </ul>
+        <p className={cn(s.curveHint, 'text-caption lg:hidden')} aria-hidden="true">
+          <span>
+            <Num>{curves.length}</Num>&nbsp;עקומות&nbsp;· גללו הצידה ←
+          </span>
+          <span className={s.curveProgress} />
         </p>
+        <ReducedNote />
       </div>
-      <ul className="grid gap-(--gutter) sm:grid-cols-2 lg:grid-cols-3">
-        {curves.map((c) => (
-          <li key={c.key} className="row-span-4 grid min-w-0 grid-rows-subgrid gap-y-0">
-            <CurveCard c={c} signal={signal} pace={pace} />
-          </li>
-        ))}
-      </ul>
-    </div>
+    </Block>
   );
 }

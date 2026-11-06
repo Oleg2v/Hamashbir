@@ -1,759 +1,846 @@
 /*
  * Motion section — the instrument panel for growth.
- * Semantic variables only (no hex), logical properties only. Every demo is
- * drawn in its final state; JS (WAAPI) animates *from* the start toward that
- * state, so prefers-reduced-motion and no-JS both see the finished picture.
+ * Semantic variables only (no hex), logical properties only, durations and
+ * easings only from tokens. Every demo is drawn in its final state; JS (WAAPI)
+ * animates *from* the start toward that state, so prefers-reduced-motion and
+ * no-JS both see the finished picture.
+ *
+ * Everything sits in @layer components, so a Tailwind utility on the same
+ * element (text-micro, leading-none, …) always wins over a rule here.
  */
 
-/* ───────────────────────── 1 · principle glyphs ───────────────────────── */
+@layer components {
+  /* ───────────────────────── 1 · principle glyphs ───────────────────────── */
 
-.glyph {
-  display: block;
-  inline-size: auto;
-  block-size: 3.5rem;
-  overflow: visible;
-}
-
-.glyph [data-ink='rule'] {
-  stroke: var(--line-strong);
-  stroke-width: var(--bw);
-}
-
-.glyph [data-ink='faint'] {
-  stroke: color-mix(in oklab, var(--ink) 22%, transparent);
-  stroke-width: var(--bw);
-}
-
-.glyph [data-ink='data'] {
-  stroke: var(--sprout-ink);
-  stroke-width: 2px;
-}
-
-.glyph [data-ink='progress'] {
-  stroke: var(--sprout-ink);
-  stroke-width: 3px;
-}
-
-.glyph [data-fill='data'] {
-  fill: var(--sprout-ink);
-}
-
-.glyph [data-ink='water'] {
-  stroke: var(--water-ink);
-  stroke-width: 2px;
-}
-
-.glyph [data-fill='water'] {
-  fill: var(--water-ink);
-}
-
-.glyph [data-ink='wrong'] {
-  stroke: var(--harvest-ink);
-  stroke-width: 1.5px;
-}
-
-.glyph [data-fill='hole'] {
-  fill: var(--canvas);
-}
-
-:global(:root[data-theme='sun']) .glyph [data-ink='data'],
-:global(:root[data-theme='sun']) .glyph [data-ink='water'] {
-  stroke-width: 3px;
-}
-
-/* "Scroll is time": the season line fills as the principle scrolls through
-   the viewport — the user's hand drives it, nothing plays by itself. */
-.scrollFill {
-  stroke-dasharray: 1 1;
-  stroke-dashoffset: 0.5;
-}
-
-@supports (animation-timeline: view()) {
-  @media (prefers-reduced-motion: no-preference) {
-    .scrollFill {
-      animation: scroll-fill linear both;
-      animation-timeline: view();
-      animation-range: entry 20% cover 55%;
-    }
-
-    .scrollHead {
-      animation: scroll-head linear both;
-      animation-timeline: view();
-      animation-range: entry 20% cover 55%;
-    }
+  .glyph {
+    display: block;
+    inline-size: auto;
+    block-size: 3.5rem;
+    overflow: visible;
   }
-}
 
-@keyframes scroll-fill {
-  from {
-    stroke-dashoffset: 1;
+  .glyph [data-ink='rule'] {
+    stroke: var(--line-strong);
+    stroke-width: var(--bw);
   }
-  to {
+
+  .glyph [data-ink='faint'] {
+    stroke: color-mix(in oklab, var(--ink) 22%, transparent);
+    stroke-width: var(--bw);
+  }
+
+  .glyph [data-ink='data'] {
+    stroke: var(--sprout-ink);
+    stroke-width: 2px;
+  }
+
+  .glyph [data-ink='progress'] {
+    stroke: var(--sprout-ink);
+    stroke-width: 3px;
+  }
+
+  .glyph [data-fill='data'] {
+    fill: var(--sprout-ink);
+  }
+
+  .glyph [data-ink='water'] {
+    stroke: var(--water-ink);
+    stroke-width: 2px;
+  }
+
+  .glyph [data-fill='water'] {
+    fill: var(--water-ink);
+  }
+
+  .glyph [data-ink='wrong'] {
+    stroke: var(--harvest-ink);
+    stroke-width: 1.5px;
+  }
+
+  .glyph [data-fill='hole'] {
+    fill: var(--canvas);
+  }
+
+  :global(:root[data-theme='sun']) .glyph [data-ink='data'],
+  :global(:root[data-theme='sun']) .glyph [data-ink='water'] {
+    stroke-width: 3px;
+  }
+
+  /* "Scroll is time": the season line fills as the principle scrolls through
+     the viewport — the reader's hand drives it, nothing plays by itself. */
+  .scrollFill {
+    stroke-dasharray: 1 1;
     stroke-dashoffset: 0.5;
   }
-}
 
-/* SVG user space (1 unit = 1px): the head starts at stage 1, x = 116 */
-@keyframes scroll-head {
-  from {
-    transform: translateX(56px);
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .scrollFill {
+        animation: scroll-fill linear both;
+        animation-timeline: view();
+        animation-range: entry 20% cover 55%;
+      }
+
+      .scrollHead {
+        animation: scroll-head linear both;
+        animation-timeline: view();
+        animation-range: entry 20% cover 55%;
+      }
+    }
   }
-  to {
-    transform: none;
+
+  @keyframes scroll-fill {
+    from {
+      stroke-dashoffset: 1;
+    }
+    to {
+      stroke-dashoffset: 0.5;
+    }
   }
-}
 
-/* ───────────────────────── 2 · durations ───────────────────────── */
-
-.timeline {
-  position: relative;
-}
-
-/* Zone band above the ruler: UI ≤ 400ms | reveals and story. */
-.zones {
-  display: flex;
-  border-block-end: var(--bw) solid var(--line);
-}
-
-.zone {
-  padding-block-end: 0.5rem;
-}
-
-.zone + .zone {
-  padding-inline-start: 0.75rem;
-  border-inline-start: var(--bw) dashed var(--line-strong);
-}
-
-.ruler {
-  position: relative;
-  display: block;
-  block-size: 2rem;
-}
-
-.tick {
-  position: absolute;
-  inset-block-end: 0;
-  inset-inline-start: var(--at);
-  inline-size: var(--bw);
-  block-size: 0.25rem;
-  background: var(--line-strong);
-}
-
-.tick[data-major] {
-  block-size: 0.5rem;
-  background: var(--ink-2);
-}
-
-.rulerLabel {
-  position: absolute;
-  inset-block-start: 0.25rem;
-  inset-inline-start: var(--at);
-  translate: calc(var(--dir-sign) * -50%) 0;
-  color: var(--ink-2);
-  line-height: 1;
-}
-
-.rulerLabel[data-edge='start'] {
-  translate: none;
-}
-
-.rulerLabel[data-edge='end'] {
-  inset-inline-start: auto;
-  inset-inline-end: 0;
-  translate: none;
-}
-
-/* below desktop the axis is short: a label every 400ms, so 1000 never meets 1200ms */
-@media (max-width: 63.99rem) {
-  .rulerLabel[data-minor] {
-    display: none;
+  /* SVG user space (1 unit = 1px): the head starts at stage 1, x = 116 */
+  @keyframes scroll-head {
+    from {
+      transform: translateX(56px); /* rtl-ok: SVG user space; the glyph itself is drawn right → left */
+    }
+    to {
+      transform: none;
+    }
   }
-}
 
-/* One lane per duration, all on the same 0–1200ms axis. */
-.lane {
-  position: relative;
-  display: block;
-  block-size: 1.5rem;
-}
+  /* ───────────────────────── 2 · durations ───────────────────────── */
 
-.lane::before {
-  content: '';
-  position: absolute;
-  inset-inline: 0;
-  inset-block-start: calc(50% - var(--bw) / 2);
-  block-size: var(--bw);
-  background: var(--line);
-}
+  .timeline {
+    position: relative;
+  }
 
-/* sun mode: the axis is a guide, not a 2px black rule competing with the data */
-:global(:root[data-theme='sun']) .lane::before {
-  block-size: 1px;
-  background: color-mix(in oklab, var(--ink) 30%, transparent);
-}
+  /* Zone band above the ruler: UI up to 400ms | reveals and story. */
+  .zones {
+    display: flex;
+    border-block-end: var(--bw) solid var(--line);
+  }
 
-/* the UI ceiling (400ms) is marked on every lane, so it reads as a column */
-.lane::after {
-  content: '';
-  position: absolute;
-  inset-block: 0;
-  inset-inline-start: var(--ceiling);
-  border-inline-start: var(--bw) dashed var(--line-strong);
-}
+  .zone {
+    padding-block-end: 0.5rem;
+  }
 
-.laneBar {
-  position: absolute;
-  inset-inline-start: 0;
-  inset-block-start: calc(50% - 0.25rem);
-  inline-size: var(--at);
-  block-size: 0.5rem;
-  border-radius: var(--radius-full);
-  background: var(--sprout-ink);
-  transform-origin: var(--start) center;
-}
+  .zone + .zone {
+    padding-inline-start: 0.75rem;
+    border-inline-start: var(--bw) dashed var(--line-strong);
+  }
 
-.laneEnd {
-  position: absolute;
-  z-index: 1;
-  inset-inline-start: var(--at);
-  inset-block-start: calc(50% - 0.5rem);
-  inline-size: 1rem;
-  block-size: 1rem;
-  translate: calc(var(--dir-sign) * -50%) 0;
-  border: 3px solid var(--canvas);
-  border-radius: 50%;
-  background: var(--sprout-ink);
-}
+  .ruler {
+    position: relative;
+    display: block;
+    block-size: 2rem;
+  }
 
-/* The playhead: one hairline sweeping the shared axis in real time. */
-.sweepArea {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-}
+  .tick {
+    position: absolute;
+    inset-block-end: 0;
+    inset-inline-start: var(--at);
+    inline-size: var(--bw);
+    block-size: 0.25rem;
+    background: var(--line-strong);
+  }
 
-.sweep {
-  position: absolute;
-  inset: 0;
-  opacity: 0;
-}
+  .tick[data-major] {
+    block-size: 0.5rem;
+    background: var(--ink-2);
+  }
 
-.sweep::before {
-  content: '';
-  position: absolute;
-  inset-block: 0;
-  inset-inline-start: 0;
-  inline-size: var(--bw);
-  background: var(--ink);
-}
+  .rulerLabel {
+    position: absolute;
+    inset-block-start: 0.25rem;
+    inset-inline-start: var(--at);
+    translate: calc(var(--dir-sign) * -50%) 0;
+    color: var(--ink-2);
+  }
 
-[data-playing] .sweep {
-  opacity: 1;
-}
+  .rulerLabel[data-edge='start'] {
+    translate: none;
+  }
 
-.sweepHead {
-  position: absolute;
-  inset-block-start: 0;
-  inset-inline-start: 0;
-  translate: calc(var(--dir-sign) * -50%) 0;
-  min-inline-size: 4rem;
-  padding-block: 0.25rem;
-  padding-inline: 0.5rem;
-  border-radius: var(--radius-xs);
-  background: var(--ink);
-  color: var(--canvas);
-  text-align: center;
-  line-height: 1;
-}
+  .rulerLabel[data-edge='end'] {
+    inset-inline-start: auto;
+    inset-inline-end: 0;
+    translate: none;
+  }
 
-/* ───────────────────────── 3 · easing cards ───────────────────────── */
+  /* below desktop the axis is short: a label every 400ms, so 1000 never meets 1200ms */
+  @media (max-width: 63.99rem) {
+    .rulerLabel[data-minor] {
+      display: none;
+    }
+  }
 
-.curveCard {
+  /* One lane per duration, all on the same 0–1200ms axis. */
+  .lane {
+    position: relative;
+    display: block;
+    block-size: 1.5rem;
+  }
+
+  .lane::before {
+    content: '';
+    position: absolute;
+    inset-inline: 0;
+    inset-block-start: calc(50% - var(--bw) / 2);
+    block-size: var(--bw);
+    background: var(--line);
+  }
+
+  /* sun mode: the axis is a guide, not a 2px black rule competing with the data */
+  :global(:root[data-theme='sun']) .lane::before {
+    block-size: 1px;
+    background: color-mix(in oklab, var(--ink) 30%, transparent);
+  }
+
+  /* the UI ceiling (400ms) is marked on every lane, so it reads as a column */
+  .lane::after {
+    content: '';
+    position: absolute;
+    inset-block: 0;
+    inset-inline-start: var(--ceiling);
+    border-inline-start: var(--bw) dashed var(--line-strong);
+  }
+
+  .laneBar {
+    position: absolute;
+    inset-inline-start: 0;
+    inset-block-start: calc(50% - 0.25rem);
+    inline-size: var(--at);
+    block-size: 0.5rem;
+    border-radius: var(--radius-full);
+    background: var(--sprout-ink);
+    transform-origin: var(--start) center;
+  }
+
+  /* the end dot sits in a knock-out ring of the canvas colour */
+  .laneEnd {
+    position: absolute;
+    z-index: 1;
+    inset-inline-start: var(--at);
+    inset-block-start: calc(50% - 0.5rem);
+    inline-size: 1rem;
+    block-size: 1rem;
+    translate: calc(var(--dir-sign) * -50%) 0;
+    border: 0.25rem solid var(--canvas);
+    border-radius: 50%;
+    background: var(--sprout-ink);
+  }
+
+  /* The playhead: one hairline sweeping the shared axis in real time. */
+  .sweepArea {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  .sweep {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+  }
+
+  .sweep::before {
+    content: '';
+    position: absolute;
+    inset-block: 0;
+    inset-inline-start: 0;
+    inline-size: var(--bw);
+    background: var(--ink);
+  }
+
+  [data-playing] .sweep {
+    opacity: 1;
+  }
+
+  .sweepHead {
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline-start: 0;
+    translate: calc(var(--dir-sign) * -50%) 0;
+    min-inline-size: 4rem;
+    padding-block: 0.25rem;
+    padding-inline: 0.5rem;
+    border-radius: var(--radius-xs);
+    background: var(--ink);
+    color: var(--canvas);
+    text-align: center;
+  }
+
+  /* ───────────────────────── 3 · easing cards ───────────────────────── */
+
+  /* Below desktop the six cards are one swipeable row that bleeds to the
+     page edges; the next card always peeks in at inline-end (left). */
+  .curveRail {
+    timeline-scope: --curves;
+  }
+
+  .curveList {
+    scroll-timeline: --curves inline;
+  }
+
+  .curveHint {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: var(--ink-2);
+  }
+
+  /* scroll progress: the line fills from inline-start as the row is swiped */
+  .curveProgress {
+    position: relative;
+    flex: 1 1 0;
+    max-inline-size: 12rem;
+    block-size: var(--bw);
+    background: var(--line-strong);
+  }
+
+  .curveProgress::before {
+    content: '';
+    position: absolute;
+    inset-block: calc(var(--bw) * -1);
+    inset-inline: 0;
+    background: var(--sprout-ink);
+    transform-origin: var(--start) center;
+    transform: scaleX(calc(1 / 6));
+  }
+
+  @supports (animation-timeline: scroll()) {
+    .curveProgress::before {
+      animation: curve-progress linear both;
+      animation-timeline: --curves;
+    }
+  }
+
+  @supports not (animation-timeline: scroll()) {
+    .curveProgress {
+      display: none;
+    }
+  }
+
+  @keyframes curve-progress {
+    from {
+      transform: scaleX(calc(1 / 6));
+    }
+    to {
+      transform: scaleX(1);
+    }
+  }
+
   /* the shell comes from .card; the four rows (header, plot, readout, spec)
      ride the list's subgrid so every card in a row lines up, title wrap or not */
-  display: grid;
-  grid-row: 1 / -1;
-  grid-template-rows: subgrid;
-  row-gap: 0;
-}
-
-.screen {
-  position: relative;
-  display: block;
-  inline-size: 100%;
-  padding-block: 2.5rem 1rem;
-  padding-inline: 2rem 2.75rem;
-  border: var(--bw) solid var(--line);
-  border-radius: var(--radius-md);
-  background: var(--sunken);
-  color: var(--ink);
-  font: inherit;
-  text-align: start;
-  transition: border-color var(--dur-fast) var(--ease-out-quint);
-}
-
-.screen:hover {
-  border-color: var(--line-strong);
-}
-
-.plot {
-  position: relative;
-  display: block;
-  aspect-ratio: 16 / 10;
-}
-
-.plotSvg {
-  position: absolute;
-  inset: 0;
-  inline-size: 100%;
-  block-size: 100%;
-  overflow: visible;
-}
-
-.plotSvg * {
-  vector-effect: non-scaling-stroke;
-}
-
-.gridLine {
-  stroke: color-mix(in oklab, var(--ink) 9%, transparent);
-  stroke-width: 1px;
-}
-
-.axis {
-  fill: none;
-  stroke: var(--line-strong);
-  stroke-width: var(--bw);
-}
-
-.target {
-  stroke: var(--line-strong);
-  stroke-width: var(--bw);
-  stroke-dasharray: 3 4;
-}
-
-.handle {
-  stroke: var(--ink-3);
-  stroke-width: 1px;
-}
-
-.handlePoint {
-  fill: var(--sunken);
-  stroke: var(--ink-2);
-  stroke-width: 1.25px;
-}
-
-.dropLine {
-  stroke: var(--ink-3);
-  stroke-width: 1px;
-  stroke-dasharray: 1 3;
-}
-
-.markRing {
-  fill: var(--sunken);
-  stroke: var(--ink);
-  stroke-width: 1.5px;
-}
-
-.curve {
-  fill: none;
-  stroke: var(--sprout-ink);
-  stroke-width: 2px;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-.stop {
-  fill: var(--sprout-ink);
-}
-
-.dimension {
-  stroke: var(--ink);
-  stroke-width: 1px;
-}
-
-:global(:root[data-theme='sun']) .curve {
-  stroke-width: 3px;
-}
-
-:global(:root[data-theme='sun']) .gridLine {
-  stroke: color-mix(in oklab, var(--ink) 16%, transparent);
-}
-
-.axisLabel {
-  position: absolute;
-  color: var(--ink-3);
-  line-height: 1;
-  pointer-events: none;
-}
-
-.axisLabel[data-pos='y1'] {
-  inset-block-start: 0;
-  inset-inline-end: calc(100% + 0.5rem);
-  translate: 0 -50%;
-}
-
-.axisLabel[data-pos='origin'] {
-  inset-block-start: calc(100% + 0.5rem);
-  inset-inline-start: 0;
-  translate: calc(var(--dir-sign) * -50%) 0;
-}
-
-.axisLabel[data-pos='x1'] {
-  inset-block-start: calc(100% + 0.5rem);
-  inset-inline-end: 0;
-  translate: calc(var(--dir-sign) * 50%) 0;
-}
-
-.axisLabel[data-pos='time'] {
-  inset-block-start: calc(100% + 0.5rem);
-  inset-inline: 0;
-  text-align: center;
-}
-
-/* Tracer: x moves linearly with time, y with the easing — so the dot draws
-   the curve exactly, using the browser's own timing function. */
-.tracerX,
-.tracerY {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-}
-
-.tracer {
-  position: absolute;
-  inset-block-start: 0;
-  inset-inline-end: 0;
-  inline-size: 0.75rem;
-  block-size: 0.75rem;
-  translate: calc(var(--dir-sign) * 50%) -50%;
-  border: 2px solid var(--sunken);
-  border-radius: 50%;
-  background: var(--ink);
-  opacity: 0;
-}
-
-[data-playing] .tracer {
-  opacity: 1;
-}
-
-/* The demo track: the dot travels from inline-start (right) to inline-end. */
-.track {
-  position: relative;
-  display: block;
-  block-size: 1.5rem;
-  margin-block-start: 3rem;
-}
-
-.trackLine {
-  position: absolute;
-  inset-inline: 0;
-  inset-block-start: calc(50% - var(--bw) / 2);
-  block-size: var(--bw);
-  background: var(--line-strong);
-}
-
-.trackTick {
-  position: absolute;
-  inset-block-start: calc(50% - 0.25rem);
-  inset-inline-start: var(--at);
-  inline-size: var(--bw);
-  block-size: 0.5rem;
-  background: var(--line-strong);
-}
-
-.trackTick[data-edge] {
-  inset-block-start: calc(50% - 0.375rem);
-  block-size: 0.75rem;
-  background: var(--ink-2);
-}
-
-/* spring only: the overshoot zone past the target, exactly the curve's peak */
-.trackBeyond {
-  position: absolute;
-  inset-inline-start: 100%;
-  inset-block-start: calc(50% - var(--bw) / 2);
-  inline-size: var(--beyond);
-  border-block-start: var(--bw) dashed var(--harvest-ink);
-}
-
-.rail {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-}
-
-.trackDot {
-  position: absolute;
-  inset-block-start: calc(50% - 0.5rem);
-  inset-inline-end: 0;
-  inline-size: 1rem;
-  block-size: 1rem;
-  translate: calc(var(--dir-sign) * 50%) 0;
-  border: 3px solid var(--sunken);
-  border-radius: 50%;
-  background: var(--sprout-ink);
-}
-
-.fullValue summary {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3em;
-  min-block-size: var(--target);
-  color: var(--link);
-  font-weight: 700;
-  text-decoration-line: underline;
-  text-decoration-thickness: 1px;
-  text-underline-offset: 0.25em;
-  cursor: pointer;
-  list-style: none;
-}
-
-.fullValue summary::-webkit-details-marker {
-  display: none;
-}
-
-.fullValue[open] summary {
-  text-decoration-thickness: 2px;
-}
-
-.fullValue pre {
-  margin-block-start: 0.5rem;
-  padding: 0.75rem;
-  border-radius: var(--radius-sm);
-  background: var(--sunken);
-  white-space: pre-wrap;
-  overflow-wrap: anywhere;
-}
-
-/* ───────────────────────── 4 · stagger field ───────────────────────── */
-
-.field {
-  --field-h: 12rem;
-  --pitch: calc(var(--field-h) / var(--rows));
-  position: relative;
-  display: grid;
-  grid-template-rows: repeat(var(--rows), minmax(0, 1fr));
-  block-size: var(--field-h);
-}
-
-.fieldRow {
-  position: relative;
-  display: grid;
-  grid-template-columns: 3rem repeat(var(--cols), minmax(0, 1fr));
-  align-items: center;
-  min-block-size: 0;
-}
-
-/* the furrow — a drip-line-straight row on the ground */
-.fieldRow::before {
-  content: '';
-  position: absolute;
-  inset-inline: 3rem 0;
-  inset-block-start: calc(50% - 0.5px);
-  block-size: 1px;
-  background: color-mix(in oklab, var(--ink) 12%, transparent);
-}
-
-.rowLabel {
-  color: var(--ink-3);
-  line-height: 1;
-}
-
-.plant {
-  position: relative;
-  justify-self: center;
-  inline-size: min(calc(72% * var(--k)), calc(var(--pitch) * 0.56 * var(--k)));
-  aspect-ratio: 1;
-  border-radius: 50%;
-  background: var(--sprout-ink);
-}
-
-/* ───────────────────────── 5 · count-up ───────────────────────── */
-
-/* The final value reserves the width; the live value counts inside it,
-   aligned on the units digit, so nothing around it ever moves. */
-.figure {
-  display: inline-grid;
-  justify-items: end;
-}
-
-.figure > * {
-  grid-area: 1 / 1;
-}
-
-.figureGhost {
-  visibility: hidden;
-}
-
-.yieldBar {
-  position: relative;
-  display: block;
-  block-size: 0.5rem;
-  border-radius: var(--radius-full);
-  background: var(--line);
-  overflow: hidden;
-}
-
-.yieldFill {
-  --p: 1;
-  --rest: calc((1 - var(--p)) * 100%);
-  position: absolute;
-  inset: 0;
-  background-image: var(--ndvi-inline);
-  /* reveal from inline-start: clip the inline-end side (left in RTL) */
-  clip-path: inset(0 calc(var(--rest) * (1 + var(--dir-sign)) / 2) 0 calc(var(--rest) * (1 - var(--dir-sign)) / 2));
-}
-
-/* ───────────────────────── 6 · magnetic stage ───────────────────────── */
-
-.stage {
-  --w: 14.5rem;
-  --h: 3.5rem;
-  position: relative;
-  display: grid;
-  /* status · the field · readout — rows, so nothing overlaps in any theme */
-  grid-template-rows: auto minmax(11rem, 1fr) auto;
-  gap: 0.75rem;
-  padding: 0.75rem 1rem;
-  border: var(--bw) solid var(--line);
-  border-radius: var(--radius-lg);
-  background: var(--sunken);
-  overflow: hidden;
-}
-
-.stage > * {
-  grid-area: 2 / 1;
-  place-self: center;
-}
-
-.stage > .stageStatus {
-  grid-area: 1 / 1;
-  justify-self: start;
-}
-
-.stage > .readout {
-  grid-area: 3 / 1;
-  justify-self: end;
-}
-
-.zoneBox {
-  position: relative;
-  inline-size: min(100%, calc(var(--w) * var(--reach)));
-  block-size: calc(var(--h) * var(--reach) + 3rem);
-  border: var(--bw) dashed var(--line-strong);
-  border-radius: var(--radius-sm);
-  pointer-events: none;
-}
-
-.zoneLabel {
-  position: absolute;
-  inset-block-start: 0.5rem;
-  inset-inline-start: 0.75rem;
-  color: var(--ink-3);
-  line-height: 1;
-}
-
-.ghost {
-  inline-size: var(--w);
-  block-size: var(--h);
-  border: var(--bw) dashed var(--ink-3);
-  border-radius: var(--radius-full);
-  pointer-events: none;
-}
-
-/* max travel: crop marks MAGNET.max px outside the button's rest box */
-.envelope {
-  --arm: 0.75rem;
-  position: relative;
-  inline-size: calc(var(--w) + 2 * var(--max));
-  block-size: calc(var(--h) + 2 * var(--max));
-  pointer-events: none;
-}
-
-.envelope > i {
-  position: absolute;
-  inline-size: var(--arm);
-  block-size: var(--arm);
-  border: 0 solid var(--ink-2);
-}
-
-.envelope > i:nth-child(1) {
-  inset-block-start: 0;
-  inset-inline-start: 0;
-  border-block-start-width: var(--bw);
-  border-inline-start-width: var(--bw);
-}
-
-.envelope > i:nth-child(2) {
-  inset-block-start: 0;
-  inset-inline-end: 0;
-  border-block-start-width: var(--bw);
-  border-inline-end-width: var(--bw);
-}
-
-.envelope > i:nth-child(3) {
-  inset-block-end: 0;
-  inset-inline-start: 0;
-  border-block-end-width: var(--bw);
-  border-inline-start-width: var(--bw);
-}
-
-.envelope > i:nth-child(4) {
-  inset-block-end: 0;
-  inset-inline-end: 0;
-  border-block-end-width: var(--bw);
-  border-inline-end-width: var(--bw);
-}
-
-.envelopeLabel {
-  position: absolute;
-  inset-block-end: calc(100% + 0.25rem);
-  inset-inline-end: 0;
-  color: var(--ink-2);
-  line-height: 1;
-  white-space: nowrap;
-}
-
-/* rest-centre crosshair */
-.cross {
-  position: relative;
-  inline-size: 1.25rem;
-  block-size: 1.25rem;
-  pointer-events: none;
-}
-
-.cross::before,
-.cross::after {
-  content: '';
-  position: absolute;
-  background: var(--ink-3);
-}
-
-.cross::before {
-  inset-inline: 0;
-  inset-block-start: calc(50% - 0.5px);
-  block-size: 1px;
-}
-
-.cross::after {
-  inset-block: 0;
-  inset-inline-start: calc(50% - 0.5px);
-  inline-size: 1px;
-}
-
-.magnet {
-  position: relative;
-  z-index: 1;
-}
-
-.readout {
-  color: var(--ink-2);
-  line-height: 1;
-}
-
-.readoutValue {
-  display: inline-block;
-  min-inline-size: 5ch;
-  text-align: end;
-  color: var(--ink);
+  :global(.card).curveCard {
+    display: grid;
+    grid-row: 1 / -1;
+    grid-template-rows: subgrid;
+    row-gap: 0;
+  }
+
+  .screen {
+    position: relative;
+    display: block;
+    inline-size: 100%;
+    padding-block: 2.5rem 1rem;
+    padding-inline: 2rem 2.75rem;
+    border: var(--bw) solid var(--line);
+    border-radius: var(--radius-md);
+    background: var(--sunken);
+    color: var(--ink);
+    font: inherit;
+    text-align: start;
+    transition: border-color var(--dur-fast) var(--ease-out-quint);
+  }
+
+  .screen:hover {
+    border-color: var(--line-strong);
+  }
+
+  .plot {
+    position: relative;
+    display: block;
+    aspect-ratio: 16 / 10;
+  }
+
+  .plotSvg {
+    position: absolute;
+    inset: 0;
+    inline-size: 100%;
+    block-size: 100%;
+    overflow: visible;
+  }
+
+  .plotSvg * {
+    vector-effect: non-scaling-stroke;
+  }
+
+  .gridLine {
+    stroke: color-mix(in oklab, var(--ink) 9%, transparent);
+    stroke-width: 1px;
+  }
+
+  .axis {
+    fill: none;
+    stroke: var(--line-strong);
+    stroke-width: var(--bw);
+  }
+
+  .target {
+    stroke: var(--line-strong);
+    stroke-width: var(--bw);
+    stroke-dasharray: 3 4;
+  }
+
+  .handle {
+    stroke: var(--ink-3);
+    stroke-width: 1px;
+  }
+
+  .handlePoint {
+    fill: var(--sunken);
+    stroke: var(--ink-2);
+    stroke-width: 1.25px;
+  }
+
+  .dropLine {
+    stroke: var(--ink-3);
+    stroke-width: 1px;
+    stroke-dasharray: 1 3;
+  }
+
+  .markRing {
+    fill: var(--sunken);
+    stroke: var(--ink);
+    stroke-width: 1.5px;
+  }
+
+  .curve {
+    fill: none;
+    stroke: var(--sprout-ink);
+    stroke-width: 2px;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .stops {
+    fill: none;
+    stroke: var(--sprout-ink);
+    stroke-width: 3px;
+    stroke-linecap: round;
+  }
+
+  .dimension {
+    stroke: var(--ink);
+    stroke-width: 1px;
+  }
+
+  :global(:root[data-theme='sun']) .curve {
+    stroke-width: 3px;
+  }
+
+  :global(:root[data-theme='sun']) .gridLine {
+    stroke: color-mix(in oklab, var(--ink) 16%, transparent);
+  }
+
+  .axisLabel {
+    position: absolute;
+    color: var(--ink-3);
+    pointer-events: none;
+  }
+
+  .axisLabel[data-pos='y1'] {
+    inset-block-start: 0;
+    inset-inline-end: calc(100% + 0.5rem);
+    translate: 0 -50%;
+  }
+
+  .axisLabel[data-pos='origin'] {
+    inset-block-start: calc(100% + 0.5rem);
+    inset-inline-start: 0;
+    translate: calc(var(--dir-sign) * -50%) 0;
+  }
+
+  .axisLabel[data-pos='x1'] {
+    inset-block-start: calc(100% + 0.5rem);
+    inset-inline-end: 0;
+    translate: calc(var(--dir-sign) * 50%) 0;
+  }
+
+  .axisLabel[data-pos='time'] {
+    inset-block-start: calc(100% + 0.5rem);
+    inset-inline: 0;
+    text-align: center;
+  }
+
+  /* Tracer: x moves linearly with time, y with the easing — so the dot draws
+     the curve exactly, using the browser's own timing function. */
+  .tracerX,
+  .tracerY {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  .tracer {
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline-end: 0;
+    inline-size: 0.75rem;
+    block-size: 0.75rem;
+    translate: calc(var(--dir-sign) * 50%) -50%;
+    border: 2px solid var(--sunken);
+    border-radius: 50%;
+    background: var(--ink);
+    opacity: 0;
+  }
+
+  [data-playing] .tracer {
+    opacity: 1;
+  }
+
+  /* The demo track: the dot travels from inline-start (right) to inline-end. */
+  .track {
+    position: relative;
+    display: block;
+    block-size: 1.5rem;
+    margin-block-start: 3rem;
+  }
+
+  .trackLine {
+    position: absolute;
+    inset-inline: 0;
+    inset-block-start: calc(50% - var(--bw) / 2);
+    block-size: var(--bw);
+    background: var(--line-strong);
+  }
+
+  .trackTick {
+    position: absolute;
+    inset-block-start: calc(50% - 0.25rem);
+    inset-inline-start: var(--at);
+    inline-size: var(--bw);
+    block-size: 0.5rem;
+    background: var(--line-strong);
+  }
+
+  .trackTick[data-edge] {
+    inset-block-start: calc(50% - 0.375rem);
+    block-size: 0.75rem;
+    background: var(--ink-2);
+  }
+
+  /* spring only: the overshoot zone past the target, exactly the curve's peak */
+  .trackBeyond {
+    position: absolute;
+    inset-inline-start: 100%;
+    inset-block-start: calc(50% - var(--bw) / 2);
+    inline-size: var(--beyond);
+    border-block-start: var(--bw) dashed var(--harvest-ink);
+  }
+
+  .rail {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  .trackDot {
+    position: absolute;
+    inset-block-start: calc(50% - 0.5rem);
+    inset-inline-end: 0;
+    inline-size: 1rem;
+    block-size: 1rem;
+    translate: calc(var(--dir-sign) * 50%) 0;
+    border: 0.25rem solid var(--sunken);
+    border-radius: 50%;
+    background: var(--sprout-ink);
+  }
+
+  .fullValue summary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    min-block-size: var(--target);
+    color: var(--link);
+    font-weight: 700;
+    text-decoration-line: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.25em;
+    cursor: pointer;
+    list-style: none;
+  }
+
+  .fullValue summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .fullValue[open] summary {
+    text-decoration-thickness: 2px;
+  }
+
+  .fullValue pre {
+    margin-block-start: 0.5rem;
+    padding: 0.75rem;
+    border-radius: var(--radius-sm);
+    background: var(--sunken);
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+
+  /* ───────────────────────── 4 · stagger field ───────────────────────── */
+
+  .field {
+    --field-h: 12rem;
+    --pitch: calc(var(--field-h) / var(--rows));
+    /* the delay column fits "+480ms" at the sun-mode type floor */
+    --label-w: 3.5rem;
+    /* plant size reads the field's width through cqi */
+    container-type: inline-size;
+    display: grid;
+    grid-template-rows: repeat(var(--rows), minmax(0, 1fr));
+    block-size: var(--field-h);
+  }
+
+  .fieldRow {
+    position: relative;
+    display: grid;
+    grid-template-columns: var(--label-w) minmax(0, 1fr);
+    align-items: center;
+    min-block-size: 0;
+  }
+
+  /* the furrow — a drip-line-straight row on the ground */
+  .fieldRow::before {
+    content: '';
+    position: absolute;
+    inset-inline: var(--label-w) 0;
+    inset-block-start: calc(50% - 0.5px);
+    block-size: 1px;
+    background: color-mix(in oklab, var(--ink) 12%, transparent);
+  }
+
+  .rowLabel {
+    color: var(--ink-3);
+  }
+
+  .strip {
+    display: block;
+    inline-size: 100%;
+    block-size: 100%;
+    overflow: visible;
+  }
+
+  /* One dot per plant: a zero-length round-capped subpath. The stroke does
+     not scale with the stretched viewBox, so every plant stays a true circle:
+     72% of the column pitch or 56% of the row pitch, whichever is smaller,
+     times its vigour class (--k). */
+  .strip path {
+    --col: calc((100cqi - var(--label-w)) / var(--cols));
+    fill: none;
+    stroke: var(--sprout-ink);
+    stroke-linecap: round;
+    stroke-width: calc(min(var(--col) * 0.72, var(--pitch) * 0.56) * var(--k));
+    vector-effect: non-scaling-stroke;
+  }
+
+  /* ───────────────────────── 5 · count-up ───────────────────────── */
+
+  /* The final value reserves the width (an invisible ghost). The live value
+     is stacked on it and stretched to the same box, so the box never changes
+     while the digits count: zero layout shift. Inside the number (LTR) the
+     live digits align to the end — the units digit — like an odometer. */
+  .figure {
+    display: inline-grid;
+  }
+
+  .figure > * {
+    grid-area: 1 / 1;
+  }
+
+  .figureGhost {
+    visibility: hidden;
+  }
+
+  .figureLive {
+    justify-self: stretch;
+    text-align: end;
+  }
+
+  .yieldBar {
+    position: relative;
+    display: block;
+    block-size: 0.5rem;
+    border-radius: var(--radius-full);
+    background: var(--line);
+    overflow: hidden;
+  }
+
+  .yieldFill {
+    --p: 1;
+    --rest: calc((1 - var(--p)) * 100%);
+    position: absolute;
+    inset: 0;
+    background-image: var(--ndvi-inline);
+    /* reveal from inline-start: clip the inline-end side (left in RTL) */
+    clip-path: inset(0 calc(var(--rest) * (1 + var(--dir-sign)) / 2) 0 calc(var(--rest) * (1 - var(--dir-sign)) / 2));
+  }
+
+  /* ───────────────────────── 6 · magnetic stage ───────────────────────── */
+
+  .stage {
+    --w: 14.5rem;
+    --h: 3.5rem;
+    position: relative;
+    display: grid;
+    /* status · the field · readout — rows, so nothing overlaps in any theme */
+    grid-template-rows: auto minmax(11rem, 1fr) auto;
+    gap: 0.75rem;
+    padding-block: 0.75rem;
+    padding-inline: 1rem;
+    border: var(--bw) solid var(--line);
+    border-radius: var(--radius-lg);
+    background: var(--sunken);
+    overflow: hidden;
+  }
+
+  .stage > * {
+    grid-area: 2 / 1;
+    place-self: center;
+  }
+
+  .stage > .stageStatus {
+    grid-area: 1 / 1;
+    justify-self: start;
+  }
+
+  .stage > .readout {
+    grid-area: 3 / 1;
+    justify-self: end;
+  }
+
+  /* The activation zone, drawn with <Magnetic>'s own maths: the pull lasts
+     while max(|dx| / half-width, |dy| / half-height) stays within `reach`,
+     so the zone is the button scaled by `reach` around its centre. */
+  .zoneBox {
+    position: relative;
+    inline-size: min(100%, calc(var(--w) * var(--reach)));
+    block-size: calc(var(--h) * var(--reach));
+    border: var(--bw) dashed var(--line-strong);
+    border-radius: var(--radius-sm);
+    pointer-events: none;
+  }
+
+  .zoneLabel {
+    position: absolute;
+    inset-block-end: calc(100% + 0.5rem);
+    inset-inline-start: 0;
+    color: var(--ink-3);
+  }
+
+  .ghost {
+    inline-size: var(--w);
+    block-size: var(--h);
+    border: var(--bw) dashed var(--ink-3);
+    border-radius: var(--radius-full);
+    pointer-events: none;
+  }
+
+  /* max travel: crop marks MAGNET.max px outside the button's rest box */
+  .envelope {
+    --arm: 0.75rem;
+    position: relative;
+    inline-size: calc(var(--w) + 2 * var(--max));
+    block-size: calc(var(--h) + 2 * var(--max));
+    pointer-events: none;
+  }
+
+  .envelope > i {
+    position: absolute;
+    inline-size: var(--arm);
+    block-size: var(--arm);
+    border: 0 solid var(--ink-2);
+  }
+
+  .envelope > i:nth-child(1) {
+    inset-block-start: 0;
+    inset-inline-start: 0;
+    border-block-start-width: var(--bw);
+    border-inline-start-width: var(--bw);
+  }
+
+  .envelope > i:nth-child(2) {
+    inset-block-start: 0;
+    inset-inline-end: 0;
+    border-block-start-width: var(--bw);
+    border-inline-end-width: var(--bw);
+  }
+
+  .envelope > i:nth-child(3) {
+    inset-block-end: 0;
+    inset-inline-start: 0;
+    border-block-end-width: var(--bw);
+    border-inline-start-width: var(--bw);
+  }
+
+  .envelope > i:nth-child(4) {
+    inset-block-end: 0;
+    inset-inline-end: 0;
+    border-block-end-width: var(--bw);
+    border-inline-end-width: var(--bw);
+  }
+
+  /* under the zone's bottom edge, beneath the end-side crop marks: the gap
+     between the envelope and the zone is (h × (reach − 1) − 2 × max) / 2 */
+  .envelopeLabel {
+    position: absolute;
+    inset-block-start: calc(100% + (var(--h) * (var(--reach) - 1) - 2 * var(--max)) / 2 + 0.5rem);
+    inset-inline-end: 0;
+    color: var(--ink-2);
+    white-space: nowrap;
+  }
+
+  /* rest-centre crosshair */
+  .cross {
+    position: relative;
+    inline-size: 1.25rem;
+    block-size: 1.25rem;
+    pointer-events: none;
+  }
+
+  .cross::before,
+  .cross::after {
+    content: '';
+    position: absolute;
+    background: var(--ink-3);
+  }
+
+  .cross::before {
+    inset-inline: 0;
+    inset-block-start: calc(50% - 0.5px);
+    block-size: 1px;
+  }
+
+  .cross::after {
+    inset-block: 0;
+    inset-inline-start: calc(50% - 0.5px);
+    inline-size: 1px;
+  }
+
+  .magnet {
+    position: relative;
+    z-index: 1;
+  }
+
+  .readout {
+    color: var(--ink-2);
+  }
+
+  .readoutValue {
+    display: inline-block;
+    min-inline-size: 5ch;
+    text-align: end;
+    color: var(--ink);
+  }
 }

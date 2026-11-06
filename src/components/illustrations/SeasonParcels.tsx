@@ -218,8 +218,22 @@ type Spec = {
 };
 
 /** Wide: the five moments side by side, the first at the right. */
-const WT: P[] = [[1590, 18], [1262, 10], [950, 22], [644, 12], [316, 24], [10, 14]];
-const WB: P[] = [[1584, 626], [1278, 632], [934, 620], [662, 630], [298, 618], [16, 628]];
+const WT: P[] = [
+  [1590, 18],
+  [1262, 10],
+  [950, 22],
+  [644, 12],
+  [316, 24],
+  [10, 14],
+];
+const WB: P[] = [
+  [1584, 626],
+  [1278, 632],
+  [934, 620],
+  [662, 630],
+  [298, 618],
+  [16, 628],
+];
 
 const wideSpec: Spec = {
   key: 'w',
@@ -723,9 +737,7 @@ function DatumLine({ d }: { d: Datum }) {
 }
 
 function ariaLabel(withData: boolean) {
-  const parts = season.map(
-    (s) => `${s.num} ${s.name}${NB}– ${LOOK[s.id]}${withData ? `, ${datumText(s.datum)}` : ''}`,
-  );
+  const parts = season.map((s) => `${s.num} ${s.name}${NB}– ${LOOK[s.id]}${withData ? `, ${datumText(s.datum)}` : ''}`);
   return `העונה מלמעלה: איור אווירי סכמטי של אותה חלקה, ${field}, בחמישה רגעים של עונה אחת, זה לצד זה לפי סדר העונה. ${parts.join('; ')}.${withData ? ' נתוני דמו.' : ''}`;
 }
 
@@ -890,7 +902,11 @@ function WideLabels() {
       {season.map((s, i) => {
         const a = WIDE.anchors[i];
         return (
-          <div key={s.id} className={css.label} style={{ ...vars({ '--x': pct(a.x), '--w': pct(a.w) }), ...stageVars(s.id) }}>
+          <div
+            key={s.id}
+            className={css.label}
+            style={{ ...vars({ '--x': pct(a.x), '--w': pct(a.w) }), ...stageVars(s.id) }}
+          >
             <p className={css.labelHead}>
               <Num className="text-caption text-ink-2">{s.num}</Num>
               <span className="text-lead font-bold">{s.name}</span>
@@ -936,7 +952,13 @@ function NarrowPlates() {
 function NorthArrow() {
   return (
     <svg className={css.northIcon} viewBox="0 0 16 16" aria-hidden="true" focusable="false">
-      <path d="M8 1.5 12.5 14 8 11 3.5 14Z" fill="none" stroke="currentColor" strokeWidth="1.25" strokeLinejoin="round" />
+      <path
+        d="M8 1.5 12.5 14 8 11 3.5 14Z"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.25"
+        strokeLinejoin="round"
+      />
       <path d="M8 1.5V11L3.5 14Z" fill="currentColor" />
     </svg>
   );

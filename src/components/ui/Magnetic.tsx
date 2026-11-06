@@ -18,7 +18,12 @@ type MagneticProps = {
  * ease, springs home with the spring linear() curve when released.
  * Off for touch, coarse pointers and prefers-reduced-motion.
  */
-export function Magnetic({ children, strength = magnet.strength, max = magnet.max, reach = magnet.reach }: MagneticProps) {
+export function Magnetic({
+  children,
+  strength = magnet.strength,
+  max = magnet.max,
+  reach = magnet.reach,
+}: MagneticProps) {
   const ref = useRef<HTMLSpanElement>(null);
   // re-evaluate when the user plugs in a mouse or toggles reduced motion
   const [env, setEnv] = useState(0);

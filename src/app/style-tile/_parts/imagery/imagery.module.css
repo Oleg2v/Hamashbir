@@ -1,0 +1,251 @@
+/*
+ * Imagery section – aerial photos, their treatments and the furniture drawn
+ * over them (survey layer, crop frames, tags). Palette and semantic
+ * variables only (no hex), logical properties only, nothing animates.
+ *
+ * Overlays sit on a photograph, which keeps its colours in every theme, so
+ * their inks are fixed: Soil plates with Paper text (15.6:1 on any photo),
+ * and Paper lines cased in Soil so they hold on white plastic and on dark
+ * earth alike. Line widths follow --bw, so they thicken in sun mode.
+ *
+ * Everything sits in @layer components, so a Tailwind utility on the same
+ * element always wins over a rule here.
+ */
+
+@layer components {
+  /* ───────────── frame + photo ───────────── */
+
+  .frame {
+    position: relative;
+    overflow: hidden;
+    container-type: inline-size;
+    border-radius: var(--radius-none);
+    background-color: var(--sunken);
+  }
+
+  .img {
+    display: block;
+    inline-size: 100%;
+    block-size: 100%;
+    object-fit: cover;
+  }
+
+  /* the two treatments – SVG filters generated from tokens (filters.tsx) */
+  .soil {
+    filter: url(#st-img-soil);
+  }
+
+  .ndvi {
+    filter: url(#st-img-ndvi);
+  }
+
+  /* ───────────── one photo, three readings ───────────── */
+
+  /* the bands follow reading order: 01 at inline-start (right), 03 at the end */
+  .bands {
+    display: flex;
+  }
+
+  .band {
+    position: relative;
+    flex: 1 1 0;
+    min-inline-size: 0;
+    overflow: hidden;
+  }
+
+  /* each band holds the whole photo, shifted so the three read as one frame */
+  .bandImg {
+    position: absolute;
+    inset-block: 0;
+    inset-inline-start: calc(var(--band) * -100%);
+    inline-size: 300%;
+    max-inline-size: none;
+    block-size: 100%;
+    object-fit: cover;
+  }
+
+  .band + .band::before {
+    content: '';
+    position: absolute;
+    z-index: 1;
+    inset-block: 0;
+    inset-inline-start: 0;
+    inline-size: var(--bw);
+    background-color: var(--color-paper);
+    box-shadow: 0 0 0 var(--bw) color-mix(in oklab, var(--color-soil) 35%, transparent);
+  }
+
+  /* ───────────── tags and plates ───────────── */
+
+  .tag {
+    position: absolute;
+    z-index: 2;
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    padding-block: 0.25rem;
+    padding-inline: 0.5rem;
+    background-color: var(--color-soil);
+    color: var(--color-paper);
+    white-space: nowrap;
+  }
+
+  .tagStart {
+    inset-block-start: 0.75rem;
+    inset-inline-start: 0.75rem;
+  }
+
+  .tagMuted {
+    color: color-mix(in oklab, var(--color-paper) 78%, var(--color-soil));
+  }
+
+  /* a plate pinned to a point of the photo: coordinates are the photo's own,
+     and a photo never mirrors, so the horizontal inset is physical on purpose */
+  .pin {
+    position: absolute;
+    z-index: 2;
+    left: var(--x); /* rtl-ok: photo coordinates are physical */
+    inset-block-start: var(--y);
+  }
+
+  /* centred on its point – a label sitting on a frame line */
+  .pinCentre {
+    translate: -50% -50%; /* rtl-ok: photo coordinates are physical */
+  }
+
+  .plate {
+    display: grid;
+    gap: 0.25rem;
+    padding-block: 0.5rem;
+    padding-inline: 0.75rem;
+    background-color: var(--color-soil);
+    color: var(--color-paper);
+  }
+
+  /* the plate's swatch: the ramp colour at the parcel's mean value */
+  .plate::before {
+    content: '';
+    inline-size: 1.25rem;
+    block-size: 0.25rem;
+    background-color: var(--swatch);
+  }
+
+  .plateMeta {
+    color: color-mix(in oklab, var(--color-paper) 78%, var(--color-soil));
+  }
+
+  /* map furniture pinned to a corner rather than to the ground */
+  .corner {
+    position: absolute;
+    z-index: 2;
+    inset-block-end: 0.75rem;
+    inset-inline-start: 0.75rem;
+  }
+
+  .corner::before {
+    content: none;
+  }
+
+  /* ───────────── survey layer and crop frames ───────────── */
+
+  .overlay {
+    position: absolute;
+    inset: 0;
+    inline-size: 100%;
+    block-size: 100%;
+    pointer-events: none;
+  }
+
+  .overlay * {
+    vector-effect: non-scaling-stroke;
+    fill: none;
+    stroke-linecap: round;
+  }
+
+  /* every Paper line (--w wide) is drawn over a Soil casing two lines wider */
+  .casing {
+    stroke: var(--color-soil);
+    stroke-opacity: 0.55;
+    stroke-width: calc(var(--w, var(--bw)) + var(--bw) * 2);
+  }
+
+  .line {
+    stroke: var(--color-paper);
+    stroke-width: var(--w, var(--bw));
+  }
+
+  .faint {
+    stroke-opacity: 0.72;
+  }
+
+  .boundary {
+    --w: calc(var(--bw) * 1.5);
+    stroke-dasharray: 8 4;
+  }
+
+  .vertex {
+    --w: calc(var(--bw) * 1.5);
+  }
+
+  .crop {
+    --w: calc(var(--bw) * 1.5);
+  }
+
+  .crop43 {
+    stroke-dasharray: 8 4;
+  }
+
+  /* dotted: round caps on near-zero dashes */
+  .crop11 {
+    --w: calc(var(--bw) * 2.5);
+    stroke-dasharray: 0.5 6;
+  }
+
+  /* scale bar: alternate filled and open halves, like the hero legend */
+  .scaleBar {
+    inline-size: calc(var(--scale) * 100cqi);
+    block-size: 0.5rem;
+    border: var(--bw) solid var(--color-paper);
+    background: linear-gradient(to var(--end), var(--color-paper) 50%, transparent 50%);
+  }
+
+  /* the same frames as glyphs in the legend, drawn in ink */
+  .glyph {
+    flex: none;
+    overflow: visible;
+  }
+
+  .glyph rect {
+    fill: none;
+    stroke: var(--ink);
+    stroke-width: var(--w, calc(var(--bw) * 1.5));
+    vector-effect: non-scaling-stroke;
+    stroke-linecap: round;
+  }
+
+  /* ───────────── small specimens ───────────── */
+
+  .gradeBar {
+    block-size: 0.75rem;
+    background: linear-gradient(to var(--end), var(--color-soil), var(--color-paper));
+    box-shadow: inset 0 0 0 var(--bw) var(--line);
+  }
+
+  .rampBar {
+    block-size: 0.75rem;
+    background-image: var(--ndvi-inline);
+  }
+
+  /* the stage disc on a photo: stage colour, soil icon, a soil ring for contrast */
+  .stageDisc {
+    display: grid;
+    place-items: center;
+    inline-size: 2.5rem;
+    block-size: 2.5rem;
+    flex: none;
+    border-radius: var(--radius-full);
+    background-color: var(--stage);
+    color: var(--color-soil);
+    box-shadow: 0 0 0 var(--bw) var(--color-soil);
+  }
+}

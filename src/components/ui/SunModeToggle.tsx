@@ -71,7 +71,12 @@ export function SunModeToggle({ className }: { className?: string }) {
   };
 
   return (
-    <button type="button" className={['sun-toggle', className].filter(Boolean).join(' ')} aria-pressed={on} onClick={onClick}>
+    <button
+      type="button"
+      className={['sun-toggle', className].filter(Boolean).join(' ')}
+      aria-pressed={on}
+      onClick={onClick}
+    >
       <SunIcon size={20} strokeWidth={2} />
       <span>מצב שמש</span>
     </button>

@@ -11,30 +11,60 @@ import { cn } from '@/lib/cn';
 /**
  * Token role strings ("ממשק וגוף טקסט · 400 / 600 / 700 / 800"): a slash list
  * of weights is one LTR number run, so it reads 400 → 800 like the range
- * beside it; a trailing "+" stays inside its number ("25px+").
+ * beside it; a trailing "+" stays inside its number ("25px+"); a Latin token
+ * name ("title") is set as code, like every other token on the page.
  */
-const ROLE_NUMERIC = /(\d+(?:\s*\/\s*\d+)+|\d[\d.,]*(?:px)?\+?)/;
+const ROLE_PARTS = /(\d+(?:\s*\/\s*\d+)+|\d[\d.,]*(?:px)?\+?|\b[a-z][a-z-]*\b)/;
 
 export function RoleText({ children }: { children: string }) {
   return (
     <>
-      {children.split(ROLE_NUMERIC).map((p, i) =>
-        i % 2 ? (
-          // a list is one token: it never breaks across lines
+      {children.split(ROLE_PARTS).map((p, i) => {
+        if (i % 2 === 0) return p;
+        if (/^[a-z]/.test(p)) return <Code key={i}>{p}</Code>;
+        // a list is one token: it never breaks across lines
+        return (
           <Num key={i} className="whitespace-nowrap">
             {p}
           </Num>
-        ) : (
-          p
-        ),
-      )}
+        );
+      })}
     </>
   );
 }
 
-/** "13–14px": a range is one LTR run with an en dash – never an arrow. */
-export function pxRange([from, to]: readonly [number, number]) {
-  return from === to ? `${from}px` : `${from}–${to}px`;
+/**
+ * "13–14px": one LTR run with an en dash – never an arrow. Screen readers
+ * hear „13 עד 14px” instead of a dash they would skip or read as minus.
+ */
+export function Range({
+  from,
+  to,
+  unit = '',
+  className,
+}: {
+  from: number;
+  to: number;
+  unit?: string;
+  className?: string;
+}) {
+  if (from === to) {
+    return (
+      <Num className={className}>
+        {from}
+        {unit}
+      </Num>
+    );
+  }
+  return (
+    <Num className={className}>
+      {from}
+      <span aria-hidden="true">–</span>
+      <span className="sr-only"> עד </span>
+      {to}
+      {unit}
+    </Num>
+  );
 }
 
 /**

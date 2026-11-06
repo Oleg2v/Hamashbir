@@ -113,7 +113,9 @@ const clean = !!opt('clean', false); // hide fixed chrome (header, badge, skip l
             id: v.id,
             impact: v.impact,
             help: v.help,
-            nodes: v.nodes.slice(0, 6).map((n) => n.target.join(' ') + ' :: ' + (n.failureSummary || '').split('\n')[1]),
+            nodes: v.nodes
+              .slice(0, 6)
+              .map((n) => n.target.join(' ') + ' :: ' + (n.failureSummary || '').split('\n')[1]),
             count: v.nodes.length,
           }));
         });

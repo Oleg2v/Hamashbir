@@ -1,11 +1,13 @@
 'use client';
 
-import { useCallback, useEffect, useRef, type CSSProperties } from 'react';
+import { useCallback, useEffect, useRef, type CSSProperties, type ReactNode } from 'react';
 import { Num } from '@/components/ui/Num';
 import { bezierCss, durations, easings, stagger, type DurationKey } from '@/design/tokens';
-import { PlayButton, ReducedNote } from './controls';
-import { cancelAll, dirSign, prefersReducedMotion } from './hooks';
+import { Block } from '../Section';
+import { PlayButton } from './controls';
+import { cancelAll, prefersReducedMotion } from './hooks';
 import s from './motion.module.css';
+import { Token } from './Token';
 
 const names: Record<DurationKey, string> = {
   instant: 'מיידי',
@@ -23,9 +25,9 @@ const AXIS = durations.season.ms;
 const CEILING = durations.slow.ms;
 const pct = (ms: number) => `${(ms / AXIS) * 100}%`;
 
-/** Minor ticks every stagger step (40ms), labels every 200ms. */
+/** Minor ticks every stagger step (40ms), a label every fifth tick (200ms). */
 const ticks = Array.from({ length: AXIS / stagger.stepMs + 1 }, (_, i) => i * stagger.stepMs);
-const LABEL_EVERY = 200;
+const LABEL_EVERY = 5 * stagger.stepMs;
 const labels = ticks.filter((ms) => ms % LABEL_EVERY === 0);
 
 const outQuint = bezierCss(easings['out-quint'].bezier);
@@ -35,7 +37,7 @@ const outQuint = bezierCss(easings['out-quint'].bezier);
  * axis in real time and every bar fills at the playhead, so each one takes
  * exactly its own duration. Drawn full (the final state) until played.
  */
-export function DurationLab() {
+export function DurationLab({ title, note }: { title: string; note?: ReactNode }) {
   const root = useRef<HTMLDivElement>(null);
   const sweep = useRef<HTMLSpanElement>(null);
   const clock = useRef<HTMLSpanElement>(null);
@@ -55,12 +57,10 @@ export function DurationLab() {
       const bar = lane.querySelector<HTMLElement>('[data-bar]');
       const end = lane.querySelector<HTMLElement>('[data-end]');
       if (bar) {
-        anims.current.push(
-          bar.animate([{ transform: 'scaleX(0)' }, { transform: 'scaleX(1)' }], { duration: ms, easing: 'linear' }),
-        );
+        anims.current.push(bar.animate([{ transform: 'scaleX(0)', offset: 0 }], { duration: ms, easing: 'linear' }));
       }
       if (end) {
-        // waits, dimmed, until its moment – then a short ping
+        // waits, dimmed, until its moment – then a short ping
         anims.current.push(end.animate([{ opacity: 0.25 }, { opacity: 0.25 }], { duration: ms }));
         anims.current.push(
           end.animate([{ scale: '1' }, { scale: '1.6', offset: 0.3 }, { scale: '1' }], {
@@ -74,7 +74,8 @@ export function DurationLab() {
 
     const head = sweep.current;
     if (!head) return;
-    const a = head.animate([{ transform: 'none' }, { transform: `translateX(${dirSign(el) * 100}%)` }], {
+    // --dir-sign: forward is toward inline-end, whatever the page direction
+    const a = head.animate([{ transform: 'none' }, { transform: 'translateX(calc(var(--dir-sign) * 100%))' }], {
       duration: AXIS,
       easing: 'linear',
     });
@@ -103,21 +104,13 @@ export function DurationLab() {
   }, []);
 
   return (
-    <div ref={root} className="grid gap-8" style={{ '--ceiling': pct(CEILING) } as CSSProperties}>
-      <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
-        <PlayButton onClick={play} context="שישה משכים על ציר אחד" />
-        <p className="max-w-[56ch] text-caption text-ink-2">
-          כל פס מתמלא בזמן אמת, בדיוק במשך שלו. שנתה קטנה כל <Num>{stagger.stepMs}ms</Num> – צעד ההשהיה בין שורות.{' '}
-          <ReducedNote />
-        </p>
-      </div>
-
-      <div className={s.timeline}>
+    <Block title={title} note={note} action={<PlayButton onClick={play} context="שישה משכים על ציר אחד" />}>
+      <div ref={root} className={s.timeline} style={{ '--ceiling': pct(CEILING) } as CSSProperties}>
         <div className="grid grid-cols-4 gap-x-(--gutter) sm:grid-cols-8 lg:grid-cols-12" aria-hidden="true">
           <div className="col-span-4 sm:col-start-5 lg:col-span-8 lg:col-start-5">
             <div className={`${s.zones} text-micro font-semibold text-ink-2`}>
               <span className={s.zone} style={{ inlineSize: pct(CEILING) }}>
-                ממשק · עד <Num>{CEILING}ms</Num>
+                ממשק · עד&nbsp;<Num>{CEILING}ms</Num>
               </span>
               <span className={s.zone}>חשיפה וסיפור</span>
             </div>
@@ -133,7 +126,7 @@ export function DurationLab() {
               {labels.map((ms, i) => (
                 <span
                   key={ms}
-                  className={`${s.rulerLabel} text-micro`}
+                  className={`${s.rulerLabel} text-micro leading-none`}
                   data-edge={i === 0 ? 'start' : i === labels.length - 1 ? 'end' : undefined}
                   data-minor={ms % (LABEL_EVERY * 2) === 0 ? undefined : ''}
                   style={{ '--at': pct(ms) } as CSSProperties}
@@ -145,18 +138,18 @@ export function DurationLab() {
           </div>
         </div>
 
-        <ol aria-label="שישה משכים על ציר זמן משותף של 1200 אלפיות שנייה">
+        <ol aria-label={`שישה משכים על ציר זמן משותף של ${AXIS} אלפיות שנייה`}>
           {keys.map((k) => {
             const d = durations[k];
             return (
               <li
                 key={k}
-                className="grid grid-cols-4 items-center gap-x-(--gutter) gap-y-3 border-b border-line py-4 sm:grid-cols-8 lg:grid-cols-12"
+                className="grid grid-cols-4 items-center gap-x-(--gutter) gap-y-3 border-b-(length:--bw) border-line py-4 sm:grid-cols-8 lg:grid-cols-12"
               >
                 <div className="col-span-3 grid gap-1">
                   <p className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
                     <span className="text-body font-bold">{names[k]}</span>
-                    <Num className="text-micro text-ink-3">--dur-{k}</Num>
+                    <Token className="text-micro text-ink-3">--dur-{k}</Token>
                   </p>
                   <p className="text-caption text-ink-2">{d.use}</p>
                 </div>
@@ -180,7 +173,7 @@ export function DurationLab() {
         >
           <span className="relative col-span-4 col-start-5 lg:col-span-8 lg:col-start-5">
             <span ref={sweep} className={s.sweep}>
-              <span className={`${s.sweepHead} text-micro font-medium`}>
+              <span className={`${s.sweepHead} text-micro font-medium leading-none`}>
                 <Num>
                   <span ref={clock}>0000ms</span>
                 </Num>
@@ -189,6 +182,6 @@ export function DurationLab() {
           </span>
         </div>
       </div>
-    </div>
+    </Block>
   );
 }

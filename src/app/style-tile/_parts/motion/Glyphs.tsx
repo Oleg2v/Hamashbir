@@ -1,4 +1,6 @@
+import type { ReactNode } from 'react';
 import { easings } from '@/design/tokens';
+import { cn } from '@/lib/cn';
 import s from './motion.module.css';
 
 /**
@@ -8,7 +10,7 @@ import s from './motion.module.css';
 
 type GlyphProps = { className?: string };
 
-function Frame({ children, className }: GlyphProps & { children: React.ReactNode }) {
+function Frame({ children, className }: GlyphProps & { children: ReactNode }) {
   return (
     <svg
       viewBox="0 0 120 56"
@@ -17,7 +19,7 @@ function Frame({ children, className }: GlyphProps & { children: React.ReactNode
       fill="none"
       strokeLinecap="round"
       strokeLinejoin="round"
-      className={[s.glyph, className].filter(Boolean).join(' ')}
+      className={cn(s.glyph, className)}
       aria-hidden="true"
       focusable="false"
     >

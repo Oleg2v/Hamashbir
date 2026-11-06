@@ -6,18 +6,20 @@ import { Chip } from '@/components/ui/Chip';
 import { Magnetic } from '@/components/ui/Magnetic';
 import { Num } from '@/components/ui/Num';
 import { useToast } from '@/components/ui/Toast';
-import { spring } from '@/design/tokens';
+import { magnet } from '@/design/tokens';
 import { FINE_QUERY, REDUCE_QUERY, useMedia } from './hooks';
 import s from './motion.module.css';
-import { MAGNET } from './spec';
 
-const signed = (v: number) => `${v < 0 ? '−' : '+'}${Math.abs(v).toFixed(1)}`;
+/** U+2212 minus, so a negative offset reads as one; one decimal, always signed. */
+const signed = (v: number) => `${v < -0.05 ? '−' : '+'}${Math.abs(v).toFixed(1)}`;
 
 /**
- * The magnetic CTA on a test bench: the dashed box is the activation zone
- * (the same maths Magnetic uses), the dashed pill is the rest position, and
- * the readout shows the live offset – including the spring's overshoot on
- * release. Off for touch, coarse pointers and reduced motion.
+ * The magnetic CTA on a test bench. The dashed box is the activation zone,
+ * drawn with <Magnetic>'s own maths (the button scaled by `reach`); the
+ * dashed pill is the rest position; the crop marks are the ±max travel. The
+ * readout shows the live offset of the real element – including the
+ * spring's overshoot on release, whatever released it (leaving the zone or
+ * the window, scrolling). Off for touch, coarse pointers and reduced motion.
  */
 export function MagneticDemo() {
   const fine = useMedia(FINE_QUERY);
@@ -40,39 +42,34 @@ export function MagneticDemo() {
     return () => ro.disconnect();
   }, []);
 
-  // live readout of the actual (transitioning) offset while the pointer is near
+  // live readout: sample the real transform for as long as its transition runs
   useEffect(() => {
-    const st = stage.current;
-    const mag = st?.querySelector<HTMLElement>('.magnetic');
-    if (!st || !mag || !fine || reduce) return;
+    const mag = stage.current?.querySelector<HTMLElement>('.magnetic');
+    if (!mag || !fine || reduce) return;
     let raf = 0;
-    let until = 0;
+    const moving = () =>
+      mag.getAnimations().some((a) => a instanceof CSSTransition && a.transitionProperty === 'transform');
     const read = () => {
       const t = getComputedStyle(mag).transform;
       const m = t && t !== 'none' ? new DOMMatrixReadOnly(t) : null;
       if (rx.current) rx.current.textContent = signed(m ? m.m41 : 0);
       if (ry.current) ry.current.textContent = signed(m ? m.m42 : 0);
-      if (performance.now() < until) raf = requestAnimationFrame(read);
+      raf = moving() ? requestAnimationFrame(read) : 0;
     };
-    const wake = (ms: number) => {
-      const was = performance.now() < until;
-      until = Math.max(until, performance.now() + ms);
-      if (!was) raf = requestAnimationFrame(read);
+    const onRun = (e: TransitionEvent) => {
+      if (e.target !== mag || e.propertyName !== 'transform' || raf) return;
+      raf = requestAnimationFrame(read);
     };
-    const onMove = () => wake(400);
-    const onLeave = () => wake(spring.durationMs + 200);
-    st.addEventListener('pointermove', onMove);
-    st.addEventListener('pointerleave', onLeave);
+    mag.addEventListener('transitionrun', onRun);
     return () => {
-      st.removeEventListener('pointermove', onMove);
-      st.removeEventListener('pointerleave', onLeave);
+      mag.removeEventListener('transitionrun', onRun);
       cancelAnimationFrame(raf);
     };
   }, [fine, reduce]);
 
   const status =
     fine === null || reduce === null ? (
-      <Chip tone="neutral">מצביע עדין בלבד</Chip>
+      <Chip tone="neutral">מצביע מדויק בלבד</Chip>
     ) : reduce ? (
       <Chip tone="wheat">כבוי · תנועה מופחתת</Chip>
     ) : !fine ? (
@@ -85,24 +82,24 @@ export function MagneticDemo() {
     <div
       ref={stage}
       className={s.stage}
-      style={{ '--reach': MAGNET.reach, '--max': `${MAGNET.max}px` } as CSSProperties}
+      style={{ '--reach': magnet.reach, '--max': `${magnet.max}px` } as CSSProperties}
     >
       <span className={s.zoneBox} aria-hidden="true">
-        <span className={`${s.zoneLabel} text-micro`}>אזור משיכה</span>
+        <span className={`${s.zoneLabel} text-micro leading-none`}>אזור משיכה</span>
       </span>
       <span className={s.envelope} aria-hidden="true">
         <i />
         <i />
         <i />
         <i />
-        <span className={`${s.envelopeLabel} text-micro`}>
-          <Num>±{MAGNET.max}px</Num>
+        <span className={`${s.envelopeLabel} text-micro leading-none`}>
+          <Num>±{magnet.max}px</Num>
         </span>
       </span>
       <span className={s.ghost} aria-hidden="true" />
       <span className={s.cross} aria-hidden="true" />
       <span className={s.magnet}>
-        <Magnetic strength={MAGNET.strength} max={MAGNET.max} reach={MAGNET.reach}>
+        <Magnetic strength={magnet.strength} max={magnet.max} reach={magnet.reach}>
           <Button
             size="lg"
             onClick={() =>
@@ -110,7 +107,6 @@ export function MagneticDemo() {
                 tone: 'info',
                 title: 'כאן ייפתח מתכנן העונה',
                 body: 'בשלב 0 הכפתור מדגים תנועה בלבד.',
-                duration: 4000,
               })
             }
           >
@@ -119,9 +115,13 @@ export function MagneticDemo() {
         </Magnetic>
       </span>
       <span className={s.stageStatus}>{status}</span>
-      <span className={`${s.readout} text-micro`} aria-hidden="true">
+      <span className={`${s.readout} text-micro leading-none`} aria-hidden="true">
         <Num>
-          x <span ref={rx} className={s.readoutValue}>+0.0</span> · y{' '}
+          x{' '}
+          <span ref={rx} className={s.readoutValue}>
+            +0.0
+          </span>{' '}
+          · y{' '}
           <span ref={ry} className={s.readoutValue}>
             +0.0
           </span>{' '}

@@ -122,11 +122,24 @@ function Targets() {
       {/* specimens, not controls: the same primary button at 44 and at 56 */}
       <div className="flex flex-wrap items-end gap-6" aria-hidden="true">
         {[ergonomics.default.target, ergonomics.sun.target].map((px) => (
-          <figure key={px} className="grid justify-items-start gap-3" style={{ '--target': `${px / 16}rem` } as CSSProperties}>
+          <figure
+            key={px}
+            className="grid justify-items-start gap-3"
+            style={{ '--target': `${px / 16}rem` } as CSSProperties}
+          >
             <span className="btn btn--primary">
               <span className="btn__label">איסוף מסניף</span>
               <span className="btn__bud">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
                   <path d="M19 12H5.5" />
                   <path d="M11 6l-6 6 6 6" />
                 </svg>

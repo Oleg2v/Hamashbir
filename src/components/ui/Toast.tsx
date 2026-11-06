@@ -1,15 +1,6 @@
 'use client';
 
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type ReactNode,
-} from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { durations } from '@/design/tokens';
 import { AlertIcon, CheckIcon, CloseIcon, InfoIcon, ShieldIcon } from './icons';
 

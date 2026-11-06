@@ -10,6 +10,12 @@ import type { StageId } from '@/design/tokens';
  * inside the 24px keyline so their enclosed areas don't outweigh the rest.
  * None of them is directional, so RTL needs no mirroring.
  *
+ * Small sizes (chips, table rows: 16–20px) are optically corrected: the
+ * stroke thickens so it never renders under 1.5px – the weight of a
+ * semibold label beside it – and the tomato drops its two inner sepals so
+ * the calyx doesn't clot. Sun mode adds a quarter to the stroke, in step
+ * with the 2px lines (--bw) everywhere else outdoors.
+ *
  * Crop protection is a leaf inside the agronomist-gate shield – never a
  * sprayer, a drum or a skull.
  */
@@ -61,16 +67,34 @@ const paths: Record<StageId, ReactNode> = {
   ),
 };
 
+/** Simplified drawings for 20px and below, where a detail would clot. */
+const compact: Partial<Record<StageId, ReactNode>> = {
+  harvest: (
+    <>
+      <path d="M12 8.75c-4.5 0-7.5 2.55-7.5 6s3.25 6.25 7.5 6.25 7.5-2.8 7.5-6.25-3-6-7.5-6z" />
+      <path d="M12 8.75V5.5c0-.95.55-1.7 1.5-2" />
+      <path d="M12 8.75c-1.15-.95-2.7-1.25-4.15-.8M12 8.75c1.15-.95 2.7-1.25 4.15-.8" />
+    </>
+  ),
+};
+
 type StageIconProps = {
   stage: StageId;
   size?: number;
   className?: string;
+  /** Stroke in 24-grid units; by default optically corrected for `size` (see above). */
   strokeWidth?: number;
   /** Hebrew accessible name; omit when a visible label sits next to the icon. */
   title?: string;
 };
 
-export function StageIcon({ stage, size = 24, className, strokeWidth = 1.75, title }: StageIconProps) {
+const round2 = (v: number) => Math.round(v * 100) / 100;
+
+export function StageIcon({ stage, size = 24, className, strokeWidth, title }: StageIconProps) {
+  // never thinner than 1.5px on screen: 1.75 units at 24px and up, more below
+  const sw = round2(strokeWidth ?? Math.max(1.75, (1.5 * 24) / size));
+  // sun mode: --bw is 1px indoors, 2px outdoors → a quarter more stroke outdoors
+  const style = { strokeWidth: `calc(${sw}px + (var(--bw, 1px) - 1px) * ${round2(sw * 0.25)})` };
   return (
     <svg
       width={size}
@@ -78,17 +102,18 @@ export function StageIcon({ stage, size = 24, className, strokeWidth = 1.75, tit
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      strokeWidth={strokeWidth}
+      strokeWidth={sw}
       strokeLinecap="round"
       strokeLinejoin="round"
       className={className}
+      style={style}
       role={title ? 'img' : undefined}
       aria-label={title}
       aria-hidden={title ? undefined : true}
       focusable="false"
       data-stage={stage}
     >
-      {paths[stage]}
+      {(size <= 20 && compact[stage]) || paths[stage]}
     </svg>
   );
 }

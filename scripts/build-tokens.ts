@@ -178,10 +178,7 @@ ${indent([
 /* ── Reduced motion: durations collapse, nothing travels ── */
 out.push(`@media (prefers-reduced-motion: reduce) {
   :root {
-${indent(
-  [...Object.keys(durations).map((k) => `--dur-${k}: 1ms;`), '--dur-spring: 1ms;', '--stagger-step: 0ms;'],
-  4,
-)}
+${indent([...Object.keys(durations).map((k) => `--dur-${k}: 1ms;`), '--dur-spring: 1ms;', '--stagger-step: 0ms;'], 4)}
   }
 }`);
 

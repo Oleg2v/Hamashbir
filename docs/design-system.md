@@ -18,33 +18,32 @@ living version of this document.
 
 Tailwind's defaults are reset for colour, type size, radius, shadow and easing
 (only the values below exist). Spacing keeps Tailwind's 0.25rem multiplier —
-that *is* the 4px grid; weights, line-height and blur keep their defaults.
+that _is_ the 4px grid; weights, line-height and blur keep their defaults.
 The bare `transition` utilities default to `--dur-fast` + `ease-out-quint`.
 
-
-| Kind | Utilities |
-| --- | --- |
-| Type | `text-micro` `text-caption` `text-body` `text-lead` `text-title` `text-h3` `text-h2` `text-h1` `text-display` (fluid `clamp()`, line-height built in) — plus `text-poster`, the single hero headline per page, deliberately outside the nine-step UI scale |
-| Fonts | `font-display` (Suez One — `text-title` (25px) and larger only, never body text), `font-sans` (Assistant), `font-mono` / `.num` (IBM Plex Mono) |
-| Semantic colour | `bg-canvas` `bg-surface` `bg-sunken` `bg-input` `text-ink` `text-ink-2` `text-ink-3` `border-line` `border-line-strong` `bg-tint-hover` `bg-tint-press` `text-link` `text-sprout-ink` `text-water-ink` `text-harvest-ink` `text-wheat-ink` `bg-cta` `text-cta-ink` `bg-bud` `bg-inverse` `text-inverse-ink` |
-| Raw brand colour (fills, data marks only) | `soil` `loam` `paper` `field` `sprout` `water` `harvest` `wheat` `white` `black` |
-| Radius | `rounded-none` `-xs` (4) `-sm` (8) `-md` (12) `-lg` (20) `-xl` (32) `-full` |
-| Shadow | `shadow-raised` `shadow-float` `shadow-overlay` `shadow-inset` `shadow-glow-sprout` `shadow-glow-water` |
-| Easing | `ease-out-quint` (UI default) `ease-out-expo` `ease-in-out-quart` `ease-in-quint` (exits) `ease-growth` `ease-spring` |
-| Duration | `duration-(--dur-instant|fast|base|slow|grow|season)` — 80/160/240/400/720/1200 ms |
-| Space | Tailwind integer steps only (`p-1` = 4px … `p-40` = 160px). Layout vars: `--page-margin`, `--gutter`, `--section-y`, `--target`, `--target-lg` |
+| Kind                                      | Utilities                                                                                                                                                                                                                                                                                                   |
+| ----------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Type                                      | `text-micro` `text-caption` `text-body` `text-lead` `text-title` `text-h3` `text-h2` `text-h1` `text-display` (fluid `clamp()`, line-height built in) — plus `text-poster`, the single hero headline per page, deliberately outside the nine-step UI scale                                                  |
+| Fonts                                     | `font-display` (Suez One — `text-title` (25px) and larger only, never body text), `font-sans` (Assistant), `font-mono` / `.num` (IBM Plex Mono)                                                                                                                                                             |
+| Semantic colour                           | `bg-canvas` `bg-surface` `bg-sunken` `bg-input` `text-ink` `text-ink-2` `text-ink-3` `border-line` `border-line-strong` `bg-tint-hover` `bg-tint-press` `text-link` `text-sprout-ink` `text-water-ink` `text-harvest-ink` `text-wheat-ink` `bg-cta` `text-cta-ink` `bg-bud` `bg-inverse` `text-inverse-ink` |
+| Raw brand colour (fills, data marks only) | `soil` `loam` `paper` `field` `sprout` `water` `harvest` `wheat` `white` `black`                                                                                                                                                                                                                            |
+| Radius                                    | `rounded-none` `-xs` (4) `-sm` (8) `-md` (12) `-lg` (20) `-xl` (32) `-full`                                                                                                                                                                                                                                 |
+| Shadow                                    | `shadow-raised` `shadow-float` `shadow-overlay` `shadow-inset` `shadow-glow-sprout` `shadow-glow-water`                                                                                                                                                                                                     |
+| Easing                                    | `ease-out-quint` (UI default) `ease-out-expo` `ease-in-out-quart` `ease-in-quint` (exits) `ease-growth` `ease-spring`                                                                                                                                                                                       |
+| Duration                                  | `duration-(--dur-instant                                                                                                                                                                                                                                                                                    | fast | base | slow | grow | season)` — 80/160/240/400/720/1200 ms |
+| Space                                     | Tailwind integer steps only (`p-1` = 4px … `p-40` = 160px). Layout vars: `--page-margin`, `--gutter`, `--section-y`, `--target`, `--target-lg`                                                                                                                                                              |
 
 Use `.wrap` for the page container (max 1440px, responsive margins).
 
 ## Heading hierarchy
 
-| Level | Element | Style |
-| --- | --- | --- |
-| Page | `h1` | `text-poster` (hero) or `text-display` |
-| Section | `h2` | Suez `text-h2` (via `<Section>`) |
-| Block | `h3` | Suez `text-h3` (via `<Block>`; its note sits under the title, controls go in `action`) |
-| Statement | `h4` | `font-display text-title` — principles, decisions, pull-quotes |
-| Card title | `h4` | `font-sans text-lead font-extrabold` |
+| Level      | Element | Style                                                                                  |
+| ---------- | ------- | -------------------------------------------------------------------------------------- |
+| Page       | `h1`    | `text-poster` (hero) or `text-display`                                                 |
+| Section    | `h2`    | Suez `text-h2` (via `<Section>`)                                                       |
+| Block      | `h3`    | Suez `text-h3` (via `<Block>`; its note sits under the title, controls go in `action`) |
+| Statement  | `h4`    | `font-display text-title` — principles, decisions, pull-quotes                         |
+| Card title | `h4`    | `font-sans text-lead font-extrabold`                                                   |
 
 Nothing inside a block is set larger than the block title, except type
 specimens. Anything that reads as a heading is marked up as one.
@@ -82,7 +81,7 @@ specimens. Anything that reads as a heading is marked up as one.
   Hebrew and outside: `<Num>40</Num> דונם`.
 - Punctuation: gershayim ״ and geresh ׳ (מ״מ, ק״מ, ג׳) for abbreviations —
   never straight quotes; quotation marks are „…” (never ״…״); en dash with
-  spaces for clauses, and the space *before* it is non-breaking
+  spaces for clauses, and the space _before_ it is non-breaking
   (`&nbsp;– `) so a dash never opens a line; maqaf joins a prefix to a digit
   (ב־14, ל־5,000). No letter-spacing on Hebrew. Body line-height 1.6,
   measure 45–75 characters.

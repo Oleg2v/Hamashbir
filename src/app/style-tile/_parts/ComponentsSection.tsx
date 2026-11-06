@@ -311,7 +311,12 @@ function BranchCard() {
         </div>
       </CardBody>
       <CardFooter className="pt-0">
-        <Button href={`https://waze.com/ul?ll=${lat},${lon}&navigate=yes`} variant="secondary" target="_blank" rel="noopener noreferrer">
+        <Button
+          href={`https://waze.com/ul?ll=${lat},${lon}&navigate=yes`}
+          variant="secondary"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
           ניווט ב־Waze
         </Button>
         <Button variant="ghost">שעות ופרטים</Button>

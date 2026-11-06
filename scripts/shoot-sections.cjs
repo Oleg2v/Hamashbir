@@ -25,7 +25,9 @@ const opt = (n, d) => {
 const base = opt('base', 'http://localhost:3000');
 const route = opt('path', '/style-tile');
 const out = opt('out', 'shots/review');
-const sizes = String(opt('sizes', '1440x900,390x844')).split(',').map((s) => s.split('x').map(Number));
+const sizes = String(opt('sizes', '1440x900,390x844'))
+  .split(',')
+  .map((s) => s.split('x').map(Number));
 const sun = !!opt('sun', false);
 const reduced = !!opt('reduced', false);
 const scale = Number(opt('scale', 1));
@@ -65,7 +67,11 @@ const maxH = Number(opt('maxH', 1400));
         .filter((el, i, all) => all.indexOf(el) === i)
         .map((el) => {
           const r = el.getBoundingClientRect();
-          return { id: el.id || el.tagName.toLowerCase(), top: Math.round(r.top + scrollY), height: Math.round(r.height) };
+          return {
+            id: el.id || el.tagName.toLowerCase(),
+            top: Math.round(r.top + scrollY),
+            height: Math.round(r.height),
+          };
         }),
     );
     const tag = `${w}x${h}${sun ? '-sun' : ''}${reduced ? '-rm' : ''}`;

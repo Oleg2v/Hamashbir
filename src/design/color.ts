@@ -81,7 +81,11 @@ function fromOklab([L, A, B]: readonly [number, number, number]) {
   return (
     '#' +
     rgb
-      .map((c) => Math.round(Math.min(1, Math.max(0, toGamma(c))) * 255).toString(16).padStart(2, '0'))
+      .map((c) =>
+        Math.round(Math.min(1, Math.max(0, toGamma(c))) * 255)
+          .toString(16)
+          .padStart(2, '0'),
+      )
       .join('')
       .toUpperCase()
   );

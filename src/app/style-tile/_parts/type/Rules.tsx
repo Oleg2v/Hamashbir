@@ -3,9 +3,10 @@ import { ChevronDownIcon } from '@/components/ui/icons';
 import { Num } from '@/components/ui/Num';
 import { NumText } from '@/components/ui/NumText';
 import { Verdict } from '@/components/ui/Verdict';
-import { demoFarm, dripAvailability } from '@/data/demo-farm';
+import { demoFarm, dripAvailability, season } from '@/data/demo-farm';
 import { posterType, typeScale } from '@/design/tokens';
 import { cn } from '@/lib/cn';
+import { formatNumber } from '@/lib/format';
 import { Code, CodePoint, Mark } from './bits';
 
 type Rule = {
@@ -27,9 +28,9 @@ const titleStep = typeScale.find((s) => s.name === 'title')!;
 const tightest = posterType.tracking.replace('-', '−');
 
 const para =
-  'התוכנית מתחילה מהשדה: הגידול, מספר הדונמים ותאריך השתילה. מכאן נבנה סל לכל שלב – זרעים ושתילים לזריעה ולשתילה, טפטוף ומסננים להשקיה, ציוד לקטיף וקרטונים לאריזה. כל פריט מגיע עם כמות מחושבת, מחיר ומלאי בזמן אמת בסניף הקרוב אליך: הזמינו עד 12:00 ואספו היום.';
+  'התוכנית מתחילה מהשדה: הגידול, מספר הדונמים ותאריך השתילה. מכאן נבנה סל לכל שלב\u00A0– זרעים ושתילים לזריעה ולשתילה, טפטוף ומסננים להשקיה, ציוד לקטיף וקרטונים לאריזה. כל פריט מגיע עם כמות מחושבת, מחיר ומלאי בזמן אמת בסניף הקרוב אליך: הזמינו עד 12:00 ואספו היום.';
 
-const short = 'הזינו את הגידול והדונמים – ונבנה לך סל לכל שלב בעונה.';
+const short = 'הזינו את הגידול והדונמים\u00A0– ונבנה לך סל לכל שלב בעונה.';
 
 /* every sample sits at one size, so the panes compare glyph for glyph */
 const sampleSize = 'text-lead';
@@ -38,14 +39,17 @@ const rules: Rule[] = [
   {
     title: 'גרשיים וגרש, לא מירכאות',
     why: 'ראשי תיבות מקבלים גרשיים (״): מ״מ, ק״מ. קיצורים מקבלים גרש (׳): מ׳, יח׳. אלה סימנים עבריים, נטויים ומכווננים לאות; מירכאות ישרות ואפוסטרוף הם שריד של מכונת הכתיבה.',
+    // the demo farm's drip line: a 16 mm lateral, 50,000 m of it
     good: (
       <p className={sampleSize}>
-        <Num>16</Num>&nbsp;מ<Mark ok>״</Mark>מ&nbsp;· <Num>50,000</Num>&nbsp;מ<Mark ok>׳</Mark>
+        <Num>16</Num>&nbsp;מ<Mark ok>״</Mark>מ&nbsp;· <Num>{formatNumber(season.dripMeters)}</Num>&nbsp;מ
+        <Mark ok>׳</Mark>
       </p>
     ),
     bad: (
       <p className={sampleSize}>
-        <Num>16</Num>&nbsp;מ<Mark ok={false}>{'"'}</Mark>מ&nbsp;· <Num>50,000</Num>&nbsp;מ<Mark ok={false}>{"'"}</Mark>
+        <Num>16</Num>&nbsp;מ<Mark ok={false}>{'"'}</Mark>מ&nbsp;· <Num>{formatNumber(season.dripMeters)}</Num>
+        &nbsp;מ<Mark ok={false}>{"'"}</Mark>
       </p>
     ),
     goodNote: (
@@ -60,8 +64,8 @@ const rules: Rule[] = [
     ),
   },
   {
-    title: 'קו מפריד, עם רווח משני צדיו',
-    why: 'משפט שנשבר באמצע מקבל קו מפריד (–) ורווח משני צדיו, והרווח שלפניו בלתי שביר – כך הקו לעולם לא פותח שורה. מקף המקלדת (-) קצר מדי, ונבלע בין המילים.',
+    title: 'קו מפריד, עם\u00A0רווח משני צדיו', // the preposition never ends a line
+    why: 'משפט שנשבר באמצע מקבל קו מפריד (–) ורווח משני צדיו, והרווח שלפניו בלתי שביר\u00A0– כך הקו לעולם לא פותח שורה. מקף המקלדת (-) קצר מדי, ונבלע בין המילים.',
     good: (
       <p className={sampleSize}>
         זרעים ודשנים&nbsp;<Mark ok>–</Mark> בסל אחד
@@ -86,17 +90,18 @@ const rules: Rule[] = [
   {
     title: 'מקף עברי לפני ספרה',
     why: 'אות שימוש שנצמדת למספר מתחברת במקף העברי (־), שיושב בגובה הקו העליון. מקף המקלדת יושב באמצע הגובה, וקורא מסך עלול להקריא אותו כ„מינוס”.',
+    // the network's real size (the hero's „21 נקודות”) and the demo farm – never a count that contradicts them
     good: (
       <p className={sampleSize}>
         ב<Mark ok>־</Mark>
-        <Num>{dripAvailability.branchesWithStock}</Num>&nbsp;סניפים&nbsp;· ל<Mark ok>־</Mark>
+        <Num>{dripAvailability.networkPoints}</Num>&nbsp;נקודות&nbsp;· ל<Mark ok>־</Mark>
         <Num>{demoFarm.area}</Num>&nbsp;דונם
       </p>
     ),
     bad: (
       <p className={sampleSize}>
         ב<Mark ok={false}>-</Mark>
-        <Num>{dripAvailability.branchesWithStock}</Num>&nbsp;סניפים&nbsp;· ל<Mark ok={false}>-</Mark>
+        <Num>{dripAvailability.networkPoints}</Num>&nbsp;נקודות&nbsp;· ל<Mark ok={false}>-</Mark>
         <Num>{demoFarm.area}</Num>&nbsp;דונם
       </p>
     ),
@@ -133,8 +138,8 @@ const rules: Rule[] = [
     why: (
       <>
         מספר בתוך משפט עברי עובר דרך <Code>&lt;Num&gt;</Code>&nbsp;– בידוד כיווניות ב־
-        <Code>&lt;bdi dir=&quot;ltr&quot;&gt;</Code>. בלי בידוד, האלגוריתם הדו־כיווני מסדר את הסימנים מחדש. שתי
-        הדוגמאות הן אותה מחרוזת בדיוק, כפי שהדפדפן הזה מציג אותה.
+        <Code>&lt;bdi dir=&quot;ltr&quot;&gt;</Code>. בלי בידוד, האלגוריתם הדו־כיווני מסדר את הסימנים מחדש. שתי הדוגמאות
+        הן אותה מחרוזת בדיוק, כפי שהדפדפן הזה מציג אותה.
       </>
     ),
     good: (
@@ -175,9 +180,8 @@ const rules: Rule[] = [
     span: 2,
     coda: (
       <p className="text-caption text-ink-2">
-        <span className="font-bold text-ink">בהתראת קרה, סימן המינוס הוא כל ההבדל.</span> בלי בידוד המינוס נראה
-        כמו קו מפריד, <Num>−2°</Num>&nbsp;נקרא כמו <Num>2°</Num>&nbsp;– והתראה שאמורה להציל יבול נקראת כמו עוד לילה
-        רגיל.
+        <span className="font-bold text-ink">בהתראת קרה, סימן המינוס הוא כל ההבדל.</span> בלי בידוד המינוס נראה כמו קו
+        מפריד, <Num>−2°</Num>&nbsp;נקרא כמו <Num>2°</Num>&nbsp;– והתראה שאמורה להציל יבול נקראת כמו עוד לילה רגיל.
       </p>
     ),
   },
@@ -189,8 +193,8 @@ const rules: Rule[] = [
     ),
     why: (
       <>
-        סואץ כבדה ודחוסה: בגוף טקסט העיניים הפנימיות של האותיות נסגרות, והפסקה הופכת לכתם. זה הכלל שלנו, לא של
-        הגופן: אצלנו <span lang="en">Suez One</span> מתחילה ב־<Code>title</Code> (<Num>{titleStep.min}px</Num>)
+        סואץ כבדה ודחוסה: בגודל של גוף טקסט החללים הפנימיים של האותיות מצטמקים, והפסקה הופכת לכתם כהה. זה הכלל שלנו, לא
+        של הגופן: אצלנו <span lang="en">Suez One</span> מתחילה ב־<Code>title</Code> (<Num>{titleStep.min}px</Num>)
         ומעלה, ורק בכותרות.
       </>
     ),
@@ -209,7 +213,7 @@ const rules: Rule[] = [
   },
   {
     title: 'אין כותרות־על לטיניות במוצר',
-    why: 'בממשק המוצר הכול בעברית. תווית־על באנגלית, ברישיות מרווחות, היא קישוט מיובא – החקלאי לא צריך לתרגם כדי לדעת איפה הוא.',
+    why: 'בממשק המוצר הכול בעברית. תווית־על באנגלית, ברישיות מרווחות, היא קישוט מיובא\u00A0– החקלאי לא צריך לתרגם כדי לדעת איפה הוא.',
     good: (
       <div className="grid gap-1">
         <p className="text-caption font-bold text-ink-2">
@@ -247,6 +251,7 @@ const rules: Rule[] = [
       </>
     ),
     good: (
+      // 50ch of the zero glyph sets about 60 Hebrew characters a line (measured: 58–60)
       <p className="max-w-[50ch] text-body">
         <NumText>{para}</NumText>
       </p>
@@ -297,6 +302,7 @@ function Why({ children }: { children: ReactNode }) {
         )}
       >
         למה
+        <span className="sr-only">&nbsp;– ההסבר המלא</span>
         <ChevronDownIcon
           size={16}
           strokeWidth={2}
@@ -329,16 +335,18 @@ export function Rules() {
           >
             {/* room at inline-end for the "למה" summary */}
             <h4 className="flex items-baseline gap-3 pe-20 font-sans text-lead font-extrabold">
-              <span className="text-caption font-medium text-ink-3">
+              {/* the list already numbers the rules for screen readers: no „1. 01” */}
+              <span className="text-caption font-medium text-ink-3" aria-hidden="true">
                 <Num>{String(i + 1).padStart(2, '0')}</Num>
               </span>
               <span>{r.title}</span>
             </h4>
             <Why>{typeof r.why === 'string' ? <NumText>{r.why}</NumText> : r.why}</Why>
-            {/* wide rules compare side by side; the measure rule gives the bad pane the long line it needs */}
+            {/* wide rules compare side by side; the measure rule gives the bad pane the long line it needs.
+                The panes stretch to the card's height, so a taller neighbour leaves no hole above the coda. */}
             <div
               className={cn(
-                'mt-4 grid flex-1 content-start gap-3',
+                'mt-4 grid flex-1 content-stretch gap-3',
                 span === 2 && 'sm:grid-cols-2',
                 span === 4 && 'xl:grid-cols-[5fr_7fr]',
               )}

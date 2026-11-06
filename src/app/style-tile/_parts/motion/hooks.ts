@@ -1,5 +1,10 @@
-'use client';
-
+/**
+ * Motion helpers for the style-tile demos. A plain module, not a client
+ * boundary ("use client" would turn every import into a client reference);
+ * `client-only` makes a server import fail at build time instead, because
+ * useMedia is a React client hook.
+ */
+import 'client-only';
 import { useSyncExternalStore } from 'react';
 
 export const REDUCE_QUERY = '(prefers-reduced-motion: reduce)';
@@ -18,14 +23,9 @@ export function useMedia(query: string): boolean | null {
   );
 }
 
-/** Checked at the moment of playing – JS animation must jump to the final state. */
+/** Checked at the moment of playing – JS animation must jump to the final state. */
 export function prefersReducedMotion() {
   return typeof window !== 'undefined' && window.matchMedia(REDUCE_QUERY).matches;
-}
-
-/** −1 in RTL, 1 in LTR: multiply x-travel so "forward" heads toward inline-end. */
-export function dirSign(el: Element) {
-  return getComputedStyle(el).direction === 'rtl' ? -1 : 1;
 }
 
 /** Cancel every animation in the list and empty it. */

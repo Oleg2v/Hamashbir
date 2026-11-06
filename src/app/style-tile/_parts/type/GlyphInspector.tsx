@@ -112,7 +112,7 @@ export function GlyphInspector({ lead }: { lead?: ReactNode }) {
   const caption = letter
     ? zoneCopy[letter.zone]
     : // no-break spaces keep each one-letter word with the word that follows it
-      'שלוש אותיות, שלושה אזורים: ש בגוף האות, ל עולה מעל הקו העליון, ך יורדת מתחת לקו הבסיס.';
+      'שלוש אותיות, שלושה אזורים: ש\u00A0בגוף האות, ל\u00A0עולה מעל הקו העליון, ך\u00A0יורדת מתחת לקו הבסיס.';
 
   return (
     <div className="grid gap-x-(--gutter) gap-y-6 lg:grid-cols-12">
@@ -152,14 +152,7 @@ export function GlyphInspector({ lead }: { lead?: ReactNode }) {
               />
             ))}
             <g key={sel} className={styles.glyphIn}>
-              <text
-                x={CX}
-                y={BASE}
-                textAnchor="middle"
-                fontSize={FS}
-                className="fill-ink font-display"
-                direction="rtl"
-              >
+              <text x={CX} y={BASE} textAnchor="middle" fontSize={FS} className="fill-ink font-display" direction="rtl">
                 {letter ? (
                   letter.ch
                 ) : (
@@ -213,16 +206,19 @@ export function GlyphInspector({ lead }: { lead?: ReactNode }) {
         aria-labelledby="type-glyph-legend"
         className="grid min-w-0 content-start gap-3 border-t-(length:--bw) border-line pt-6 lg:col-span-5 xl:col-span-12"
       >
-        <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
-          <div className="grid gap-1">
-            <p id="type-glyph-legend" className="text-caption font-bold">
-              האלף־בית: <Num>22</Num>&nbsp;אותיות ו־<Num>5</Num>&nbsp;סופיות
-            </p>
-            <p className="text-micro text-ink-2">
-              בחרו אות&nbsp;– בעכבר, במגע או בחצים במקלדת. השם של אות סופית מסומן בקו תחתון.
-            </p>
-          </div>
-          <label className={cn(styles.cell, 'grid-flow-col items-center gap-3 px-4 py-2')}>
+        <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
+          <h5 id="type-glyph-legend" className="text-caption font-bold">
+            האלף־בית: <Num>22</Num>&nbsp;אותיות ו־<Num>5</Num>&nbsp;סופיות
+          </h5>
+          <p className="text-micro text-ink-2">
+            בחרו אות&nbsp;– בעכבר, במגע או בחצים במקלדת. השם של אות סופית מסומן בקו תחתון.
+          </p>
+        </div>
+
+        {/* auto-fill at the target width (44px, 56px in sun mode). The word comes first, as a
+            double cell, then its alphabet: 2 + 13 and 14 on wide screens, two rows of 15. */}
+        <div className={cn(styles.grid, 'xl:grid-cols-15')}>
+          <label className={cn(styles.cell, 'col-span-2')}>
             <input
               type="radio"
               name="type-glyph"
@@ -232,17 +228,13 @@ export function GlyphInspector({ lead }: { lead?: ReactNode }) {
               className="sr-only"
               aria-label="המילה שלך"
             />
-            <span aria-hidden="true" className="font-display text-h3 leading-none">
+            <span aria-hidden="true" className={cn(styles.cellGlyph, 'font-display text-h3 leading-none')}>
               שלך
             </span>
-            <span aria-hidden="true" className={cn(styles.cellName, 'text-micro')}>
+            <span aria-hidden="true" className={cn(styles.cellName, 'text-micro leading-none')}>
               מילה
             </span>
           </label>
-        </div>
-
-        {/* auto-fill at the target width (44px, 56px in sun mode); 14 + 13 on wide screens */}
-        <div className={cn(styles.grid, 'xl:grid-cols-14')}>
           {letters.map((l) => (
             <label key={l.ch} className={cn(styles.cell, l.final && styles.cellFinal)}>
               <input

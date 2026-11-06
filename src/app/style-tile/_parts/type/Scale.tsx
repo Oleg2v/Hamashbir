@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 import { Num } from '@/components/ui/Num';
 import { demoFarm } from '@/data/demo-farm';
 import {
@@ -6,12 +6,13 @@ import {
   fluidClamp,
   posterType,
   sunTypeFloor,
+  surfaces,
   typeScale,
   type TypeStepName,
 } from '@/design/tokens';
 import { formatDate } from '@/lib/format';
 import { cn } from '@/lib/cn';
-import { Code, formatPx, pxRange, signed } from './bits';
+import { Code, formatPx, Range, signed } from './bits';
 import { NowPx } from './NowPx';
 import { ViewportGauge } from './ViewportGauge';
 
@@ -55,10 +56,12 @@ const sample: Record<TypeStepName, ReactNode> = {
   ),
   body: <>הזינו את הגידול, הדונמים ותאריך השתילה&nbsp;– ונבנה לך סל לכל שלב בעונה.</>,
   lead: <>זרעים, השקיה, דשנים ואריזה&nbsp;– בתוכנית אחת.</>,
-  title: <>חקלאים לא קונים מוצרים. הם מנהלים עונות.</>,
+  // the second sentence's subject stays with its verb: never „…מוצרים. הם” / „מנהלים עונות.”
+  title: <>חקלאים לא קונים מוצרים. הם&nbsp;מנהלים עונות.</>,
   h3: <>מה צריך לשבוע הבא</>,
-  // a department name is a proper noun: verbatim from the client's site
-  h2: <>השקייה ותשתיות</>,
+  // a department name is a proper noun, verbatim from the client's site; this one
+  // has no השקיה/השקייה spelling to clash with the running text two rows up
+  h2: <>זרעים ושתילים</>,
   h1: <>תוכנית העונה</>,
   display: <>העונה מוכנה.</>,
 };
@@ -82,14 +85,14 @@ function Spec({
       <div className="flex items-baseline gap-1">
         <dt className="sr-only">טווח</dt>
         <dd>
-          <Num className="font-semibold text-ink">{pxRange([min, max])}</Num>
+          <Range from={min} to={max} unit="px" className="font-semibold text-ink" />
         </dd>
       </div>
       {sun ? (
         <div className="flex items-baseline gap-1">
           <dt>בשמש</dt>
           <dd>
-            <Num className="font-semibold text-ink">{pxRange(sun)}</Num>
+            <Range from={sun[0]} to={sun[1]} unit="px" className="font-semibold text-ink" />
           </dd>
         </div>
       ) : null}
@@ -100,7 +103,8 @@ function Spec({
         </dd>
       </div>
       <div className="flex items-baseline gap-1">
-        <dt className="sr-only">יחס בין המקסימום למינימום</dt>
+        {/* max ÷ min: how much the step grows between the two ends */}
+        <dt>גדל</dt>
         <dd>
           פי&nbsp;<Num>{(max / min).toFixed(2)}</Num>
         </dd>
@@ -117,13 +121,17 @@ function Spec({
   );
 }
 
-/** The step's role and its clamp(): one line on desktop, two on a phone (the formula never splits from its role mid-line). */
+/**
+ * The step's role and its clamp(): one line on desktop, two from tablet width.
+ * On a phone the 48-character formula would wrap in every row, so it stays for
+ * wider screens; the live „עכשיו” readout tells the same story there.
+ */
 function UseLine({ use, clamp }: { use: string; clamp: string }) {
   return (
     <p className="text-micro text-ink-3">
       {use}
       <span className="hidden lg:inline">&nbsp;· </span>
-      <span className="block lg:inline">
+      <span className="hidden sm:block lg:inline">
         <Num>{clamp}</Num>
       </span>
     </p>
@@ -178,35 +186,74 @@ function PosterRow() {
       </div>
       <div className="grid min-w-0 gap-1 lg:col-span-8">
         <UseLine use="מחוץ לסולם" clamp={fluidClamp(posterType.min, posterType.max)} />
-        <p className="max-w-[64ch] text-caption text-ink-2">
+        <p className="max-w-[68ch] text-caption text-ink-2">
           {/* a probe for the live reading: the poster size itself, invisible */}
           <span id={id} className="text-poster sr-only" aria-hidden="true">
             ע
           </span>
-          הכותרת היחידה של מסך הפתיחה, פעם אחת בעמוד. היא לא שלב עשירי&nbsp;– תשעת השלבים נשארים סגורים, והכרזה
-          עומדת לבד, כמו הכותרת בראש העמוד הזה.
+          הכותרת היחידה של מסך הפתיחה, פעם אחת בעמוד. היא לא שלב עשירי&nbsp;– תשעת השלבים נשארים סגורים, והכרזה עומדת
+          לבד, כמו הכותרת בראש העמוד הזה.
         </p>
       </div>
     </div>
   );
 }
 
+/**
+ * Sun mode, previewed rather than described: the strip repaints itself with the
+ * sun surface's own tokens (white, black ink, 2px lines, the sun type floors,
+ * body weight 500), whatever theme the page around it is in.
+ */
+const sun = surfaces.sun;
+const sunPreview = {
+  '--canvas': sun.canvas,
+  '--surface': sun.surface,
+  '--ink': sun.ink,
+  '--ink-2': sun.ink2,
+  '--ink-3': sun.ink3,
+  '--line': sun.line,
+  '--line-strong': sun.lineStrong,
+  '--sprout-ink': sun.sproutInk,
+  '--focus': sun.focus,
+  '--bw': `${ergonomics.sun.borderWidth}px`,
+  '--text-caption': fluidClamp(...sunTypeFloor.caption!),
+  '--text-body': fluidClamp(...sunTypeFloor.body!),
+  fontWeight: 500,
+} as CSSProperties;
+
+function SunStrip() {
+  return (
+    <div
+      style={sunPreview}
+      className="grid gap-x-(--gutter) gap-y-2 rounded-lg border-(length:--bw) border-ink bg-canvas p-4 text-ink sm:p-6 lg:grid-cols-12 lg:items-center"
+    >
+      <h4 className="font-display text-title font-normal lg:col-span-6">
+        אין טקסט קטן מ־<Num mono={false}>{SUN_FLOOR}px</Num>&nbsp;תחת שמש של צהריים.
+      </h4>
+      <p className="text-caption text-ink-2 lg:col-span-6">
+        כך נראה מצב שמש: לבן, דיו שחור, קווים של <Num>{ergonomics.sun.borderWidth}px</Num>&nbsp;וגוף טקסט במשקל{' '}
+        <Num>500</Num>. הפעילו אותו בכותרת העליונה, וערכי „עכשיו” בסולם יעלו לרצפות „בשמש”.
+      </p>
+    </div>
+  );
+}
+
 export function Scale() {
   return (
-    <div className="grid gap-10 lg:gap-12">
+    <div className="grid gap-10">
       <div className="grid gap-x-(--gutter) gap-y-8 lg:grid-cols-12">
         <div className="grid content-start gap-4 lg:col-span-5">
-          <h4 className="font-display text-title">סולם אחד ושני קצוות.</h4>
+          <h4 className="font-display text-title font-normal">סולם אחד ושני קצוות.</h4>
           <p className="text-body text-ink-2">ביניהם כל שלב גדל בקו ישר, כך שאין קפיצות בין נייד לדסקטופ.</p>
           <ul className="grid border-b-(length:--bw) border-line text-caption text-ink-2">
             <li className="border-t-(length:--bw) border-line py-2">
               <Code className="text-ink">clamp()</Code> אחד לכל שלב, ב־<Code className="text-ink">rem + vw</Code>, והיחס
-              בין הקצוות לכל היותר <Num>{MAX_RATIO}</Num>&nbsp;– כך שזום <Num>200%</Num>&nbsp;עדיין מגדיל טקסט (
-              <Num lang="en">WCAG 1.4.4</Num>).
+              בין הקצוות לכל היותר <Num>{MAX_RATIO}</Num>&nbsp;– כך שזום <Num>200%</Num>&nbsp;עדיין מגדיל טקסט{' '}
+              <Num lang="en">(WCAG 1.4.4)</Num>.
             </li>
             <li className="border-t-(length:--bw) border-line py-2">
-              גובה השורה יורד ככל שהאות גדלה: <Num>{base.leading}</Num>&nbsp;בגוף טקסט, <Num>{titleStep.leading}</Num>&nbsp;בשלב{' '}
-              <Code>title</Code>, <Num>{top.leading}</Num>&nbsp;בתצוגה.
+              גובה השורה יורד ככל שהאות גדלה: <Num>{base.leading}</Num>&nbsp;בגוף טקסט, <Num>{titleStep.leading}</Num>
+              &nbsp;בשלב <Code>title</Code>, <Num>{top.leading}</Num>&nbsp;בתצוגה.
             </li>
             <li className="border-t-(length:--bw) border-line py-2">
               שני השלבים הקטנים מוגבהים לרצפת קריאוּת:{' '}
@@ -255,8 +302,8 @@ export function Scale() {
 
       <div className="grid gap-3">
         <p className="text-caption text-ink-2">
-          מהקטן לגדול, כמו צמח: <Num>{typeScale.length}</Num>&nbsp;שלבים, כל אחד עם מחרוזת אמיתית מהמוצר בגודל
-          האמיתי שלה. עמודת „בשמש” היא הרצפה במצב שמש.
+          מהקטן לגדול, כמו צמח: <Num>{typeScale.length}</Num>&nbsp;שלבים, כל אחד עם מחרוזת אמיתית מהמוצר בגודל האמיתי
+          שלה. הערך „בשמש” הוא הרצפה של השלב במצב שמש.
         </p>
         <div>
           <ol aria-label="תשעת שלבי הסולם, מהקטן לגדול">
@@ -268,17 +315,8 @@ export function Scale() {
         </div>
       </div>
 
-      {/* sun mode, folded into the ladder above ("בשמש"); one statement here */}
-      <div className="grid gap-x-(--gutter) gap-y-3 rounded-lg border-(length:--bw) border-line bg-surface p-4 sm:p-6 lg:grid-cols-12 lg:items-baseline">
-        <h4 className="font-display text-title lg:col-span-5">
-          אין טקסט קטן מ־<Num mono={false}>{SUN_FLOOR}px</Num>&nbsp;תחת שמש של צהריים.
-        </h4>
-        <p className="text-body text-ink-2 lg:col-span-7">
-          במצב שמש המסך עובר ללבן ולדיו שחור, הקווים מתעבים ל־<Num>{ergonomics.sun.borderWidth}px</Num>&nbsp;והצללים
-          נעלמים. ארבעת השלבים הקטנים עולים לרצפות שבעמודת „בשמש”, ומשקל גוף הטקסט עולה מ־<Num>400</Num>{' '}
-          ל־<Num>500</Num>. נסו: הפעילו „מצב שמש” בכותרת העליונה, וערכי „עכשיו” בסולם יקפצו לרצפות.
-        </p>
-      </div>
+      {/* sun mode is folded into the ladder ("בשמש"); this strip only shows what it looks like */}
+      <SunStrip />
     </div>
   );
 }

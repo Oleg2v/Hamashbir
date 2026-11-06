@@ -9,7 +9,7 @@ import { demoFarm, lineTotal, planLines, prices, season } from '@/data/demo-farm
 import { fonts } from '@/design/tokens';
 import { formatDate, formatMoney, formatNumber } from '@/lib/format';
 import { cn } from '@/lib/cn';
-import { Code, RoleText } from './bits';
+import { Code, Range, RoleText } from './bits';
 import { GlyphInspector } from './GlyphInspector';
 
 /* ───────────────────────── shared header ───────────────────────── */
@@ -70,12 +70,13 @@ function DisplaySpecimen() {
         <GlyphInspector
           lead={
             <>
-              {/* the product's own opening line (the brief, verbatim), at the top step of the scale */}
+              {/* the product's own opening line (the brief, verbatim), at the top step of the scale;
+                  the page's one poster headline sits outside the scale (see the scale's footnote row) */}
               <p className="font-display text-display text-balance">
                 העונה <span className="text-sprout-ink">שלך</span> מתחילה כאן
               </p>
               <p className="mt-4 text-caption text-ink-2">
-                הכותרת הראשית של מסך הפתיחה, בשלב העליון של הסולם&nbsp;· <Code>text-display</Code>
+                שורת הפתיחה מהבריף, מילה במילה, בשלב העליון של הסולם&nbsp;· <Code>text-display</Code>
               </p>
             </>
           }
@@ -114,7 +115,7 @@ function SansSpecimen() {
         role={fonts.sans.role}
         credit={
           <>
-            בן נתן · עברית לצד <span lang="en">Source Sans</span> · גופן משתנה <Num>200–800</Num> ·{' '}
+            בן נתן · עברית לצד <span lang="en">Source Sans</span> · גופן משתנה <Range from={200} to={800} /> ·{' '}
             <span lang="en">SIL OFL</span>
           </>
         }
@@ -139,7 +140,7 @@ function SansSpecimen() {
         </ol>
 
         <div className="grid min-w-0 content-start gap-3 xl:col-span-3">
-          <p className="text-caption font-bold">בממשק: תווית, ערך, רמז וכפתור</p>
+          <h5 className="text-caption font-bold">בממשק: תווית, ערך, רמז וכפתור</h5>
           <div className="grid min-w-0 gap-5 rounded-lg border-(length:--bw) border-line bg-canvas p-4 sm:p-5">
             {/* size: the field's intrinsic width stays small, so it never pushes a phone layout sideways */}
             <TextField
@@ -159,10 +160,13 @@ function SansSpecimen() {
         </div>
 
         <div className="grid min-w-0 content-start gap-3 border-t-(length:--bw) border-line pt-5 lg:border-t-0 lg:pt-0 xl:col-span-3 xl:border-s-(length:--bw) xl:ps-6">
-          <p id="type-ui-spec" className="text-caption font-bold">
+          <h5 id="type-ui-spec" className="text-caption font-bold">
             המפרט מאחורי הדוגמה
-          </p>
-          <dl className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-2 text-caption" aria-labelledby="type-ui-spec">
+          </h5>
+          <dl
+            className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-2 text-caption"
+            aria-labelledby="type-ui-spec"
+          >
             {uiSpec.map((s) => (
               <div key={s.part} className="contents">
                 <dt className="text-ink-2">{s.part}</dt>
@@ -194,7 +198,8 @@ const tiles: Array<{ label: string; value: ReactNode; span: string }> = [
     span: 'lg:col-span-3',
   },
   {
-    label: 'שלוחות טפטוף',
+    // the quantity, in the trade's own words (the product itself is „שלוחת טפטוף 16 מ״מ”)
+    label: 'אורך שלוחות הטפטוף',
     value: (
       <>
         <Num>{formatNumber(season.dripMeters)}</Num>&nbsp;מ׳
@@ -202,13 +207,19 @@ const tiles: Array<{ label: string; value: ReactNode; span: string }> = [
     ),
     span: 'col-span-2 lg:col-span-3',
   },
-  { label: 'טפטוף לחלקה', value: <Num>{formatMoney(dripCost)}</Num>, span: 'col-span-2 lg:col-span-4' },
+  { label: 'עלות הטפטוף', value: <Num>{formatMoney(dripCost)}</Num>, span: 'col-span-2 lg:col-span-4' },
   { label: 'מדד צמחייה', value: <Num>0.78</Num>, span: 'lg:col-span-2' },
   { label: 'ממטיר העשושית', value: <Num>AR044</Num>, span: 'lg:col-span-2' },
   // ״ is a strong RTL character: the LRM after it keeps "× 2" on its LTR side
   { label: 'מסנן דיסקים', value: <Num>{'2״\u200E × 2'}</Num>, span: 'lg:col-span-2' },
+  // the section's own route stamp (03): the Jezreel Valley branch shares the Migdal HaEmek site
   { label: 'סניף עמק יזרעאל', value: <Num>32.67°N 35.24°E</Num>, span: 'col-span-2 lg:col-span-5' },
-  { label: 'איסוף מהסניף', value: <Num>{formatDate(new Date(2026, 10, 6))}</Num>, span: 'col-span-2 lg:col-span-3' },
+  // the demo farm's branch and the hero's promise: ordered in the morning, picked up today
+  {
+    label: `איסוף היום ב${demoFarm.branch.name}`,
+    value: <Num>{formatDate(new Date(2026, 10, 6))}</Num>,
+    span: 'col-span-2 lg:col-span-3',
+  },
 ];
 
 /* the demo farm's priced lines: seedlings, drip, export cartons (crop protection has no price) */
@@ -256,9 +267,7 @@ function OrderTable() {
               {/* narrow figure: the unit sits under its number instead of in its own column */}
               <span className="block text-micro text-ink-2 @sm:hidden">{l.unit}</span>
             </td>
-            <td className={cn('w-[1%] whitespace-nowrap py-2 ps-2 pe-3 text-start text-ink-2', unitCol)}>
-              {l.unit}
-            </td>
+            <td className={cn('w-[1%] whitespace-nowrap py-2 ps-2 pe-3 text-start text-ink-2', unitCol)}>{l.unit}</td>
             <td className={cn('w-[1%] whitespace-nowrap py-2 ps-2 pe-3 text-start text-ink-2', guide, unitPriceCol)}>
               <Num>{formatMoney(l.unitPrice!)}</Num>
             </td>
@@ -309,7 +318,7 @@ function MonoSpecimen() {
       />
 
       <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
-        <p className="max-w-[64ch] text-caption text-ink-2">
+        <p className="max-w-[68ch] text-caption text-ink-2">
           ספרות במונו ויחידות בעברית, מחוץ ל־<Code>&lt;Num&gt;</Code>, ורווח בלתי שביר ביניהן:{' '}
           <Num>{demoFarm.area}</Num>&nbsp;דונם לא נפרדים בסוף שורה.
         </p>
@@ -345,8 +354,10 @@ function MonoSpecimen() {
           <figcaption className="grid gap-1">
             <span className="text-caption font-bold">למה מונו: אותם מספרים, שני גופנים</span>
             <span className="text-micro text-ink-2">
-              באסיסטנט הספרות פרופורציונליות&nbsp;– במדידה <Num>1111</Num>&nbsp;צר בכ־<Num>8%</Num>&nbsp;מ־<Num>8888</Num>,
-              ו־<Code>tabular-nums</Code> לא משנה דבר: אין לגופן ספרות טבלאיות. לכן כל מספר עובר לפלקס מונו.
+              באסיסטנט הספרות פרופורציונליות&nbsp;– במדידה <Num>1111</Num>&nbsp;צר בכ־<Num>8%</Num>&nbsp;מ־
+              <Num>8888</Num>,{/* a token never breaks at its own hyphen */}
+              ו־<Code className="whitespace-nowrap">tabular-nums</Code> לא משנה דבר: אין לגופן ספרות טבלאיות. לכן כל
+              מספר עובר לפלקס מונו.
             </span>
           </figcaption>
           <div className="grid grid-cols-2 gap-4">

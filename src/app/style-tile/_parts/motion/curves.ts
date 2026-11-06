@@ -7,7 +7,7 @@
  * season itself, so a plot and the dot travelling under it always agree.
  */
 
-import { easings, spring, type EasingKey } from '@/design/tokens';
+import { bezierCss, easings, spring, type EasingKey } from '@/design/tokens';
 
 export type Point = { readonly x: number; readonly y: number };
 export type Ease = (t: number) => number;
@@ -205,7 +205,7 @@ export const curves: CurveSpec[] = curveOrder.map((key) => {
     token: `ease-${key}`,
     he: e.he,
     use: e.use,
-    css: `cubic-bezier(${e.bezier.join(', ')})`,
+    css: bezierCss(e.bezier),
     gsap: e.gsap,
     ease,
     path: plotPath(sampleEase(ease)),

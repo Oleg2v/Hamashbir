@@ -47,8 +47,8 @@ export function Hero() {
 
         <div className="mt-6 grid gap-x-(--gutter) lg:mt-8 lg:grid-cols-12">
           <p className="max-w-[40ch] text-lead text-ink-2 lg:col-span-5 lg:col-start-8">
-            מערכת העיצוב של פורטל החקלאי: צבע, תמונה, טיפוגרפיה, מרווח, צורה, תנועה ורכיבים{NB}– לפני שורת קוד
-            אחת של האפליקציה.
+            מערכת העיצוב של פורטל החקלאי: צבע, תמונה, טיפוגרפיה, מרווח, צורה, תנועה ורכיבים{NB}– לפני שורת קוד אחת של
+            האפליקציה.
           </p>
         </div>
       </div>

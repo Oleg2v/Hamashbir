@@ -46,10 +46,7 @@ function ElevationRow() {
   return (
     <ul className="grid grid-cols-2 gap-(--gutter) lg:grid-cols-4">
       {elevations.map((e) => (
-        <li
-          key={e.name}
-          className={`grid min-h-36 content-between rounded-lg p-5 ${shadowClass[e.name]}`}
-        >
+        <li key={e.name} className={`grid min-h-36 content-between rounded-lg p-5 ${shadowClass[e.name]}`}>
           <Num className="text-caption font-medium">shadow-{e.name}</Num>
           <span className="grid gap-0.5 text-caption">
             <span className="font-bold">{e.he}</span>
@@ -173,7 +170,10 @@ export function ShapeSection() {
         <Block title="עומק על נייר" note="צל חם, בגוון אדמה">
           <ElevationRow />
         </Block>
-        <div data-surface="soil" className="-mx-(--page-margin) rounded-none px-(--page-margin) py-12 sm:mx-0 sm:rounded-xl sm:px-8 lg:px-12">
+        <div
+          data-surface="soil"
+          className="-mx-(--page-margin) rounded-none px-(--page-margin) py-12 sm:mx-0 sm:rounded-xl sm:px-8 lg:px-12"
+        >
           <Block title="עומק ואור על אדמה" note="הדגשה עליונה + צל עמוק; זוהר רק למים ולפעולה">
             <div className="grid gap-12">
               <ElevationRow />

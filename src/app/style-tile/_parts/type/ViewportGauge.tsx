@@ -39,9 +39,9 @@ export function ViewportGauge({ minLabel, maxLabel }: { minLabel: React.ReactNod
     w == null
       ? null
       : w < typeViewport.min
-        ? 'מתחת לטווח – המינימום נשמר'
+        ? 'מתחת לטווח\u00A0– המינימום נשמר'
         : w > typeViewport.max
-          ? 'מעל הטווח – המקסימום נשמר'
+          ? 'מעל הטווח\u00A0– המקסימום נשמר'
           : null;
 
   return (

@@ -57,7 +57,10 @@ const translateX = /translateX\((?![^)]*--dir-sign)/;
 const typo = [
   { re: /<\/Num>[ \t\n](?=[֐-׿])/, msg: 'breaking space between </Num> and a Hebrew unit (use \\u00a0 or <NumText>)' },
   { re: /(?<=[֐-׿\w)»”]) – /, msg: 'breaking space before an en dash (use \\u00a0– )' },
-  { re: /[≥≤](?=[^<]*[֐-׿])|(?<=[֐-׿][^>]*)[≥≤]/, msg: '≥/≤ in Hebrew text (mirrored by bidi; write „לפחות”/„לכל היותר”)' },
+  {
+    re: /[≥≤](?=[^<]*[֐-׿])|(?<=[֐-׿][^>]*)[≥≤]/,
+    msg: '≥/≤ in Hebrew text (mirrored by bidi; write „לפחות”/„לכל היותר”)',
+  },
   { re: /(?<=[\s(>{'"])״[֐-׿][^״\n]{0,40}״(?=[\s.,:;)<'"])/, msg: 'gershayim used as quotation marks (use „…”)' },
   { re: /[֐-׿][^'"`<>]*—|—[^'"`<>]*[֐-׿]/, msg: 'em dash in Hebrew copy (use a spaced en dash)' },
 ];

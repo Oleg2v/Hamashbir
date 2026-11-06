@@ -83,7 +83,8 @@ function SoilCore() {
               <div className="col-span-2 flex items-baseline justify-between gap-4 sm:col-span-2 lg:col-span-2 lg:grid lg:justify-items-end lg:gap-1">
                 <dt className="sr-only">היקף שימוש וניגודיות</dt>
                 <dd>
-                  <Num className="text-caption font-semibold">{share}%</Num>&nbsp;<span className="text-micro">מהמסך</span>
+                  <Num className="text-caption font-semibold">{share}%</Num>&nbsp;
+                  <span className="text-micro">מהמסך</span>
                 </dd>
                 <dd className="text-micro">
                   טקסט <Ratio value={text.ratio} className="font-semibold" />
@@ -173,7 +174,15 @@ function Ndvi() {
         <div className="relative h-8 text-micro text-ink-2" aria-hidden="true">
           {ndvi.ticks.map((t, i) => (
             <Pin key={t} at={t} edge={i === 0 ? 'start' : i === ndvi.ticks.length - 1 ? 'end' : undefined}>
-              <span className={i === 0 ? 'ms-0 h-2 w-px bg-line-strong' : i === ndvi.ticks.length - 1 ? 'ms-auto h-2 w-px bg-line-strong' : 'mx-auto h-2 w-px bg-line-strong'} />
+              <span
+                className={
+                  i === 0
+                    ? 'ms-0 h-2 w-px bg-line-strong'
+                    : i === ndvi.ticks.length - 1
+                      ? 'ms-auto h-2 w-px bg-line-strong'
+                      : 'mx-auto h-2 w-px bg-line-strong'
+                }
+              />
               <Num>{t.toFixed(1)}</Num>
             </Pin>
           ))}
@@ -185,17 +194,13 @@ function Ndvi() {
             }
           </NumText>
         </figcaption>
-        <p className="sr-only">
-          רמפת NDVI: אדמה חשופה בערך 0.1, צמחייה דלילה 0.35, צמיחה פעילה 0.6, חופה מלאה 0.85.
-        </p>
+        <p className="sr-only">רמפת NDVI: אדמה חשופה בערך 0.1, צמחייה דלילה 0.35, צמיחה פעילה 0.6, חופה מלאה 0.85.</p>
       </figure>
 
       <div className="grid gap-x-(--gutter) gap-y-12 lg:grid-cols-12">
         <figure className="grid content-start gap-3 lg:col-span-7">
           <figcaption className="flex flex-wrap items-baseline justify-between gap-2">
-            <span className="text-caption font-bold">
-              שימוש: מפת חום שבועית · חלקה 3 · תפוח אדמה, שדה פתוח, אביב
-            </span>
+            <span className="text-caption font-bold">שימוש: מפת חום שבועית · חלקה 3 · תפוח אדמה, שדה פתוח, אביב</span>
             <DemoTag />
           </figcaption>
           <ol className="grid grid-cols-7 gap-1 sm:grid-cols-14" aria-label="NDVI לפי שבוע, נתוני דמו">
@@ -303,9 +308,7 @@ const surfaceNames: Record<SurfaceKey, string> = { paper: 'נייר', soil: 'א�
 
 function Matrix({ surface }: { surface: SurfaceKey }) {
   const set = surfaces[surface] as Record<SemanticKey, string>;
-  const minRatio = Math.min(
-    ...inkRows.flatMap((r) => bgCols.map((c) => contrast(set[r.key], set[c.key]))),
-  );
+  const minRatio = Math.min(...inkRows.flatMap((r) => bgCols.map((c) => contrast(set[r.key], set[c.key]))));
   return (
     <table className="w-full table-fixed border-separate border-spacing-0 text-caption">
       <caption className="pb-3 text-start">
@@ -384,13 +387,7 @@ function RawColourRule() {
               aria-hidden="true"
               focusable="false"
             >
-              <text
-                x="120"
-                y="62"
-                textAnchor="middle"
-                fill={fg}
-                style={{ font: '400 40px var(--font-suez), serif' }}
-              >
+              <text x="120" y="62" textAnchor="middle" fill={fg} style={{ font: '400 40px var(--font-suez), serif' }}>
                 מלאי
               </text>
             </svg>
@@ -414,8 +411,8 @@ export function PaletteSection() {
       id="palette"
       intro={
         <p>
-          שמונה צבעים מהשדה עצמו. אדמה ורגב נותנים עומק, נייר נותן קריאוּת, שדה ונבט מסמנים פעולה, מים שמורים
-          להשקיה בלבד, קטיף וחיטה לפרי ולאריזה. כל צבע הוא משמעות – לא קישוט.
+          שמונה צבעים מהשדה עצמו. אדמה ורגב נותנים עומק, נייר נותן קריאוּת, שדה ונבט מסמנים פעולה, מים שמורים להשקיה
+          בלבד, קטיף וחיטה לפרי ולאריזה. כל צבע הוא משמעות – לא קישוט.
         </p>
       }
     >
@@ -436,10 +433,7 @@ export function PaletteSection() {
           <SeasonSpine />
         </Block>
 
-        <Block
-          title="מטריצת ניגודיות"
-          note={<NumText>{'כל זוג טקסט לפחות 4.5:1 על המשטח שלו · WCAG 2.0 AA'}</NumText>}
-        >
+        <Block title="מטריצת ניגודיות" note={<NumText>{'כל זוג טקסט לפחות 4.5:1 על המשטח שלו · WCAG 2.0 AA'}</NumText>}>
           <div className="grid gap-x-(--gutter) gap-y-12 lg:grid-cols-3">
             <div className="rounded-lg border border-line p-4" data-surface="paper">
               <Matrix surface="paper" />

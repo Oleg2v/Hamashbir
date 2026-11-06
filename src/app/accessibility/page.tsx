@@ -43,8 +43,8 @@ export default function AccessibilityPage() {
               <span lang="en" dir="ltr">
                 WCAG 2.0
               </span>{' '}
-              ברמה AA, ובעברית מימין לשמאל. המטרה: שכל חקלאי יוכל לתכנן עונה, לבדוק מלאי ולהזמין{NB}– גם בשטח, בשמש
-              של צהריים, עם כפפות או עם קורא מסך.
+              ברמה AA, ובעברית מימין לשמאל. המטרה: שכל חקלאי יוכל לתכנן עונה, לבדוק מלאי ולהזמין{NB}– גם בשטח, בשמש של
+              צהריים, עם כפפות או עם קורא מסך.
             </p>
           </section>
 
@@ -82,9 +82,7 @@ export default function AccessibilityPage() {
             <h2 id="a11y-contact" className="text-h3">
               פנייה בנושא נגישות
             </h2>
-            <p>
-              נתקלתם בקושי? נשמח לשמוע ולתקן. פרטי רכז הנגישות יפורסמו כאן עם עליית השירות.
-            </p>
+            <p>נתקלתם בקושי? נשמח לשמוע ולתקן. פרטי רכז הנגישות יפורסמו כאן עם עליית השירות.</p>
             <dl className="grid grid-cols-[auto_1fr] gap-x-6 gap-y-2 text-caption">
               <dt className="font-bold">רכז/ת נגישות</dt>
               <dd className="text-ink-2">ימולא בהמשך</dd>

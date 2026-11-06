@@ -69,7 +69,8 @@ export function StockChip({
         {km != null ? (
           <>
             {' · '}
-            <Num>{km.toLocaleString('he-IL')}</Num>{'\u00a0'}ק״מ ממך
+            <Num>{km.toLocaleString('he-IL')}</Num>
+            {'\u00a0'}ק״מ ממך
           </>
         ) : null}
       </span>
