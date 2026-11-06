@@ -39,10 +39,11 @@ export function NowPx({ target, className }: { target: string; className?: strin
   return (
     <span className={className}>
       עכשיו:{' '}
-      {/* fixed 6ch box, digits hugging the label: rows of readouts line up */}
-      <Num className="inline-block min-w-[6ch] text-end" data-live={px == null ? undefined : ''}>
-        {px == null ? '‒‒' : formatPx(px)}px
-      </Num>
+      {/* a fixed box (sized in mono ch) holds the digits against the label, so
+          rows of readouts line up. The box is positioned, never the <Num>. */}
+      <span className="num inline-block min-w-[6ch] text-start">
+        <Num data-live={px == null ? undefined : ''}>{px == null ? '‒‒' : formatPx(px)}px</Num>
+      </span>
     </span>
   );
 }

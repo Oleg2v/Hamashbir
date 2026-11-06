@@ -1,105 +1,27 @@
 import type { ReactNode } from 'react';
-import { CheckIcon, CloseIcon } from '@/components/ui/icons';
 import { Num } from '@/components/ui/Num';
 import { cn } from '@/lib/cn';
 
 /**
  * Small typographic helpers for the type section.
- * Copy that comes from tokens.ts ("שלב 3 ומעלה", "400 / 600") still has to put
- * every number through <Num>; `Nums` does that for a plain string.
+ * Right/wrong markers come from @/components/ui/Verdict; running text with
+ * digits goes through @/components/ui/NumText.
  */
-export function Nums({ children, mono = true }: { children: string; mono?: boolean }) {
-  const parts = children.split(/(\d+(?:[.,/]\d+)*)/);
-  return <>{parts.map((p, i) => (i % 2 ? <Num key={i} mono={mono}>{p}</Num> : p))}</>;
-}
 
 /**
- * → drawn, not typed: no loaded subset (Plex Mono, Assistant, Suez One) has
- * U+2192, and a system fallback glyph would break the mono rhythm.
- * Sits inside an LTR <Num> run ("61 → 144px"), so it points right.
+ * Token role strings ("ממשק וגוף טקסט · 400 / 600 / 700 / 800"): a slash list
+ * of weights is one LTR number run, so it reads 400 → 800 like the range
+ * beside it; a trailing "+" stays inside its number ("25px+").
  */
-export function RangeArrow({ className }: { className?: string }) {
-  return (
-    <>
-      <svg
-        viewBox="0 0 20 10"
-        className={cn('mx-[0.3em] inline-block h-[0.5em] w-[1em] align-[0.12em]', className)}
-        fill="none"
-        stroke="currentColor"
-        strokeWidth={1.5}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        aria-hidden="true"
-        focusable="false"
-      >
-        <path d="M1 5h17M14 1.5 18 5l-4 3.5" />
-      </svg>
-      <span className="sr-only"> עד </span>
-    </>
-  );
+const ROLE_NUMERIC = /(\d+(?:\s*\/\s*\d+)+|\d[\d.,]*(?:px)?\+?)/;
+
+export function RoleText({ children }: { children: string }) {
+  return <>{children.split(ROLE_NUMERIC).map((p, i) => (i % 2 ? <Num key={i}>{p}</Num> : p))}</>;
 }
 
-/** ← → : the two ends of a range, between two Hebrew phrases. */
-export function BothWays({ className }: { className?: string }) {
-  return (
-    <>
-      <svg
-        viewBox="0 0 34 10"
-        className={cn('mx-[0.35em] inline-block h-[0.55em] w-[1.9em] align-[0.1em]', className)}
-        fill="none"
-        stroke="currentColor"
-        strokeWidth={1.5}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        aria-hidden="true"
-        focusable="false"
-      >
-        <path d="M1 5h11M4.5 1.5 1 5l3.5 3.5M22 5h11M29.5 1.5 33 5l-3.5 3.5" />
-      </svg>
-      <span className="sr-only"> ועד </span>
-    </>
-  );
-}
-
-/** ≤ – same reason as the arrow: no loaded face carries U+2264. */
-export function AtMost({ className }: { className?: string }) {
-  return (
-    <>
-      <svg
-        viewBox="0 0 10 12"
-        className={cn('mx-[0.15em] inline-block h-[0.7em] w-[0.6em] align-[-0.04em]', className)}
-        fill="none"
-        stroke="currentColor"
-        strokeWidth={1.4}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        aria-hidden="true"
-        focusable="false"
-      >
-        <path d="M9 1 1 4.5 9 8M1 11h8" />
-      </svg>
-      <span className="sr-only">לכל היותר </span>
-    </>
-  );
-}
-
-/** "נכון" / "שגוי" – always an icon and a word, never colour alone. */
-export function Verdict({ ok, className }: { ok: boolean; className?: string }) {
-  const Icon = ok ? CheckIcon : CloseIcon;
-  return (
-    <span
-      className={cn(
-        'inline-flex items-center gap-2 text-caption font-bold leading-none',
-        ok ? 'text-sprout-ink' : 'text-harvest-ink',
-        className,
-      )}
-    >
-      <span className="grid size-6 place-items-center rounded-full border-2 border-current" aria-hidden="true">
-        <Icon size={14} strokeWidth={3} />
-      </span>
-      {ok ? 'נכון' : 'שגוי'}
-    </span>
-  );
+/** "13–14px": a range is one LTR run with an en dash – never an arrow. */
+export function pxRange([from, to]: readonly [number, number]) {
+  return from === to ? `${from}px` : `${from}–${to}px`;
 }
 
 /**
@@ -141,4 +63,13 @@ export function formatPx(px: number) {
 export function signed(n: number) {
   if (n === 0) return '0';
   return n < 0 ? `−${Math.abs(n)}` : `+${n}`;
+}
+
+/** A CSS token printed as code: LTR, isolated, mono, English for screen readers. */
+export function Code({ children, className }: { children: ReactNode; className?: string }) {
+  return (
+    <code dir="ltr" lang="en" className={cn('font-mono', className)}>
+      {children}
+    </code>
+  );
 }

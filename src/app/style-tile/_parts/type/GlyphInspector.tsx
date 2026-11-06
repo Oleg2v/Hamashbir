@@ -112,15 +112,15 @@ export function GlyphInspector() {
       'שלוש אותיות, שלושה אזורים: ש\u00A0בגוף האות, ל\u00A0עולה מעל הקו העליון, ך\u00A0יורדת מתחת לקו הבסיס.';
 
   return (
-    <div className="grid gap-x-(--gutter) gap-y-10 xl:grid-cols-12">
+    <div className="grid gap-x-(--gutter) gap-y-8 xl:grid-cols-12">
       {/* ── anatomy ── */}
-      <figure className="grid content-start gap-5 xl:col-span-7">
+      <figure className="grid content-start gap-4 xl:col-span-7">
         <div className="relative">
           <svg
             viewBox={`0 0 ${W} ${H}`}
             className="block h-auto w-full overflow-visible"
             role="img"
-            aria-label={`אנטומיה של ${letter ? `האות ${letter.name}` : 'המילה שלך'} על ארבעה קווי מתאר: עולה, קו עליון, קו בסיס ויורדת.`}
+            aria-label={`אנטומיה של ${letter ? `האות ${letter.name}` : 'המילה שלך'} על ארבעה קווים מנחים: עולה, קו עליון, קו בסיס ויורדת.`}
           >
             {/* the body zone: where every Hebrew letter lives */}
             <rect x={0} y={Y.top} width={W} height={BASE - Y.top} className="fill-tint-hover" />
@@ -132,7 +132,7 @@ export function GlyphInspector() {
                 y1={Y[l.key]}
                 y2={Y[l.key]}
                 className={cn(
-                  'transition-[stroke] duration-(--dur-fast)',
+                  'transition-[stroke] duration-(--dur-fast) ease-out-quint',
                   hot.includes(l.key) ? 'stroke-sprout-ink' : 'stroke-line-strong',
                 )}
                 strokeDasharray={l.dash ? '6 6' : undefined}
@@ -181,7 +181,7 @@ export function GlyphInspector() {
 
         <figcaption className="grid gap-2 border-t-(length:--bw) border-line pt-4">
           <p className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-            <span className="text-lead font-bold">{letter ? letter.name : 'המילה „שלך”'}</span>
+            <span className="text-body font-extrabold">{letter ? letter.name : 'המילה „שלך”'}</span>
             {letter ? (
               <CodePoint ch={letter.ch} className="text-caption text-ink-2" />
             ) : (
@@ -202,7 +202,7 @@ export function GlyphInspector() {
           <p id="type-glyph-legend" className="text-caption font-bold">
             האלף־בית: <Num>22</Num> אותיות ו־<Num>5</Num> סופיות
           </p>
-          <label className={cn(styles.cell, 'grid-flow-col gap-3 px-4')}>
+          <label className={cn(styles.cell, 'grid-flow-col items-center gap-3 px-4 py-2')}>
             <input
               type="radio"
               name="type-glyph"
@@ -221,7 +221,7 @@ export function GlyphInspector() {
           </label>
         </div>
 
-        <div className="grid grid-cols-9 gap-1">
+        <div className={styles.grid}>
           {letters.map((l) => (
             <label key={l.ch} className={cn(styles.cell, l.final && styles.cellFinal)}>
               <input
@@ -243,7 +243,7 @@ export function GlyphInspector() {
           ))}
         </div>
         <p className="text-micro text-ink-2">
-          בחרו אות&nbsp;– בעכבר, במגע או בחצים במקלדת. אותיות סופיות מסומנות בקו תחתון.
+          בחרו אות&nbsp;– בעכבר, במגע או בחצים במקלדת. השם של אות סופית מסומן בקו תחתון.
         </p>
       </div>
     </div>
