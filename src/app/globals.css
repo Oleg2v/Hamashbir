@@ -30,7 +30,10 @@
     background-color: var(--canvas);
     color: var(--ink);
     font-family: var(--font-sans);
-    scroll-padding-block-start: 6rem;
+    /* anchors and focus-scrolling clear the fixed header (+ section rail)
+       at the top and the fixed demo badge at the bottom */
+    scroll-padding-block-start: 8.5rem;
+    scroll-padding-block-end: 5rem;
   }
 
   body {
@@ -117,12 +120,6 @@
     unicode-bidi: isolate;
   }
 
-  @media (prefers-reduced-motion: no-preference) {
-    html {
-      scroll-behavior: smooth;
-    }
-  }
-
   @media (prefers-reduced-motion: reduce) {
     *,
     *::before,
@@ -143,6 +140,41 @@
 }
 
 @layer utilities {
+  /* Sun mode: Tailwind's 1px border utilities follow --bw (2px outdoors). */
+  :root[data-theme='sun'] :where(.border) {
+    border-width: var(--bw);
+  }
+  :root[data-theme='sun'] :where(.border-t) {
+    border-block-start-width: var(--bw);
+  }
+  :root[data-theme='sun'] :where(.border-b) {
+    border-block-end-width: var(--bw);
+  }
+  :root[data-theme='sun'] :where(.border-s) {
+    border-inline-start-width: var(--bw);
+  }
+  :root[data-theme='sun'] :where(.border-e) {
+    border-inline-end-width: var(--bw);
+  }
+  :root[data-theme='sun'] :where(.border-y) {
+    border-block-width: var(--bw);
+  }
+  :root[data-theme='sun'] :where(.border-x) {
+    border-inline-width: var(--bw);
+  }
+
+  /* Sun mode turns soil panels white — give them a frame so they keep their shape. */
+  :root[data-theme='sun'] :where(div, figure, article)[data-surface='soil']:not(.card, .toast) {
+    box-shadow: inset 0 0 0 var(--bw) var(--ink);
+  }
+
+  /* Off-screen sections skip layout and paint until they are near the
+     viewport: faster first paint and a faster sun-mode restyle. */
+  .defer-render {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 2400px;
+  }
+
   .wrap {
     inline-size: 100%;
     max-inline-size: var(--max-w);
@@ -154,6 +186,12 @@
     font-family: var(--font-mono);
     font-variant-numeric: tabular-nums;
     font-feature-settings: 'zero' 0;
+  }
+
+  /* Mono at display sizes: every glyph has a 0.6em advance, so separators
+     open wide gaps — tighten the run optically. */
+  .num-tight {
+    letter-spacing: -0.05em;
   }
 
   .eyebrow {
@@ -173,5 +211,20 @@
 
   .hairline {
     border-color: var(--line);
+  }
+}
+
+/* Windows High Contrast / forced colours: state must not live in background colour alone. */
+@media (forced-colors: active) {
+  .sun-toggle[aria-pressed='true'],
+  :root[data-theme='sun'] .sun-toggle,
+  .chip--filter[aria-pressed='true'],
+  .segmented__option input:checked + .segmented__chip {
+    outline: 2px solid Highlight;
+    outline-offset: 2px;
+  }
+
+  .btn--primary {
+    border: 2px solid ButtonText;
   }
 }

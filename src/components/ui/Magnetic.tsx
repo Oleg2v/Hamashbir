@@ -62,30 +62,44 @@ export function Magnetic({ children, strength = magnet.strength, max = magnet.ma
       cancelAnimationFrame(raf);
       raf = requestAnimationFrame(() => {
         const r = el.getBoundingClientRect();
-        // centre of the element at rest (remove current travel)
+        // centre and half-size at rest (remove the current travel)
         const cx = r.left + r.width / 2 - ox;
         const cy = r.top + r.height / 2 - oy;
+        const hx = r.width / 2;
+        const hy = r.height / 2;
         const dx = e.clientX - cx;
         const dy = e.clientY - cy;
-        const zoneX = (r.width / 2) * reach;
-        const zoneY = (r.height / 2) * reach + 24;
-        if (Math.abs(dx) > zoneX || Math.abs(dy) > zoneY) {
+        // normalised distance: 1 on the element's edge, `reach` at the zone edge
+        const nd = Math.max(Math.abs(dx) / hx, Math.abs(dy) / hy);
+        if (nd > reach) {
           if (active) set(0, 0, false);
           return;
         }
+        // Smooth falloff: zero pull at the zone edge, full pull from the edge of
+        // the element inwards — so entering the zone never makes the CTA jump.
+        const t = Math.min(1, Math.max(0, (reach - nd) / (reach - 1)));
+        const ease = t * t * (3 - 2 * t);
         const clamp = (v: number) => Math.max(-max, Math.min(max, v));
-        set(clamp(dx * strength), clamp(dy * strength), true);
+        set(clamp(dx * strength) * ease, clamp(dy * strength) * ease, true);
       });
     };
 
     const release = () => active && set(0, 0, false);
+    // pointer left the window from inside the zone
+    const onOut = (e: PointerEvent) => {
+      if (!e.relatedTarget) release();
+    };
 
     window.addEventListener('pointermove', onMove, { passive: true });
+    document.addEventListener('pointerout', onOut);
+    document.documentElement.addEventListener('pointerleave', release);
     window.addEventListener('blur', release);
     window.addEventListener('scroll', release, { passive: true });
     return () => {
       cancelAnimationFrame(raf);
       window.removeEventListener('pointermove', onMove);
+      document.removeEventListener('pointerout', onOut);
+      document.documentElement.removeEventListener('pointerleave', release);
       window.removeEventListener('blur', release);
       window.removeEventListener('scroll', release);
     };

@@ -33,21 +33,33 @@ export function Button(props: AsButton | AsLink) {
   const isPrimary = variant === 'primary';
   const cls = cn('btn', `btn--${variant}`, className);
 
+  const budIcon = icon ?? <ArrowForwardIcon size={size === 'lg' ? 20 : 18} strokeWidth={2} />;
   const inner = (
     <>
-      {isPrimary ? <span className="btn__fill" aria-hidden="true" /> : null}
       <span className="btn__label">{children}</span>
       {isPrimary ? (
         <span className="btn__bud" aria-hidden="true">
-          {icon ?? <ArrowForwardIcon size={size === 'lg' ? 20 : 18} strokeWidth={2} />}
+          {budIcon}
+        </span>
+      ) : null}
+      {isPrimary ? (
+        // The sprouting fill carries its own copy of the label in bud ink, so the
+        // colour flips exactly at the growing edge (aria-hidden: the label above
+        // is the accessible name).
+        <span className="btn__fill" aria-hidden="true">
+          <span className="btn__label">{children}</span>
+          <span className="btn__bud">{budIcon}</span>
         </span>
       ) : null}
       {loading ? (
-        <span className="btn__loader" aria-hidden="true">
-          <i />
-          <i />
-          <i />
-        </span>
+        <>
+          <span className="btn__loader" aria-hidden="true">
+            <i />
+            <i />
+            <i />
+          </span>
+          <span className="sr-only">בטעינה</span>
+        </>
       ) : null}
     </>
   );

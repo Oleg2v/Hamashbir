@@ -11,6 +11,11 @@ type ChipProps = ComponentPropsWithoutRef<'span'> & {
   icon?: ReactNode;
 };
 
+/**
+ * Status chip — never interactive. Hue tones (sprout/water/field/harvest/wheat)
+ * mean a stage or department; stock tones (in/low/out) are shapes in ink
+ * (● ◐ ○), so a dot never carries two meanings.
+ */
 /** Status chip – never interactive. Colour is always backed by words. */
 export function Chip({ tone = 'neutral', dot = true, icon, className, children, ...rest }: ChipProps) {
   return (
@@ -64,7 +69,7 @@ export function StockChip({
         {km != null ? (
           <>
             {' · '}
-            <Num>{km.toLocaleString('he-IL')}</Num> ק״מ ממך
+            <Num>{km.toLocaleString('he-IL')}</Num>{'\u00a0'}ק״מ ממך
           </>
         ) : null}
       </span>

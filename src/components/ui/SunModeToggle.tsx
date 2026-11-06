@@ -3,12 +3,8 @@
 import { useEffect, useState } from 'react';
 import { flushSync } from 'react-dom';
 import { bezierCss, durations, easings } from '@/design/tokens';
+import { setThemeColor, SUN_STORAGE_KEY } from '@/lib/sun-mode';
 import { SunIcon } from './icons';
-
-export const SUN_STORAGE_KEY = 'hm:sun';
-
-/** Inline <head> script: apply sun mode before first paint (no flash). */
-export const sunModeInitScript = `(function(){try{var d=document.documentElement,v=localStorage.getItem('${SUN_STORAGE_KEY}');if(v==='1'||(v===null&&window.matchMedia('(prefers-contrast: more)').matches)){d.dataset.theme='sun'}}catch(e){}})();`;
 
 type DocWithVT = Document & {
   startViewTransition?: (cb: () => void) => { ready: Promise<void> };
@@ -25,7 +21,11 @@ export function SunModeToggle({ className }: { className?: string }) {
   // Stay in sync with every other toggle (and the init script) on the page.
   useEffect(() => {
     const root = document.documentElement;
-    const read = () => setOn(root.dataset.theme === 'sun');
+    const read = () => {
+      const sun = root.dataset.theme === 'sun';
+      setOn(sun);
+      setThemeColor(sun);
+    };
     read();
     const mo = new MutationObserver(read);
     mo.observe(root, { attributes: true, attributeFilter: ['data-theme'] });
@@ -36,6 +36,7 @@ export function SunModeToggle({ className }: { className?: string }) {
     const root = document.documentElement;
     if (next) root.dataset.theme = 'sun';
     else delete root.dataset.theme;
+    setThemeColor(next);
     try {
       localStorage.setItem(SUN_STORAGE_KEY, next ? '1' : '0');
     } catch {

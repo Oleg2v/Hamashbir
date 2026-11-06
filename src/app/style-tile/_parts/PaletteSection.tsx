@@ -1,6 +1,8 @@
 import { StageIcon } from '@/components/illustrations/StageIcons';
 import { DemoTag } from '@/components/ui/Chip';
 import { Num } from '@/components/ui/Num';
+import { NumText } from '@/components/ui/NumText';
+import { Verdict } from '@/components/ui/Verdict';
 import { contrast, grade, oklchString, rgbString, sampleRamp, type Grade } from '@/design/color';
 import {
   ndvi,
@@ -25,7 +27,7 @@ function bestText(hex: string) {
   const pick = (cands: string[]) =>
     cands.map((c) => ({ color: c, ratio: contrast(hex, c) })).sort((a, b) => b.ratio - a.ratio)[0];
   const brand = pick([INK, PAPER]);
-  return brand.ratio >= 4.5 ? brand : pick(['#000000', '#FFFFFF']);
+  return brand.ratio >= 4.5 ? brand : pick([surfaces.sun.ink, surfaces.sun.canvas]);
 }
 
 const gradeLabel: Record<Grade, string> = {
@@ -81,7 +83,7 @@ function SoilCore() {
               <div className="col-span-2 flex items-baseline justify-between gap-4 sm:col-span-2 lg:col-span-2 lg:grid lg:justify-items-end lg:gap-1">
                 <dt className="sr-only">היקף שימוש וניגודיות</dt>
                 <dd>
-                  <Num className="text-caption font-semibold">{share}%</Num> <span className="text-micro">מהמסך</span>
+                  <Num className="text-caption font-semibold">{share}%</Num>&nbsp;<span className="text-micro">מהמסך</span>
                 </dd>
                 <dd className="text-micro">
                   טקסט <Ratio value={text.ratio} className="font-semibold" />
@@ -119,7 +121,7 @@ function Proportions() {
           ))}
         </ul>
         <p className="mt-3 max-w-[60ch] text-caption text-ink-2">
-          נבט הוא אקסנט, לא מילוי: מעל כחמישה אחוזים מהמסך הוא מפסיק לומר „כאן פועלים”.
+          <NumText>{'נבט הוא צבע הדגשה, לא מילוי: מעל כ־5% מהמסך הוא מפסיק לומר „כאן פועלים”.'}</NumText>
         </p>
       </figcaption>
     </figure>
@@ -128,46 +130,72 @@ function Proportions() {
 
 /* ───────────────────────── NDVI ───────────────────────── */
 
-const weekly = [0.08, 0.14, 0.22, 0.33, 0.45, 0.56, 0.64, 0.71, 0.77, 0.82, 0.84, 0.8, 0.7, 0.52];
+/** Open-field potato, spring: emergence → canopy → senescence before lifting (נתוני דמו). */
+const weekly = [0.12, 0.15, 0.22, 0.33, 0.45, 0.56, 0.64, 0.71, 0.77, 0.82, 0.84, 0.8, 0.7, 0.52];
+
+const coverage = [
+  { label: 'שלוחת טפטוף 16 מ״מ', v: 0.86 },
+  { label: 'קרטון ייצוא לפלפל, 5 ק״ג', v: 0.48 },
+  { label: 'שתילי פלפל, מגש 128', v: 0.17 },
+];
+
+/** A label pinned to a value on the ramp: centred, except at the two ends. */
+function Pin({ at, edge, children }: { at: number; edge?: 'start' | 'end'; children: React.ReactNode }) {
+  return (
+    <span
+      className="absolute top-0 grid gap-1 whitespace-nowrap"
+      style={{
+        insetInlineStart: edge === 'end' ? undefined : `${at * 100}%`,
+        insetInlineEnd: edge === 'end' ? 0 : undefined,
+        justifyItems: edge === 'start' ? 'start' : edge === 'end' ? 'end' : 'center',
+        // centre on the value; --dir-sign keeps it right in RTL and LTR
+        translate: edge ? undefined : 'calc(-50% * var(--dir-sign)) 0',
+      }}
+    >
+      {children}
+    </span>
+  );
+}
 
 function Ndvi() {
   return (
-    <div className="grid gap-10">
-      <figure className="grid gap-3">
-        <div className="relative">
-          <div className="h-8 rounded-full" style={{ backgroundImage: 'var(--ndvi-inline)' }} aria-hidden="true" />
-          <ol className="relative mt-3 h-10 text-micro" aria-label="נקודות עוגן ברמפה">
-            {ndvi.stops.map((s) => (
-              <li
-                key={s.at}
-                className="absolute top-0 grid justify-items-center gap-1 whitespace-nowrap first:justify-items-start last:justify-items-end"
-                style={{
-                  insetInlineStart: s.at === 0 ? 0 : s.at === 1 ? undefined : `${s.at * 100}%`,
-                  insetInlineEnd: s.at === 1 ? 0 : undefined,
-                  transform: s.at === 0 || s.at === 1 ? 'none' : 'translateX(50%)',
-                }}
-              >
-                <span className="h-2 w-px bg-ink-2" aria-hidden="true" />
-                <span className="font-semibold">{s.label}</span>
-              </li>
-            ))}
-          </ol>
-        </div>
-        <div className="flex justify-between text-micro text-ink-2" aria-hidden="true">
-          {ndvi.ticks.map((t) => (
-            <Num key={t}>{t.toFixed(1)}</Num>
+    <div className="grid gap-12">
+      <figure className="grid gap-2">
+        <div className="relative h-12 text-micro" aria-hidden="true">
+          {ndvi.stops.map((s) => (
+            <Pin key={s.at} at={s.at}>
+              <span className="font-semibold">{s.label}</span>
+              <span className="mx-auto h-3 w-px bg-ink-2" />
+            </Pin>
           ))}
         </div>
-        <figcaption className="max-w-[62ch] text-caption text-ink-2">
-          מדד צמחייה מנורמל (NDVI), מאדמה חשופה ועד חופה מלאה. בעברית הרמפה צומחת מימין לשמאל – כמו הקריאה
-          וכמו העונה. האינטרפולציה נעשית ב־OKLCH, כדי שהגוונים באמצע יישארו מאירים ולא בוציים.
+        <div className="h-8 rounded-full" style={{ backgroundImage: 'var(--ndvi-inline)' }} aria-hidden="true" />
+        <div className="relative h-8 text-micro text-ink-2" aria-hidden="true">
+          {ndvi.ticks.map((t, i) => (
+            <Pin key={t} at={t} edge={i === 0 ? 'start' : i === ndvi.ticks.length - 1 ? 'end' : undefined}>
+              <span className={i === 0 ? 'ms-0 h-2 w-px bg-line-strong' : i === ndvi.ticks.length - 1 ? 'ms-auto h-2 w-px bg-line-strong' : 'mx-auto h-2 w-px bg-line-strong'} />
+              <Num>{t.toFixed(1)}</Num>
+            </Pin>
+          ))}
+        </div>
+        <figcaption className="mt-2 max-w-[64ch] text-caption text-ink-2">
+          <NumText>
+            {
+              'מדד צמחייה מנורמל (NDVI): אדמה חשופה סביב 0.1, צמיחה פעילה סביב 0.6, חופה מלאה סביב 0.85 – ערך 1.0 לא מתקבל בשדה. בעברית הרמפה צומחת מימין לשמאל, כמו הקריאה וכמו העונה; האינטרפולציה ב־OKLCH, כדי שהגוונים באמצע יישארו מאירים ולא בוציים.'
+            }
+          </NumText>
         </figcaption>
+        <p className="sr-only">
+          רמפת NDVI: אדמה חשופה בערך 0.1, צמחייה דלילה 0.35, צמיחה פעילה 0.6, חופה מלאה 0.85.
+        </p>
       </figure>
 
-      <div className="grid gap-x-(--gutter) gap-y-10 lg:grid-cols-12">
-        <figure className="grid gap-3 lg:col-span-7">
+      <div className="grid gap-x-(--gutter) gap-y-12 lg:grid-cols-12">
+        <figure className="grid content-start gap-3 lg:col-span-7">
           <figcaption className="flex flex-wrap items-baseline justify-between gap-2">
-            <span className="text-caption font-bold">שימוש: מפת חום שבועית · חלקה 3</span>
+            <span className="text-caption font-bold">
+              שימוש: מפת חום שבועית · חלקה 3 · תפוח אדמה, שדה פתוח, אביב
+            </span>
             <DemoTag />
           </figcaption>
           <ol className="grid grid-cols-7 gap-1 sm:grid-cols-14" aria-label="NDVI לפי שבוע, נתוני דמו">
@@ -177,11 +205,12 @@ function Ndvi() {
               return (
                 <li
                   key={i}
-                  className="grid aspect-[3/4] content-between rounded-xs p-1.5"
+                  className="grid aspect-[3/4] content-between rounded-xs p-2"
                   style={{ backgroundColor: bg, color: fg.color }}
                 >
                   <span className="text-micro font-semibold leading-none">
-                    ש׳ <Num>{i + 1}</Num>
+                    <span aria-hidden="true">שב׳</span>
+                    <span className="sr-only">שבוע</span>&nbsp;<Num>{i + 1}</Num>
                   </span>
                   <Num className="text-micro leading-none">{v.toFixed(2)}</Num>
                 </li>
@@ -189,19 +218,17 @@ function Ndvi() {
             })}
           </ol>
         </figure>
-        <figure className="grid content-start gap-3 lg:col-span-5">
+        <figure className="grid content-start gap-4 lg:col-span-5">
           <figcaption className="flex flex-wrap items-baseline justify-between gap-2">
             <span className="text-caption font-bold">שימוש: כיסוי מלאי מול ביקוש מתוכנן</span>
             <DemoTag />
           </figcaption>
-          {[
-            { label: 'טפטוף 16 מ״מ', v: 0.86 },
-            { label: 'קרטון פלפל 10 ק״ג', v: 0.48 },
-            { label: 'שתילי פלפל', v: 0.17 },
-          ].map((row) => (
-            <div key={row.label} className="grid gap-1.5">
-              <div className="flex items-baseline justify-between text-caption">
-                <span className="font-semibold">{row.label}</span>
+          {coverage.map((row) => (
+            <div key={row.label} className="grid gap-2">
+              <div className="flex items-baseline justify-between gap-4 text-caption">
+                <span className="font-semibold">
+                  <NumText>{row.label}</NumText>
+                </span>
                 <Num className="text-ink-2">{Math.round(row.v * 100)}%</Num>
               </div>
               <div className="h-2 overflow-hidden rounded-full bg-sunken" aria-hidden="true">
@@ -222,11 +249,10 @@ function Ndvi() {
 
 function SeasonSpine() {
   return (
-    <ol className="relative grid grid-cols-1 gap-4 sm:grid-cols-5" aria-label="חמשת שלבי העונה">
-      <span
-        className="absolute inset-x-[10%] top-8 hidden h-px bg-line-strong sm:block"
-        aria-hidden="true"
-      />
+    <ol className="relative grid grid-cols-1 gap-5 sm:grid-cols-5 sm:gap-4" aria-label="חמשת שלבי העונה">
+      {/* the spine: horizontal from sm up, vertical through the circle centres on phones */}
+      <span className="absolute inset-x-[10%] top-8 hidden h-px bg-line-strong sm:block" aria-hidden="true" />
+      <span className="absolute inset-y-8 start-8 w-px bg-line-strong sm:hidden" aria-hidden="true" />
       {stages.map((s, i) => {
         const hex = palette[s.color].hex;
         const fg = bestText(hex);
@@ -239,9 +265,9 @@ function SeasonSpine() {
             >
               <StageIcon stage={s.id} size={28} />
             </span>
-            <span className="grid gap-0.5">
+            <span className="grid gap-1">
               <span className="text-micro text-ink-2">
-                שלב <Num>{String(i + 1).padStart(2, '0')}</Num>
+                שלב&nbsp;<Num>{String(i + 1).padStart(2, '0')}</Num>
               </span>
               <span className="font-display text-title leading-tight">{s.he}</span>
               <span className="text-caption text-ink-2">{s.dept}</span>
@@ -261,10 +287,10 @@ const inkRows: Array<{ key: SemanticKey; he: string }> = [
   { key: 'ink2', he: 'דיו 2' },
   { key: 'ink3', he: 'דיו 3' },
   { key: 'link', he: 'קישור' },
-  { key: 'sproutInk', he: 'נבט־דיו' },
-  { key: 'waterInk', he: 'מים־דיו' },
-  { key: 'harvestInk', he: 'קטיף־דיו' },
-  { key: 'wheatInk', he: 'חיטה־דיו' },
+  { key: 'sproutInk', he: 'דיו־נבט' },
+  { key: 'waterInk', he: 'דיו־מים' },
+  { key: 'harvestInk', he: 'דיו־קטיף' },
+  { key: 'wheatInk', he: 'דיו־חיטה' },
 ];
 
 const bgCols: Array<{ key: SemanticKey; he: string }> = [
@@ -316,7 +342,7 @@ function Matrix({ surface }: { surface: SurfaceKey }) {
                     style={{
                       backgroundColor: set[c.key],
                       color: set[r.key],
-                      boxShadow: surface === 'sun' ? 'inset 0 0 0 1px #000' : undefined,
+                      boxShadow: surface === 'sun' ? `inset 0 0 0 1px ${surfaces.sun.ink}` : undefined,
                     }}
                   >
                     <span className="hidden font-bold sm:inline">אב</span>
@@ -370,8 +396,9 @@ function RawColourRule() {
             </svg>
             <span className="flex items-baseline justify-between gap-2 text-caption">
               <span className="font-semibold">{c.note}</span>
-              <span className={c.ok ? 'font-bold text-sprout-ink' : 'font-bold text-harvest-ink'}>
-                {c.ok ? 'כן' : 'לא'} · <Ratio value={ratio} />
+              <span className="inline-flex items-center gap-2">
+                <Verdict ok={c.ok} />
+                <Ratio value={ratio} className="text-micro text-ink-2" />
               </span>
             </span>
           </li>
@@ -393,7 +420,7 @@ export function PaletteSection() {
       }
     >
       <div className="grid gap-20 lg:gap-28">
-        <Block title="גלעין קרקע" note="ממוין לפי היקף שימוש · HEX · OKLCH · ניגודיות טקסט">
+        <Block title="גלעין קרקע" note="שמונת הצבעים לפי היקף השימוש · HEX · OKLCH · ניגודיות טקסט">
           <SoilCore />
         </Block>
 
@@ -409,7 +436,10 @@ export function PaletteSection() {
           <SeasonSpine />
         </Block>
 
-        <Block title="מטריצת ניגודיות" note="כל זוג טקסט ≥ 4.5:1 על המשטח שלו · WCAG 2.0 AA">
+        <Block
+          title="מטריצת ניגודיות"
+          note={<NumText>{'כל זוג טקסט לפחות 4.5:1 על המשטח שלו · WCAG 2.0 AA'}</NumText>}
+        >
           <div className="grid gap-x-(--gutter) gap-y-12 lg:grid-cols-3">
             <div className="rounded-lg border border-line p-4" data-surface="paper">
               <Matrix surface="paper" />

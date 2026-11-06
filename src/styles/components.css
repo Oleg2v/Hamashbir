@@ -14,13 +14,14 @@
     --btn-h: var(--target);
     --btn-px: 1.25rem;
     --btn-bud: 2rem;
+    --btn-gap: 0.75rem;
     --btn-inset: calc((var(--btn-h) - var(--btn-bud)) / 2 - var(--bw));
     position: relative;
     isolation: isolate;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 0.75rem;
+    gap: var(--btn-gap);
     min-block-size: var(--btn-h);
     padding-inline: var(--btn-px);
     border: var(--bw) solid transparent;
@@ -30,23 +31,24 @@
     font-family: var(--font-sans);
     font-size: var(--text-body);
     font-weight: 700;
-    line-height: 1.1;
-    white-space: nowrap;
+    line-height: 1.2;
+    text-align: center;
     text-decoration: none;
     user-select: none;
     overflow: hidden;
     transition:
-      color var(--dur-slow) var(--ease-out-quint),
       background-color var(--dur-fast) var(--ease-out-quint),
       border-color var(--dur-fast) var(--ease-out-quint),
       transform var(--dur-instant) var(--ease-out-quint);
   }
 
+  /* Sun mode: every button is a gloved-hand target (56px), lg goes to 64px. */
   :root[data-theme='sun'] .btn {
-    --btn-h: var(--target-lg);
+    --btn-h: var(--target);
   }
 
-  .btn[data-size='lg'] {
+  .btn[data-size='lg'],
+  :root[data-theme='sun'] .btn[data-size='lg'] {
     --btn-h: var(--target-lg);
     --btn-px: 1.75rem;
     --btn-bud: 2.5rem;
@@ -68,8 +70,13 @@
     gap: 0.5rem;
   }
 
-  /* Primary — the seed. A bud at inline-end; on hover it sprouts and fills. */
+  /* Primary — the seed. A bud sits at inline-end; on hover/focus it sprouts
+     and fills the pill. The fill carries its own copy of the label in the
+     bud ink, so the text colour flips exactly at the growing edge — no grey
+     midpoint. Borderless, so no dark ring survives under the fill. */
   .btn--primary {
+    --bw: 0px;
+    border-width: 0;
     background: var(--cta);
     color: var(--cta-ink);
     padding-inline-end: var(--btn-inset);
@@ -92,17 +99,23 @@
   }
 
   /* The fill is a circle centred on the bud (btn-h/2 from the inline-end edge,
-     concentric with the pill's end cap). RTL default: inline-end = left. */
+     concentric with the pill's end cap). RTL default: inline-end = left.
+     Opacity 0 at rest: contrast checkers ignore clip-path; it turns opaque
+     instantly as the sprout starts and clears only after it has shrunk back. */
   .btn__fill {
     --fill-x: calc(var(--btn-h) / 2);
     position: absolute;
-    z-index: -1;
-    inset: calc(var(--bw) * -1);
+    inset: 0;
+    z-index: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--btn-gap);
+    padding-inline: var(--btn-px) var(--btn-inset);
     background: var(--bud);
+    color: var(--bud-ink);
+    pointer-events: none;
     clip-path: circle(calc(var(--btn-bud) / 2) at var(--fill-x) 50%);
-    /* Opacity 0 at rest: contrast checkers ignore clip-path and would read the
-       hidden fill as the label's background. It becomes opaque instantly when
-       the sprout starts to grow, and clears only after it has shrunk back. */
     opacity: 0;
     transition:
       clip-path var(--dur-slow) var(--ease-out-quint),
@@ -113,10 +126,8 @@
     --fill-x: calc(100% - var(--btn-h) / 2);
   }
 
-  .btn--primary:hover:not(:disabled, [aria-disabled='true']),
-  .btn--primary:focus-visible,
-  .btn--primary[data-force='hover'] {
-    color: var(--bud-ink);
+  .btn__fill .btn__bud {
+    background: transparent;
   }
 
   .btn--primary:hover:not(:disabled, [aria-disabled='true']) .btn__fill,
@@ -141,10 +152,6 @@
     outline-offset: var(--focus-offset);
   }
 
-  .btn--primary[data-force='focus'] {
-    color: var(--bud-ink);
-  }
-
   /* Secondary — outlined, quiet. */
   .btn--secondary {
     border-color: var(--ink);
@@ -163,7 +170,7 @@
 
   /* Ghost — tertiary actions, inline with text. */
   .btn--ghost {
-    padding-inline: 0.75rem;
+    --btn-px: 0.75rem;
     color: var(--ink);
     text-decoration-line: underline;
     text-decoration-thickness: 1px;
@@ -179,8 +186,8 @@
 
   /* Icon-only — always round, always a full target. */
   .btn--icon {
+    --btn-px: 0px;
     inline-size: var(--btn-h);
-    padding: 0;
     border-color: var(--line-strong);
   }
 
@@ -196,53 +203,64 @@
     opacity: 0.42;
   }
 
-  /* Loading — three seeds sprouting in a row. Width never changes. */
+  /* Loading — three seeds sprouting in a row. Width never changes, the button
+     keeps full opacity (busy is not disabled), and the label stays the
+     accessible name (opacity, not visibility). */
   .btn[aria-busy='true'] {
     cursor: progress;
+    opacity: 1;
   }
 
-  /* opacity, not visibility: the label stays the accessible name */
-  .btn[aria-busy='true'] .btn__label {
+  .btn[aria-busy='true'] > .btn__label {
     opacity: 0;
   }
 
   .btn__loader {
     position: absolute;
-    inset-block: 0;
-    inset-inline-start: var(--btn-px);
-    inset-inline-end: calc(var(--btn-inset) + var(--btn-bud) + 0.75rem);
+    inset: 0;
+    z-index: 2;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.375rem;
+    gap: 0.5rem;
+    pointer-events: none;
   }
 
-  .btn:not(.btn--primary) .btn__loader {
-    inset-inline-end: var(--btn-px);
+  .btn--primary .btn__loader {
+    inset-inline-end: calc(var(--btn-inset) + var(--btn-bud));
+  }
+
+  .btn--icon .btn__loader {
+    gap: 0.25rem;
   }
 
   .btn__loader i {
-    inline-size: 0.4375rem;
-    block-size: 0.4375rem;
+    inline-size: 0.5rem;
+    block-size: 0.5rem;
     border-radius: 50%;
     background: currentColor;
-    transform: scale(0.35);
-    animation: seed-row 960ms var(--ease-growth) infinite;
+    animation: seed-row var(--dur-season) var(--ease-growth) infinite;
   }
 
   .btn__loader i:nth-child(2) {
-    animation-delay: 120ms;
+    animation-delay: calc(var(--stagger-step) * 3);
   }
 
   .btn__loader i:nth-child(3) {
-    animation-delay: 240ms;
+    animation-delay: calc(var(--stagger-step) * 6);
   }
 
+  /* Specimens on documentation pages stop after ≤ 5s (WCAG 2.2.2). */
+  [data-specimen] .btn__loader i {
+    animation-iteration-count: 4;
+  }
+
+  /* Resting state = fully grown dots, so reduced motion shows them clearly. */
   @keyframes seed-row {
     0%,
     100% {
-      transform: scale(0.35);
-      opacity: 0.5;
+      transform: scale(0.45);
+      opacity: 0.55;
     }
     45% {
       transform: scale(1);
@@ -250,7 +268,9 @@
     }
   }
 
-  /* Magnetic CTA: the wrapper writes --mx/--my; release springs back. */
+  /* Magnetic CTA: the wrapper writes --mx/--my; release springs back. The
+     label follows at 35% with the same spring, so the parallax settles with
+     the pill instead of snapping. */
   .magnetic {
     display: inline-flex;
     transform: translate3d(var(--mx, 0px), var(--my, 0px), 0);
@@ -258,13 +278,14 @@
     will-change: transform;
   }
 
-  .magnetic[data-active='true'] {
-    transition: transform var(--dur-fast) var(--ease-out-quint);
-  }
-
   .magnetic .btn__label {
     transform: translate3d(calc(var(--mx, 0px) * 0.35), calc(var(--my, 0px) * 0.35), 0);
-    transition: inherit;
+    transition: transform var(--dur-spring) var(--ease-spring);
+  }
+
+  .magnetic[data-active='true'],
+  .magnetic[data-active='true'] .btn__label {
+    transition: transform var(--dur-fast) var(--ease-out-quint);
   }
 
   /* ───────────────────────────── Field ───────────────────────────── */
@@ -402,9 +423,9 @@
     place-items: center;
     inline-size: var(--target);
     block-size: var(--target);
-    margin: 0.125rem;
+    margin: 0.25rem;
     border: 0;
-    border-radius: calc(var(--radius-md) - 2px);
+    border-radius: calc(var(--radius-md) - 0.25rem);
     background: transparent;
     color: var(--ink);
     transition: background-color var(--dur-fast) var(--ease-out-quint);
@@ -418,7 +439,8 @@
     background: var(--tint-press);
   }
 
-  .stepper__btn:disabled {
+  .stepper__btn:disabled,
+  .stepper__btn[aria-disabled='true'] {
     color: var(--ink-3);
     cursor: not-allowed;
   }
@@ -430,6 +452,7 @@
 
   /* ───────────────────────────── Chip ───────────────────────────── */
 
+  /* Chips may wrap (200% text, narrow phones) instead of being clipped. */
   .chip {
     --chip-h: 2rem;
     position: relative;
@@ -437,6 +460,7 @@
     align-items: center;
     gap: 0.5rem;
     min-block-size: var(--chip-h);
+    padding-block: 0.25rem;
     padding-inline: 0.75rem;
     border: var(--bw) solid transparent;
     border-radius: var(--radius-full);
@@ -444,8 +468,8 @@
     color: var(--ink);
     font-size: var(--text-caption);
     font-weight: 600;
-    line-height: 1.2;
-    white-space: nowrap;
+    line-height: 1.25;
+    text-align: start;
   }
 
   :root[data-theme='sun'] .chip {
@@ -461,20 +485,7 @@
     background: var(--ink-3);
   }
 
-  .chip[data-tone='in'] .chip__dot {
-    background: var(--sprout-ink);
-    box-shadow: 0 0 0 3px color-mix(in oklab, var(--sprout-ink) 22%, transparent);
-  }
-
-  .chip[data-tone='low'] .chip__dot {
-    background: var(--color-wheat);
-    box-shadow: 0 0 0 1px var(--wheat-ink);
-  }
-
-  .chip[data-tone='out'] .chip__dot {
-    background: var(--color-harvest);
-  }
-
+  /* Hue = stage / department (the season spine). */
   .chip[data-tone='water'] .chip__dot {
     background: var(--color-water);
   }
@@ -497,16 +508,41 @@
     background: var(--color-harvest);
   }
 
-  /* Demo label — dashed outline = placeholder data, honestly marked. */
+  /* Shape = stock level, in ink — never a stage colour, so a dot has one
+     meaning: ● in stock · ◐ low · ○ out. Always paired with words. */
+  .chip[data-tone='in'] .chip__dot,
+  .chip[data-tone='low'] .chip__dot,
+  .chip[data-tone='out'] .chip__dot {
+    inline-size: 0.625rem;
+    block-size: 0.625rem;
+    background: transparent;
+    box-shadow: inset 0 0 0 1.5px var(--ink);
+  }
+
+  .chip[data-tone='in'] .chip__dot {
+    background: var(--ink);
+  }
+
+  .chip[data-tone='low'] .chip__dot {
+    background: conic-gradient(var(--ink) 0 50%, transparent 0);
+  }
+
+  /* Demo label — dashed outline = placeholder data, honestly marked. Set in
+     Assistant: Plex Mono has no Hebrew, and its 0.6em space would open a
+     triple-width gap between the two words. */
   .chip--demo {
     --chip-h: 1.75rem;
+    padding-inline: 0.5rem;
     background: transparent;
     border: 1px dashed var(--line-strong);
     color: var(--ink-2);
-    font-family: var(--font-mono);
     font-size: var(--text-micro);
-    font-weight: 500;
-    padding-inline: 0.625rem;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  :root[data-theme='sun'] .chip--demo {
+    border-width: var(--bw);
   }
 
   /* Agronomist gate — crop protection never ships without it. */
@@ -520,6 +556,7 @@
   }
 
   .chip--agro svg {
+    flex: none;
     color: var(--wheat-ink);
   }
 
@@ -527,13 +564,18 @@
     color: var(--ink);
   }
 
-  /* Filter chip — interactive; 36px visual, 44px hit area. */
+  /* Filter chip — interactive; 36px visual, exactly 44px hit area (the
+     ::after is measured from the padding box, so it also covers the border).
+     The leading icon slot is always occupied (+ / ✓), so pressing never
+     changes the width. */
   .chip--filter {
     --chip-h: 2.25rem;
-    padding-inline: 0.875rem;
+    min-inline-size: var(--chip-h);
+    padding-inline: 0.75rem 1rem;
     border-color: var(--line-strong);
     background: transparent;
     cursor: pointer;
+    white-space: nowrap;
     transition:
       background-color var(--dur-fast) var(--ease-out-quint),
       color var(--dur-fast) var(--ease-out-quint),
@@ -543,11 +585,16 @@
   .chip--filter::after {
     content: '';
     position: absolute;
-    inset: -0.25rem 0;
+    inset-block: calc(-0.25rem - var(--bw));
+    inset-inline: calc(var(--bw) * -1);
   }
 
   :root[data-theme='sun'] .chip--filter {
     --chip-h: var(--target);
+  }
+
+  :root[data-theme='sun'] .chip--filter::after {
+    inset-block: calc(var(--bw) * -1);
   }
 
   .chip--filter:hover,
@@ -562,7 +609,13 @@
     color: var(--inverse-ink);
   }
 
-  .chip--filter .chip__check {
+  .chip__check,
+  .chip__plus {
+    flex: none;
+  }
+
+  .chip--filter .chip__check,
+  .chip--filter[aria-pressed='true'] .chip__plus {
     display: none;
   }
 
@@ -648,6 +701,12 @@
 
   /* ───────────────────────────── Table ───────────────────────────── */
 
+  /* The wrapper scrolls (never clips) if a wide table meets a narrow box. */
+  .table-wrap {
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+  }
+
   .table {
     inline-size: 100%;
     border-collapse: separate;
@@ -664,7 +723,8 @@
   }
 
   .table th {
-    padding: 0.75rem 1rem;
+    padding-block: 0.75rem;
+    padding-inline: 1rem;
     border-block-end: var(--bw) solid var(--line-strong);
     color: var(--ink-2);
     font-size: var(--text-caption);
@@ -679,6 +739,12 @@
     border-block-end: var(--bw) solid var(--line);
     vertical-align: middle;
     line-height: 1.4;
+  }
+
+  .table tfoot td {
+    border-block-end: 0;
+    font-weight: 700;
+    color: var(--ink);
   }
 
   .table tbody tr {
@@ -699,7 +765,7 @@
   }
 
   :root[data-theme='sun'] .table tbody tr[data-selected] {
-    background: color-mix(in oklab, var(--color-sprout) 40%, #ffffff);
+    background: color-mix(in oklab, var(--color-sprout) 40%, var(--color-white));
   }
 
   .table tbody tr[data-selected] > :first-child {
@@ -714,6 +780,11 @@
     white-space: nowrap;
   }
 
+  /* a quantity and its unit are one unbreakable value */
+  .table .cell-value {
+    white-space: nowrap;
+  }
+
   .table .cell-strong {
     font-weight: 700;
     color: var(--ink);
@@ -723,9 +794,10 @@
     color: var(--ink-2);
   }
 
-  /* Stacked mode drops table display, so the markup carries explicit ARIA
-     roles (role="table/rowgroup/row/columnheader/cell") to keep semantics. */
-  @media (max-width: 47.99rem) {
+  /* Stacked mode (phones and narrow tablets): rows become cards. Table
+     display is dropped, so the markup carries explicit ARIA roles; the CSS
+     label uses empty alt text so screen readers don't hear it twice. */
+  @media (max-width: 55.99rem) {
     .table--stack,
     .table--stack caption,
     .table--stack tbody,
@@ -748,8 +820,8 @@
 
     .table--stack tbody tr {
       display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 0.5rem 1rem;
+      grid-template-columns: 1fr;
+      gap: 0.5rem;
       padding: 1rem;
       border-block-end: var(--bw) solid var(--line);
     }
@@ -761,35 +833,33 @@
       align-items: baseline;
       padding: 0;
       border: 0;
-      grid-column: 1 / -1;
     }
 
     .table--stack td::before {
       content: attr(data-label);
+      content: attr(data-label) / '';
+      flex: none;
       color: var(--ink-2);
       font-size: var(--text-caption);
       font-weight: 600;
+    }
+
+    .table--stack td > .cell-content {
+      min-inline-size: 0;
+      text-align: end;
     }
 
     .table--stack td[data-primary] {
       font-size: var(--text-body);
     }
 
-    .table--stack td[data-primary]::before {
+    .table--stack td[data-primary] > .cell-content {
+      text-align: start;
+    }
+
+    .table--stack td[data-primary]::before,
+    .table--stack td:not([data-label])::before {
       content: none;
-    }
-
-    .table--stack tfoot tr {
-      display: flex;
-      justify-content: space-between;
-      gap: 1rem;
-      padding: 1rem;
-    }
-
-    .table--stack tfoot td {
-      display: block;
-      padding: 0;
-      border: 0;
     }
 
     .table--stack tbody tr[data-selected] > :first-child {
@@ -798,6 +868,20 @@
 
     .table--stack tbody tr[data-selected] {
       box-shadow: inset calc(4px * var(--dir-sign)) 0 0 var(--sprout-ink);
+    }
+
+    .table--stack tfoot tr {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 1rem;
+      padding: 1rem;
+    }
+
+    .table--stack tfoot td {
+      display: block;
+      padding: 0;
+      border: 0;
     }
   }
 
@@ -828,8 +912,8 @@
     grid-template-columns: auto 1fr auto;
     gap: 0.75rem 1rem;
     align-items: start;
-    inline-size: min(100%, 27rem);
-    padding-block: 1rem 1.125rem;
+    inline-size: min(100%, 28rem);
+    padding-block: 1rem 1.25rem;
     padding-inline: 1.25rem 0.5rem;
     border: var(--bw) solid var(--line);
     border-radius: var(--radius-lg);
@@ -838,6 +922,10 @@
     box-shadow: var(--elev-float);
     overflow: hidden;
     pointer-events: auto;
+  }
+
+  .toast[data-static] {
+    inline-size: 100%;
   }
 
   .toast[data-state='open'] {
@@ -867,7 +955,7 @@
     place-items: center;
     inline-size: 2rem;
     block-size: 2rem;
-    margin-block-start: 0.125rem;
+    margin-block-start: 0.25rem;
     border-radius: 50%;
     color: var(--color-soil);
   }
@@ -911,6 +999,7 @@
     display: inline-flex;
     align-items: center;
     min-block-size: var(--target);
+    min-inline-size: var(--target);
     padding: 0;
     border: 0;
     background: none;
@@ -925,7 +1014,7 @@
     place-items: center;
     inline-size: var(--target);
     block-size: var(--target);
-    margin-block-start: -0.375rem;
+    margin-block-start: -0.5rem;
     border: 0;
     border-radius: 50%;
     background: transparent;
@@ -941,7 +1030,7 @@
     position: absolute;
     inset-inline: 0;
     inset-block-end: 0;
-    block-size: 3px;
+    block-size: 0.25rem;
     background: var(--sprout-ink);
     transform-origin: var(--start) center;
     transform: scaleX(var(--progress, 1));
@@ -989,9 +1078,9 @@
     align-items: center;
     gap: 0.5rem;
     max-inline-size: calc(100vw - 1.5rem);
-    padding-block: 0.4375rem;
-    padding-inline: 0.75rem 0.875rem;
-    border: 1px solid var(--line);
+    padding-block: 0.5rem;
+    padding-inline: 0.75rem 1rem;
+    border: var(--bw) solid var(--line);
     border-radius: var(--radius-full);
     background: var(--canvas);
     color: var(--ink);
@@ -1007,21 +1096,25 @@
     block-size: 0.5rem;
     border-radius: 50%;
     background: var(--color-sprout);
-    box-shadow: 0 0 0 3px rgb(183 224 74 / 0.25);
+    box-shadow: 0 0 0 0.25rem color-mix(in oklab, var(--color-sprout) 25%, transparent);
   }
 
+  /* The pressed look is driven by the theme attribute itself (set by the head
+     script before first paint), so it is right before hydration too. */
   .sun-toggle {
     display: inline-flex;
+    flex: none;
     align-items: center;
     gap: 0.5rem;
     min-block-size: var(--target);
-    padding-inline: 0.875rem 1rem;
+    padding-inline: 0.75rem 1rem;
     border: var(--bw) solid var(--line-strong);
     border-radius: var(--radius-full);
     background: transparent;
     color: var(--ink);
     font-size: var(--text-caption);
     font-weight: 700;
+    white-space: nowrap;
     transition:
       background-color var(--dur-fast) var(--ease-out-quint),
       color var(--dur-fast) var(--ease-out-quint),
@@ -1033,7 +1126,7 @@
     border-color: var(--ink);
   }
 
-  .sun-toggle[aria-pressed='true'] {
+  :root[data-theme='sun'] .sun-toggle {
     background: var(--color-sprout);
     border-color: var(--ink);
     color: var(--color-soil);
@@ -1043,8 +1136,49 @@
     transition: transform var(--dur-grow) var(--ease-out-expo);
   }
 
-  .sun-toggle[aria-pressed='true'] svg {
+  :root[data-theme='sun'] .sun-toggle svg {
     transform: rotate(90deg);
+  }
+
+  /* Section rail: the 01–08 navigation as a scrolling chip row below xl. */
+  .section-rail {
+    display: flex;
+    gap: 0.5rem;
+    overflow-x: auto;
+    padding-block: 0.5rem 0.75rem;
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+  }
+
+  .section-rail::-webkit-scrollbar {
+    display: none;
+  }
+
+  .section-rail a {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    gap: 0.5rem;
+    min-block-size: var(--target);
+    padding-inline: 0.75rem 1rem;
+    border: var(--bw) solid var(--line);
+    border-radius: var(--radius-full);
+    color: var(--ink);
+    font-size: var(--text-caption);
+    font-weight: 600;
+    text-decoration: none;
+    scroll-snap-align: start;
+    white-space: nowrap;
+  }
+
+  .section-rail a[aria-current='true'] {
+    background: var(--inverse);
+    border-color: var(--inverse);
+    color: var(--inverse-ink);
+  }
+
+  .section-rail a[aria-current='true'] .num {
+    color: inherit;
   }
 
   /* Scroll-linked season line under the header. Progressive enhancement. */
@@ -1071,4 +1205,58 @@
       display: none;
     }
   }
+
+  /* ───────────────────────── Segmented control (native radios) ───────────────────────── */
+
+  .segmented {
+    display: grid;
+    gap: 0.5rem;
+    min-inline-size: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+
+  .segmented__legend {
+    margin-block-end: 0.5rem;
+    padding: 0;
+    font-size: var(--text-caption);
+    font-weight: 700;
+  }
+
+  .segmented__options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .segmented__option {
+    position: relative;
+    display: inline-flex;
+  }
+
+  .segmented__option input {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    margin: 0;
+    opacity: 0;
+    cursor: pointer;
+  }
+
+  .segmented__option input:checked + .segmented__chip {
+    background: var(--inverse);
+    border-color: var(--inverse);
+    color: var(--inverse-ink);
+  }
+
+  .segmented__option input:focus-visible + .segmented__chip {
+    outline: var(--focus-w) solid var(--focus);
+    outline-offset: var(--focus-offset);
+  }
+
+  .segmented__option:hover .segmented__chip {
+    border-color: var(--ink);
+  }
 }
+

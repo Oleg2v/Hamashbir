@@ -1,9 +1,13 @@
+import type { CSSProperties } from 'react';
 import { Num } from '@/components/ui/Num';
+import { NumText } from '@/components/ui/NumText';
 import { ergonomics, layout, space } from '@/design/tokens';
 import { Block, Section } from './Section';
 
-/** A 1:1 ruler: minor tick every 4px, major tick every 16px – the grid itself. */
-const ruler = {
+const NB = ' ';
+
+/** A 1:1 ruler: minor tick every 4px, major tick every 16px — the grid itself. */
+const ruler: CSSProperties = {
   backgroundImage: [
     'repeating-linear-gradient(to left, var(--ink) 0 1px, transparent 1px 0.25rem)',
     'repeating-linear-gradient(to left, var(--ink) 0 1px, transparent 1px 1rem)',
@@ -11,26 +15,30 @@ const ruler = {
   backgroundSize: '100% 0.375rem, 100% 0.75rem',
   backgroundPosition: 'bottom, bottom',
   backgroundRepeat: 'no-repeat',
-} as const;
+};
 
+/** Reads down, then across (CSS columns), so the series grows in one direction. */
 function SpaceScale() {
   const entries = Object.entries(space).filter(([k]) => k !== '0') as Array<[string, number]>;
   return (
-    <ol className="grid gap-x-(--gutter) gap-y-2 lg:grid-cols-2" aria-label="סולם המרווחים">
+    <ol className="gap-x-(--gutter) lg:columns-2" aria-label="סולם המרווחים">
       {entries.map(([k, px]) => (
         <li
           key={k}
-          className="grid grid-cols-[4.5rem_4rem_1fr] items-end gap-4 border-b border-line py-2 sm:grid-cols-[5.5rem_4.5rem_1fr]"
+          className="grid break-inside-avoid grid-cols-[minmax(5.5rem,auto)_minmax(4rem,auto)_1fr] items-end gap-x-4 gap-y-2 border-b border-line py-3 max-sm:grid-cols-[auto_1fr]"
         >
-          <Num className="text-caption font-medium">space-{k}</Num>
-          <Num className="text-caption text-ink-2">{px}px</Num>
-          <span className="flex items-end gap-2">
+          <Num className="whitespace-nowrap text-caption font-medium">space-{k}</Num>
+          <span className="flex items-baseline justify-end gap-3 whitespace-nowrap sm:justify-start">
+            <Num className="text-caption text-ink-2">{px}px</Num>
+            <Num className="text-micro text-ink-3 sm:hidden">p-{k}</Num>
+          </span>
+          <span className="flex items-end gap-2 max-sm:col-span-2">
             <span
               className="block h-3 shrink-0 bg-[color-mix(in_oklab,var(--color-sprout)_45%,transparent)]"
               style={{ inlineSize: `${px / 16}rem`, ...ruler }}
               aria-hidden="true"
             />
-            <Num className="text-micro text-ink-3">p-{k}</Num>
+            <Num className="whitespace-nowrap text-micro text-ink-3 max-sm:hidden">p-{k}</Num>
           </span>
         </li>
       ))}
@@ -49,10 +57,10 @@ function GridFrames() {
   return (
     <div className="flex flex-wrap items-end gap-x-10 gap-y-8">
       {frames.map((f) => (
-        <figure key={f.w} className="grid gap-3">
+        <figure key={f.w} className="grid min-w-0 gap-3" style={{ inlineSize: `min(100%, ${(f.w * scale) / 16}rem)` }}>
           <div
-            className="relative overflow-hidden rounded-sm border border-line-strong bg-surface"
-            style={{ inlineSize: `${(f.w * scale) / 16}rem`, blockSize: `${(Math.min(f.h, 900) * scale) / 16}rem` }}
+            className="relative w-full overflow-hidden rounded-sm border border-line-strong bg-surface"
+            style={{ aspectRatio: `${f.w} / ${Math.min(f.h, 900)}` }}
             aria-hidden="true"
           >
             <div
@@ -68,12 +76,12 @@ function GridFrames() {
               ))}
             </div>
           </div>
-          <figcaption className="grid gap-0.5 text-caption">
+          <figcaption className="grid gap-1 text-caption">
             <span className="font-bold">
               {f.label} · <Num>{f.w}</Num>
             </span>
             <span className="text-ink-2">
-              <Num>{f.columns}</Num> עמודות · שוליים <Num>{f.margin}</Num> · מרווח <Num>{f.gutter}</Num>
+              <NumText>{`${f.columns} עמודות · שוליים ${f.margin} · מרווח ${f.gutter}`}</NumText>
             </span>
           </figcaption>
         </figure>
@@ -82,32 +90,55 @@ function GridFrames() {
   );
 }
 
+/** Touch areas: the three sizes, then the real button at each of them. */
 function Targets() {
   const items = [
     { px: 24, title: 'מינימום', note: 'WCAG 2.2 · 2.5.8' },
     { px: ergonomics.default.target, title: 'ברירת המחדל', note: 'כל כפתור, צ׳יפ ושדה' },
-    { px: ergonomics.sun.target, title: 'מצב שמש', note: 'כפפות עבודה, יד רטובה' },
+    { px: ergonomics.sun.target, title: 'מצב שמש', note: 'כפפות עבודה, יד רטובה, שמש של צהריים' },
   ];
   return (
-    <ul className="flex flex-wrap items-end gap-x-12 gap-y-8">
-      {items.map((t) => (
-        <li key={t.px} className="grid justify-items-start gap-3">
-          <span
-            className="relative grid place-items-center rounded-full border-2 border-dashed border-line-strong"
-            style={{ inlineSize: `${t.px / 16}rem`, blockSize: `${t.px / 16}rem` }}
-            aria-hidden="true"
-          >
-            <span className="size-1.5 rounded-full bg-ink" />
-          </span>
-          <span className="grid gap-0.5 text-caption">
-            <span className="font-bold">
-              <Num>{t.px}</Num> פיקסלים · {t.title}
+    <div className="grid gap-12">
+      <ul className="flex flex-wrap items-end gap-x-12 gap-y-8">
+        {items.map((t) => (
+          <li key={t.px} className="grid justify-items-start gap-3">
+            <span
+              className="relative grid place-items-center rounded-full border-2 border-dashed border-line-strong"
+              style={{ inlineSize: `${t.px / 16}rem`, blockSize: `${t.px / 16}rem` }}
+              aria-hidden="true"
+            >
+              <span className="size-2 rounded-full bg-ink" />
             </span>
-            <span className="text-ink-2">{t.note}</span>
-          </span>
-        </li>
-      ))}
-    </ul>
+            <span className="grid gap-1 text-caption">
+              <span className="font-bold">
+                <Num>{t.px}</Num>
+                {NB}פיקסלים · {t.title}
+              </span>
+              <span className="text-ink-2">{t.note}</span>
+            </span>
+          </li>
+        ))}
+      </ul>
+      {/* specimens, not controls: the same primary button at 44 and at 56 */}
+      <div className="flex flex-wrap items-end gap-6" aria-hidden="true">
+        {[ergonomics.default.target, ergonomics.sun.target].map((px) => (
+          <figure key={px} className="grid justify-items-start gap-3" style={{ '--target': `${px / 16}rem` } as CSSProperties}>
+            <span className="btn btn--primary">
+              <span className="btn__label">איסוף מסניף</span>
+              <span className="btn__bud">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M19 12H5.5" />
+                  <path d="M11 6l-6 6 6 6" />
+                </svg>
+              </span>
+            </span>
+            <figcaption className="text-micro text-ink-2">
+              גובה&nbsp;<Num>{px}</Num>
+            </figcaption>
+          </figure>
+        ))}
+      </div>
+    </div>
   );
 }
 
@@ -115,25 +146,30 @@ export function SpaceSection() {
   return (
     <Section
       id="space"
+      surface="soil"
       intro={
         <p>
-          רשת של 4 פיקסלים, כמו שורות שתילה: מרווח קבוע, צמיחה צפויה. כל מידה בממשק היא כפולה של 4 – ריפוד, רווח,
-          גובה שורה, גודל מטרה. הסולם שלמטה מוצג בקנה מידה 1:1.
+          <NumText>
+            {
+              'רשת של 4 פיקסלים, כמו שורות שתילה: מרווח קבוע, צמיחה צפויה. כל ריפוד, רווח וגודל מטרה הוא כפולה של 4. הסולם שלמטה מוצג בקנה מידה 1:1.'
+            }
+          </NumText>
         </p>
       }
     >
       <div className="grid gap-20 lg:gap-28">
-        <Block title="סולם המרווחים" note="קנה מידה 1:1 · שנתות כל 4 ו־16 פיקסלים">
+        <Block title="סולם המרווחים" note={<NumText>{'קנה מידה 1:1 · שנתות כל 4 ו־16 פיקסלים'}</NumText>}>
           <SpaceScale />
         </Block>
-        <Block title="רשת עמודות" note="4 · 8 · 12 עמודות · רוחב מרבי 1440">
+        <Block title="רשת עמודות" note={<NumText>{'4 · 8 · 12 עמודות · רוחב מרבי 1440'}</NumText>}>
           <GridFrames />
           <p className="max-w-[62ch] text-caption text-ink-2">
-            מרווח בין מקטעים: <Num>{layout.section.mobile}</Num> בנייד, <Num>{layout.section.tablet}</Num> בטאבלט,{' '}
-            <Num>{layout.section.desktop}</Num> בדסקטופ. השוליים והמרווחים הם משתני CSS, לא מספרי קסם.
+            <NumText>
+              {`מרווח בין מקטעים: ${layout.section.mobile} פיקסלים בנייד, ${layout.section.tablet} בטאבלט, ${layout.section.desktop} בדסקטופ. השוליים והמרווחים הם משתני CSS, לא מספרי קסם.`}
+            </NumText>
           </p>
         </Block>
-        <Block title="מטרות מגע" note="נגישים לאגודל, לכפפה ולשמש של צהריים">
+        <Block title="אזורי מגע" note="לאגודל, לכפפה ולשמש של צהריים">
           <Targets />
         </Block>
       </div>

@@ -1,4 +1,5 @@
 import { Num } from '@/components/ui/Num';
+import { NumText } from '@/components/ui/NumText';
 import { elevations, radii } from '@/design/tokens';
 import { Block, Section } from './Section';
 
@@ -22,7 +23,7 @@ const shadowClass: Record<(typeof elevations)[number]['name'], string> = {
 
 function Radii() {
   return (
-    <ul className="grid grid-cols-2 gap-x-(--gutter) gap-y-8 sm:grid-cols-4 lg:grid-cols-7">
+    <ul className="grid grid-cols-2 items-start gap-x-(--gutter) gap-y-8 sm:grid-cols-4 lg:grid-cols-7">
       {(Object.keys(radii) as Array<keyof typeof radii>).map((k) => (
         <li key={k} className="grid gap-3">
           <span
@@ -113,14 +114,18 @@ function Lines() {
         <span className="block h-12 border-b border-line" aria-hidden="true" />
         <span className="text-caption">
           <Num className="font-medium">border-line</Num>
-          <span className="block text-ink-2">קו שיער · 12% דיו · מחיצות</span>
+          <span className="block text-ink-2">
+            <NumText>{'קו שיער · 12% דיו · מחיצות'}</NumText>
+          </span>
         </span>
       </li>
       <li className="grid gap-3">
         <span className="block h-12 border-b border-line-strong" aria-hidden="true" />
         <span className="text-caption">
           <Num className="font-medium">border-line-strong</Num>
-          <span className="block text-ink-2">גבול שדה · ≥ 3:1 מול הרקע</span>
+          <span className="block text-ink-2">
+            <NumText>{'גבול שדה · לפחות 3:1 מול הרקע'}</NumText>
+          </span>
         </span>
       </li>
       <li className="grid gap-3">
@@ -131,7 +136,9 @@ function Lines() {
         </span>
         <span className="text-caption">
           <Num className="font-medium">--focus</Num>
-          <span className="block text-ink-2">טבעת 3 פיקסלים · 4 במצב שמש</span>
+          <span className="block text-ink-2">
+            <NumText>{'טבעת של 3 פיקסלים · 4 במצב שמש'}</NumText>
+          </span>
         </span>
       </li>
       <li className="grid gap-3">
@@ -151,13 +158,16 @@ export function ShapeSection() {
       id="shape"
       intro={
         <p>
-          רך לשדה, חד לנתונים: כפתורים וצ׳יפים מעוגלים לגמרי, כרטיסים <Num>20</Num>, שדות <Num>12</Num>, שורות טבלה
-          ישרות. עומק בא מחומר – צללים חמים בגוון אדמה, לא אפור – ובמצב שמש הוא מתחלף בקו.
+          <NumText>
+            {
+              'רך לשדה, חד לנתונים: כפתורים וצ׳יפים מעוגלים לגמרי, כרטיסים ב־20 פיקסלים, שדות ב־12, שורות טבלה ישרות. עומק בא מחומר – צללים חמים בגוון אדמה, לא אפור – ובמצב שמש הוא מתחלף בקו.'
+            }
+          </NumText>
         </p>
       }
     >
       <div className="grid gap-20 lg:gap-28">
-        <Block title="רדיוסים" note="7 ערכים · כולם כפולות של 4">
+        <Block title="רדיוסים" note={<NumText>{'7 ערכים · כולם כפולות של 4'}</NumText>}>
           <Radii />
         </Block>
         <Block title="עומק על נייר" note="צל חם, בגוון אדמה">

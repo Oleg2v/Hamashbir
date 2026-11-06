@@ -2,8 +2,11 @@
 
 import { Button } from '@/components/ui/Button';
 import { useToast } from '@/components/ui/Toast';
+import { demoFarm, dripAvailability } from '@/data/demo-farm';
 
-/** Live triggers: fire the real toasts through the provider in the root layout. */
+const NB = ' ';
+
+/** Live triggers: the real toasts through the provider in the root layout. Every action does something. */
 export function ToastDemo() {
   const { toast } = useToast();
   return (
@@ -14,8 +17,11 @@ export function ToastDemo() {
           toast({
             tone: 'success',
             title: 'שלב 1 הוזמן',
-            body: 'איסוף מסניף עין תמר · יום ג׳, 10:00',
-            action: { label: 'ביטול ההזמנה' },
+            body: `איסוף מסניף ${demoFarm.branch.name} · יום ג׳, 10:00`,
+            action: {
+              label: 'ביטול ההזמנה',
+              onClick: () => toast({ tone: 'info', title: 'ההזמנה בוטלה', body: 'שלב 1 חזר לתוכנית כטיוטה.' }),
+            },
           })
         }
       >
@@ -27,20 +33,28 @@ export function ToastDemo() {
           toast({
             tone: 'agro',
             title: 'מוצרי הגנת הצומח דורשים אישור אגרונום לפני הזמנה',
-            body: 'השורה נשמרה בתוכנית ותישלח לאגרונום שלכם.',
-            action: { label: 'שלחו לאגרונום לאישור' },
+            body: 'השורה נשמרה בתוכנית וממתינה לאישור.',
+            action: {
+              label: 'שלחו לאגרונום לאישור',
+              onClick: () => toast({ tone: 'success', title: 'נשלח לאגרונום', body: 'נעדכן אותך כשהשורה תאושר.' }),
+            },
           })
         }
       >
-        הוספת שורת הגנה
+        הוסיפו שורת הגנה
       </Button>
       <Button
         variant="secondary"
         onClick={() =>
-          toast({ tone: 'info', title: 'המלאי עודכן', body: 'טפטוף 16 מ״מ זמין ב־14 סניפים', duration: 5000 })
+          toast({
+            tone: 'info',
+            title: 'המלאי עודכן',
+            body: `שלוחת טפטוף 16 מ״מ במלאי ב־${dripAvailability.branchesWithStock}${NB}סניפים`,
+            duration: 5000,
+          })
         }
       >
-        בדיקת מלאי
+        בדקו מלאי
       </Button>
       <Button
         variant="ghost"
@@ -49,11 +63,14 @@ export function ToastDemo() {
             tone: 'error',
             title: 'לא הצלחנו לשלוח את ההזמנה',
             body: 'אין חיבור לרשת. התוכנית שמורה במכשיר.',
-            action: { label: 'נסו שוב' },
+            action: {
+              label: 'נסו שוב',
+              onClick: () => toast({ tone: 'success', title: 'ההזמנה נשלחה', body: 'אישור יגיע בהודעה.' }),
+            },
           })
         }
       >
-        הדמיית שגיאה
+        הדגימו שגיאה
       </Button>
     </div>
   );

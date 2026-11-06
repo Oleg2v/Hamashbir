@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { ComponentsSection } from './_parts/ComponentsSection';
 import { Hero } from './_parts/Hero';
+import { ImagerySection } from './_parts/ImagerySection';
 import { MotionSection } from './_parts/MotionSection';
 import { PaletteSection } from './_parts/PaletteSection';
 import { ShapeSection } from './_parts/ShapeSection';
@@ -22,6 +23,7 @@ export default function StyleTilePage() {
       <main id="main" tabIndex={-1} className="outline-none">
         <Hero />
         <PaletteSection />
+        <ImagerySection />
         <TypeSection />
         <SpaceSection />
         <ShapeSection />

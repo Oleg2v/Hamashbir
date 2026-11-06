@@ -14,12 +14,18 @@ living version of this document.
   `.field`, `.chip`, `.card`, `.table`, `.toast`). React wrappers live in
   `src/components/ui/*`.
 
-## The closed scales (Tailwind defaults are reset)
+## The closed scales
+
+Tailwind's defaults are reset for colour, type size, radius, shadow and easing
+(only the values below exist). Spacing keeps Tailwind's 0.25rem multiplier —
+that *is* the 4px grid; weights, line-height and blur keep their defaults.
+The bare `transition` utilities default to `--dur-fast` + `ease-out-quint`.
+
 
 | Kind | Utilities |
 | --- | --- |
-| Type | `text-micro` `text-caption` `text-body` `text-lead` `text-title` `text-h3` `text-h2` `text-h1` `text-display` (fluid `clamp()`, line-height built in) |
-| Fonts | `font-display` (Suez One — h3 and larger only), `font-sans` (Assistant), `font-mono` / `.num` (IBM Plex Mono) |
+| Type | `text-micro` `text-caption` `text-body` `text-lead` `text-title` `text-h3` `text-h2` `text-h1` `text-display` (fluid `clamp()`, line-height built in) — plus `text-poster`, the single hero headline per page, deliberately outside the nine-step UI scale |
+| Fonts | `font-display` (Suez One — `text-title` (25px) and larger only, never body text), `font-sans` (Assistant), `font-mono` / `.num` (IBM Plex Mono) |
 | Semantic colour | `bg-canvas` `bg-surface` `bg-sunken` `bg-input` `text-ink` `text-ink-2` `text-ink-3` `border-line` `border-line-strong` `bg-tint-hover` `bg-tint-press` `text-link` `text-sprout-ink` `text-water-ink` `text-harvest-ink` `text-wheat-ink` `bg-cta` `text-cta-ink` `bg-bud` `bg-inverse` `text-inverse-ink` |
 | Raw brand colour (fills, data marks only) | `soil` `loam` `paper` `field` `sprout` `water` `harvest` `wheat` `white` `black` |
 | Radius | `rounded-none` `-xs` (4) `-sm` (8) `-md` (12) `-lg` (20) `-xl` (32) `-full` |
@@ -29,6 +35,30 @@ living version of this document.
 | Space | Tailwind integer steps only (`p-1` = 4px … `p-40` = 160px). Layout vars: `--page-margin`, `--gutter`, `--section-y`, `--target`, `--target-lg` |
 
 Use `.wrap` for the page container (max 1440px, responsive margins).
+
+## Heading hierarchy
+
+| Level | Element | Style |
+| --- | --- | --- |
+| Page | `h1` | `text-poster` (hero) or `text-display` |
+| Section | `h2` | Suez `text-h2` (via `<Section>`) |
+| Block | `h3` | Suez `text-h3` (via `<Block>`; its note sits under the title, controls go in `action`) |
+| Statement | `h4` | `font-display text-title` — principles, decisions, pull-quotes |
+| Card title | `h4` | `font-sans text-lead font-extrabold` |
+
+Nothing inside a block is set larger than the block title, except type
+specimens. Anything that reads as a heading is marked up as one.
+
+## Shared helpers
+
+- `<NumText>` sets running text with the number rules applied (every numeric
+  run in `<Num>`, no-break space before the Hebrew unit). Use it for any
+  string that contains digits.
+- `<Verdict ok />` is the one right/wrong marker (✓ נכון / ✕ שגוי).
+- `<SegmentedControl>` for single choice (native radios); `<FilterChip>` for
+  independent toggles (aria-pressed).
+- Demo data: `src/data/demo-farm.ts` is the only source of "the season"
+  numbers (40 dunam pepper, net house, Arava, 3 km from Ein Tamar).
 
 ## Surfaces and sun mode
 
@@ -70,6 +100,15 @@ Use `.wrap` for the page container (max 1440px, responsive margins).
   (The `--start/--end/--dir-sign` helpers are scoped with `:not(bdi)` so a
   number keeps the page's direction.)
 - No lorem ipsum, no Latin eyebrows in product UI.
+- Department names are proper nouns, verbatim from hamashbir.co.il:
+  הדברה ודשנים · השקייה ותשתיות · ציוד טכני · אריזות וקרטונים · זרעים ושתילים · בתי צמיחה.
+  Running text keeps the Academy spelling (השקיה).
+- Forms of address: imperatives in the plural (בנו, הזמינו), possessives in
+  the singular (העונה שלך, 3 ק״מ ממך) — as in the brief.
+- Comparisons in words, not glyphs: „לפחות 4.5:1”, „לכל היותר 2.5” — a typed
+  ≥ is mirrored by bidi in RTL and reads as ≤.
+- Ranges with an en dash inside `<Num>` („13–14px”), never an arrow.
+- "hero" is „מסך הפתיחה”, never „גיבור”.
 
 ## Motion
 

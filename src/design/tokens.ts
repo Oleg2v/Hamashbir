@@ -16,11 +16,11 @@ export const palette = {
   soil: { hex: '#1D1813', he: 'אדמה', en: 'Soil', role: 'רקע קולנועי, טקסט ראשי' },
   loam: { hex: '#3A2E22', he: 'רגב', en: 'Loam', role: 'משטחים על אדמה, קווי מתאר' },
   paper: { hex: '#F5F1E8', he: 'נייר', en: 'Paper', role: 'רקע האפליקציה, טקסט על אדמה' },
-  field: { hex: '#2E6B3A', he: 'שדה', en: 'Field Green', role: 'קישורים, מלאי זמין, הגנה' },
-  sprout: { hex: '#B7E04A', he: 'נבט', en: 'Sprout', role: 'האקסנט הראשי · CTA על אדמה' },
+  field: { hex: '#2E6B3A', he: 'שדה', en: 'Field Green', role: 'קישורים, שלב ההגנה, חופה מלאה' },
+  sprout: { hex: '#B7E04A', he: 'נבט', en: 'Sprout', role: 'צבע ההדגשה הראשי · כפתור פעולה על אדמה' },
   water: { hex: '#3FA9F5', he: 'מים', en: 'Water Blue', role: 'השקיה, ורק השקיה' },
-  harvest: { hex: '#E2483A', he: 'קטיף', en: 'Harvest Red', role: 'פרי, התראה, מלאי חסר' },
-  wheat: { hex: '#E6C66E', he: 'חיטה', en: 'Wheat', role: 'אריזה, מלאי נמוך, אגרונום' },
+  harvest: { hex: '#E2483A', he: 'קטיף', en: 'Harvest Red', role: 'פרי, שגיאה, שלב הקטיף' },
+  wheat: { hex: '#E6C66E', he: 'חיטה', en: 'Wheat', role: 'אריזה, שער האגרונום' },
 } as const;
 
 export type PaletteKey = keyof typeof palette;
@@ -42,15 +42,17 @@ export const proportions: Array<{ key: PaletteKey; share: number }> = [
 ];
 
 /**
- * NDVI ramp – the data motif. Bare soil → sparse → dense canopy.
+ * NDVI ramp – the data motif. Anchors sit where real readings sit: bare soil
+ * ≈ 0.1, sparse cover ≈ 0.35, active growth ≈ 0.6, dense canopy ≈ 0.85
+ * (1.0 is never reached in a field). Flat colour outside the anchors.
  * Interpolated in OKLCH so the mid-tones stay luminous instead of muddy.
  */
 export const ndvi = {
   stops: [
-    { at: 0, hex: palette.harvest.hex, label: 'אדמה חשופה' },
+    { at: 0.1, hex: palette.harvest.hex, label: 'אדמה חשופה' },
     { at: 0.35, hex: palette.wheat.hex, label: 'צמחייה דלילה' },
-    { at: 0.65, hex: palette.sprout.hex, label: 'צמיחה פעילה' },
-    { at: 1, hex: palette.field.hex, label: 'חופה מלאה' },
+    { at: 0.6, hex: palette.sprout.hex, label: 'צמיחה פעילה' },
+    { at: 0.85, hex: palette.field.hex, label: 'חופה מלאה' },
   ],
   ticks: [0, 0.2, 0.4, 0.6, 0.8, 1],
 } as const;
@@ -58,10 +60,12 @@ export const ndvi = {
 /** The season spine – five stages, one colour each, used everywhere. */
 export const stages = [
   { id: 'sow', he: 'זריעה', en: 'Sow', color: 'sprout', dept: 'זרעים ושתילים' },
+  // Department names are proper nouns, verbatim from hamashbir.co.il
+  // (running text keeps the Academy spelling השקיה).
   { id: 'irrigate', he: 'השקיה', en: 'Irrigate', color: 'water', dept: 'השקייה ותשתיות' },
   { id: 'protect', he: 'הגנה', en: 'Protect', color: 'field', dept: 'הדברה ודשנים' },
   { id: 'harvest', he: 'קטיף', en: 'Harvest', color: 'harvest', dept: 'ציוד טכני' },
-  { id: 'pack', he: 'אריזה', en: 'Pack', color: 'wheat', dept: 'אריזה וקרטונים' },
+  { id: 'pack', he: 'אריזה', en: 'Pack', color: 'wheat', dept: 'אריזות וקרטונים' },
 ] as const satisfies ReadonlyArray<{
   id: string;
   he: string;
@@ -189,7 +193,7 @@ export const fonts = {
     family: 'Suez One',
     variable: '--font-suez',
     fallback: "'Frank Ruhl Libre', 'David Libre', serif",
-    role: 'כותרות בלבד · שלב 3 ומעלה · לעולם לא בגוף טקסט',
+    role: 'כותרות בלבד · משלב title ומעלה (25px+) · לעולם לא בגוף טקסט',
   },
   sans: {
     family: 'Assistant',
@@ -222,10 +226,16 @@ export const typeScale = [
   { step: 3, name: 'h3', min: 31, max: 51, leading: 1.08, tracking: '-0.005em', use: 'כותרת משנה' },
   { step: 4, name: 'h2', min: 39, max: 72, leading: 1.02, tracking: '-0.01em', use: 'כותרת מקטע' },
   { step: 5, name: 'h1', min: 49, max: 102, leading: 0.98, tracking: '-0.015em', use: 'כותרת עמוד' },
-  { step: 6, name: 'display', min: 61, max: 144, leading: 0.94, tracking: '-0.02em', use: 'גיבור · רגע החתימה' },
+  { step: 6, name: 'display', min: 61, max: 144, leading: 0.94, tracking: '-0.02em', use: 'מסך הפתיחה · רגע החתימה' },
 ] as const;
 
 export type TypeStepName = (typeof typeScale)[number]['name'];
+
+/**
+ * Poster: the one hero headline per page. Deliberately outside the nine-step
+ * UI scale (which stays closed); still ≤ 2.5× min→max so zoom keeps working.
+ */
+export const posterType = { name: 'poster', min: 88, max: 220, leading: 0.9, tracking: '-0.025em' } as const;
 
 /** Sun mode: nothing smaller than 15px under a noon sky. */
 export const sunTypeFloor: Partial<Record<TypeStepName, [number, number]>> = {
@@ -281,7 +291,7 @@ export const layout = {
     { from: 1024, margin: 48, gutter: 24, columns: 12, label: 'דסקטופ' },
     { from: 1280, margin: 64, gutter: 24, columns: 12, label: 'רחב' },
   ],
-  section: { mobile: 80, tablet: 128, desktop: 160 },
+  section: { mobile: 80, tablet: 112, desktop: 128 },
 } as const;
 
 export const radii = {
@@ -298,7 +308,7 @@ export const elevations = [
   { name: 'raised', varName: 'elevRaised', he: 'מורם', use: 'כרטיסים, שורות פעילות' },
   { name: 'float', varName: 'elevFloat', he: 'צף', use: 'תפריטים, טוסטים, מגנטי' },
   { name: 'overlay', varName: 'elevOverlay', he: 'שכבה', use: 'מודאלים, גיליונות' },
-  { name: 'inset', varName: 'elevInset', he: 'שקוע', use: 'שדות, בארות נתונים' },
+  { name: 'inset', varName: 'elevInset', he: 'שקוע', use: 'שדות קלט, תאים שקועים' },
 ] as const;
 
 /** Emissive glows – light as information (water = blue light). */

@@ -8,7 +8,7 @@ export function SkipLink({ href = '#main' }: { href?: string }) {
   );
 }
 
-export const DEMO_BADGE_TEXT = 'קונספט של Kikkey – לא האתר הרשמי של המשביר לחקלאי';
+export const DEMO_BADGE_TEXT = 'קונספט של Kikkey – לא האתר הרשמי של המשביר לחקלאי';
 
 export function DemoBadge() {
   return (

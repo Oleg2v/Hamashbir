@@ -3,7 +3,8 @@ import { cn } from '@/lib/cn';
 /**
  * Concept mark: a seed split into two cotyledons above the soil line.
  * (Stage 1's preloader morphs a seed into exactly this shape.)
- * Not the client's registered logo – a pitch-concept lockup.
+ * Not the client's registered logo — a pitch-concept lockup, labelled as
+ * such in the footer.
  */
 export function SproutMark({ size = 32, className }: { size?: number; className?: string }) {
   return (
@@ -24,13 +25,18 @@ export function SproutMark({ size = 32, className }: { size?: number; className?
   );
 }
 
+/**
+ * The client's full name stays together ("המשביר" alone is how Israelis say
+ * the department-store chain). Real spaces between the parts, so the visible
+ * text is the accessible name (WCAG 2.5.3).
+ */
 export function Wordmark({ className, compact = false }: { className?: string; compact?: boolean }) {
   return (
     <span className={cn('inline-flex items-center gap-3 text-ink', className)}>
       <SproutMark size={compact ? 28 : 34} />
       <span className="flex flex-col leading-none">
-        <span className="font-display text-lead leading-none">המשביר</span>
-        {compact ? null : <span className="mt-1 text-micro font-bold leading-none text-ink-2">לחקלאי · העונה שלך</span>}
+        <span className="font-display text-lead leading-none whitespace-nowrap">המשביר לחקלאי</span>{' '}
+        {compact ? null : <span className="mt-1 text-micro font-bold leading-none text-ink-2">העונה שלך</span>}
       </span>
     </span>
   );

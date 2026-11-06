@@ -1,8 +1,8 @@
 import type { Metadata, Viewport } from 'next';
 import { Assistant, IBM_Plex_Mono, Suez_One } from 'next/font/google';
 import { DemoBadge, SkipLink } from '@/components/ui/chrome';
-import { sunModeInitScript } from '@/components/ui/SunModeToggle';
 import { ToastProvider } from '@/components/ui/Toast';
+import { headScript, THEME_COLOR } from '@/lib/sun-mode';
 import './globals.css';
 
 const suez = Suez_One({
@@ -43,7 +43,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: '#1D1813',
+  themeColor: THEME_COLOR.default,
   colorScheme: 'light',
 };
 
@@ -56,7 +56,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       suppressHydrationWarning
     >
       <head>
-        <script dangerouslySetInnerHTML={{ __html: sunModeInitScript }} />
+        <script dangerouslySetInnerHTML={{ __html: headScript }} />
       </head>
       <body>
         <SkipLink />

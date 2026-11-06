@@ -3,6 +3,7 @@ import { Ashushit } from '@/components/illustrations/Ashushit';
 import { SeasonParcels } from '@/components/illustrations/SeasonParcels';
 import { StageIcon } from '@/components/illustrations/StageIcons';
 import { stages } from '@/design/tokens';
+import { ComponentsSection } from '../../style-tile/_parts/ComponentsSection';
 import { MotionSection } from '../../style-tile/_parts/MotionSection';
 import { TypeSection } from '../../style-tile/_parts/TypeSection';
 
@@ -64,6 +65,7 @@ const parts: Record<string, () => React.ReactNode> = {
       </div>
     </div>
   ),
+  components: () => <ComponentsSection />,
   motion: () => <MotionSection />,
   type: () => <TypeSection />,
 };

@@ -15,6 +15,7 @@ import {
   layout,
   ndvi,
   palette,
+  posterType,
   radii,
   spring,
   stagger,
@@ -62,6 +63,9 @@ ${indent([
     if (s.tracking !== '0') lines.push(`--text-${s.name}--letter-spacing: ${s.tracking};`);
     return lines;
   }),
+  `--text-${posterType.name}: ${fluidClamp(posterType.min, posterType.max)};`,
+  `--text-${posterType.name}--line-height: ${posterType.leading};`,
+  `--text-${posterType.name}--letter-spacing: ${posterType.tracking};`,
   '',
   '--radius-*: initial;',
   ...Object.entries(radii).map(([k, v]) => `--radius-${k}: ${v.px === 9999 ? '9999px' : px(v.px)};`),
@@ -70,6 +74,10 @@ ${indent([
   '--ease-*: initial;',
   ...Object.entries(easings).map(([k, v]) => `--ease-${k}: ${bezierCss(v.bezier)};`),
   `--ease-spring: ${spring.css};`,
+  '',
+  "/* Tailwind's bare transition utilities use these: keep them on-token. */",
+  `--default-transition-duration: ${durations.fast.ms}ms;`,
+  `--default-transition-timing-function: ${bezierCss(easings['out-quint'].bezier)};`,
 ])}
 }`);
 

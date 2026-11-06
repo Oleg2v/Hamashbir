@@ -11,7 +11,9 @@
     "predev": "npm run tokens",
     "prebuild": "npm run tokens",
     "typecheck": "tsc --noEmit",
-    "lint:rtl": "node scripts/check-rtl.mjs"
+    "lint:rtl": "node scripts/check-rtl.mjs",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "dependencies": {
     "next": "15.5.29",
@@ -27,6 +29,7 @@
     "axe-core": "^4.14.0",
     "eslint": "^9",
     "eslint-config-next": "15.5.29",
+    "prettier": "^3.9.10",
     "tailwindcss": "^4",
     "tsx": "^4.23.15",
     "typescript": "^5"

@@ -94,15 +94,35 @@ export function mixOklab(a: string, b: string, t: number) {
   return fromOklab([x[0] + (y[0] - x[0]) * t, x[1] + (y[1] - x[1]) * t, x[2] + (y[2] - x[2]) * t]);
 }
 
-/** Sample a ramp of { at, hex } stops at value v ∈ [0, 1]. */
+/**
+ * Mix two hex colours in OKLCH along the shorter hue arc — the same space as
+ * CSS `linear-gradient(in oklch, …)`, so sampled tiles match the CSS ramp.
+ */
+export function mixOklch(a: string, b: string, t: number) {
+  const [L1, A1, B1] = toOklab(a);
+  const [L2, A2, B2] = toOklab(b);
+  const C1 = Math.hypot(A1, B1);
+  const C2 = Math.hypot(A2, B2);
+  const H1 = Math.atan2(B1, A1);
+  let H2 = Math.atan2(B2, A2);
+  let dH = H2 - H1;
+  if (dH > Math.PI) dH -= 2 * Math.PI;
+  if (dH < -Math.PI) dH += 2 * Math.PI;
+  H2 = H1 + dH * t;
+  const L = L1 + (L2 - L1) * t;
+  const C = C1 + (C2 - C1) * t;
+  return fromOklab([L, C * Math.cos(H2), C * Math.sin(H2)]);
+}
+
+/** Sample a ramp of { at, hex } stops at value v (flat outside the end stops), in OKLCH. */
 export function sampleRamp(stops: ReadonlyArray<{ at: number; hex: string }>, v: number) {
-  const t = Math.min(1, Math.max(0, v));
+  if (v <= stops[0].at) return stops[0].hex.toUpperCase();
   for (let i = 1; i < stops.length; i++) {
-    if (t <= stops[i].at) {
+    if (v <= stops[i].at) {
       const a = stops[i - 1];
       const b = stops[i];
-      return mixOklab(a.hex, b.hex, (t - a.at) / (b.at - a.at));
+      return mixOklch(a.hex, b.hex, (v - a.at) / (b.at - a.at));
     }
   }
-  return stops[stops.length - 1].hex;
+  return stops[stops.length - 1].hex.toUpperCase();
 }
