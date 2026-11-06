@@ -20,7 +20,7 @@ export const palette = {
   sprout: { hex: '#B7E04A', he: 'נבט', en: 'Sprout', role: 'צבע ההדגשה הראשי · כפתור פעולה על אדמה' },
   water: { hex: '#3FA9F5', he: 'מים', en: 'Water Blue', role: 'השקיה, ורק השקיה' },
   harvest: { hex: '#E2483A', he: 'קטיף', en: 'Harvest Red', role: 'פרי, שגיאה, שלב הקטיף' },
-  wheat: { hex: '#E6C66E', he: 'חיטה', en: 'Wheat', role: 'אריזה, שער האגרונום' },
+  wheat: { hex: '#E6C66E', he: 'חיטה', en: 'Wheat', role: 'שלב האריזה, קרטון' },
 } as const;
 
 export type PaletteKey = keyof typeof palette;
@@ -234,7 +234,7 @@ export type TypeStepName = (typeof typeScale)[number]['name'];
  * Poster: the one hero headline per page. Deliberately outside the nine-step
  * UI scale (which stays closed); still ≤ 2.5× min→max so zoom keeps working.
  */
-export const posterType = { name: 'poster', min: 88, max: 220, leading: 0.9, tracking: '-0.025em' } as const;
+export const posterType = { name: 'poster', min: 128, max: 220, leading: 0.9, tracking: '-0.025em' } as const;
 
 /** Sun mode: nothing smaller than 15px under a noon sky. */
 export const sunTypeFloor: Partial<Record<TypeStepName, [number, number]>> = {

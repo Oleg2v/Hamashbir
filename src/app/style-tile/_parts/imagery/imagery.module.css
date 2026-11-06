@@ -134,12 +134,26 @@
     color: color-mix(in oklab, var(--color-paper) 78%, var(--color-soil));
   }
 
+  /* plates never wrap (sun-mode type is larger), so they never grow into each other */
+  .plate > span {
+    white-space: nowrap;
+  }
+
   /* map furniture pinned to a corner rather than to the ground */
   .corner {
     position: absolute;
     z-index: 2;
     inset-block-end: 0.75rem;
     inset-inline-start: 0.75rem;
+  }
+
+  /* on a phone the photo is small: map furniture moves to the opposite corner,
+     clear of the pinned plates */
+  @media (max-width: 40rem) {
+    .corner {
+      inset-inline-start: auto;
+      inset-inline-end: 0.75rem;
+    }
   }
 
   .corner::before {
@@ -187,8 +201,9 @@
     --w: calc(var(--bw) * 1.5);
   }
 
+  /* crop frames must read over white tunnel plastic too: heavier line */
   .crop {
-    --w: calc(var(--bw) * 1.5);
+    --w: calc(var(--bw) * 3);
   }
 
   .crop43 {
@@ -197,7 +212,7 @@
 
   /* dotted: round caps on near-zero dashes */
   .crop11 {
-    --w: calc(var(--bw) * 2.5);
+    --w: calc(var(--bw) * 3.5);
     stroke-dasharray: 0.5 6;
   }
 

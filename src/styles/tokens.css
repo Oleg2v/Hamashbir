@@ -39,7 +39,7 @@
   --text-display: clamp(3.8125rem, 2.0833rem + 7.6852vw, 9rem);
   --text-display--line-height: 0.94;
   --text-display--letter-spacing: -0.02em;
-  --text-poster: clamp(5.5rem, 2.75rem + 12.2222vw, 13.75rem);
+  --text-poster: clamp(8rem, 6.0833rem + 8.5185vw, 13.75rem);
   --text-poster--line-height: 0.9;
   --text-poster--letter-spacing: -0.025em;
 

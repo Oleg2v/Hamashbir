@@ -264,8 +264,11 @@ function OrderTable() {
               <span className="font-medium">
                 <Num>{formatNumber(l.qty!)}</Num>
               </span>
-              {/* narrow figure: the unit sits under its number instead of in its own column */}
-              <span className="block text-micro text-ink-2 @sm:hidden">{l.unit}</span>
+              {/* narrow figure: the unit stays on its number's line (no-break space), never under it */}
+              <span className="text-micro text-ink-2 @sm:hidden">
+                {'\u00a0'}
+                {l.unit}
+              </span>
             </td>
             <td className={cn('w-[1%] whitespace-nowrap py-2 ps-2 pe-3 text-start text-ink-2', unitCol)}>{l.unit}</td>
             <td className={cn('w-[1%] whitespace-nowrap py-2 ps-2 pe-3 text-start text-ink-2', guide, unitPriceCol)}>

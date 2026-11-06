@@ -985,7 +985,7 @@ function Legend() {
       </div>
       <div className={css.ndvi}>
         <p className="text-micro text-ink-2">
-          מדד צמחייה <Num>NDVI</Num> · מאדמה חשופה לחופה מלאה
+          מדד צמחייה <Num>NDVI</Num> · מתחת לרשת · מכויל · מאדמה חשופה לחופה מלאה
         </p>
         <div className={css.gauge}>
           {marks.map((s) => (

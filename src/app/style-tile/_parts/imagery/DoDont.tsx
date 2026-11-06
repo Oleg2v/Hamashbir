@@ -36,10 +36,10 @@ function List({
       {items.map((it) => (
         <li
           key={it.head}
-          className="grid gap-x-4 gap-y-2 border-t-(length:--bw) border-line py-4 sm:grid-cols-[6rem_1fr] sm:items-baseline"
+          className="grid gap-x-4 gap-y-1 border-t-(length:--bw) border-line py-3 sm:grid-cols-[6rem_1fr] sm:items-baseline"
         >
           <Verdict ok={ok} />
-          <p className="text-body">
+          <p className="text-caption">
             <span className="font-bold">{it.head}. </span>
             <span className="text-ink-2">{it.body}</span>
           </p>

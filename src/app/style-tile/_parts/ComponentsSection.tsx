@@ -41,8 +41,8 @@ const states = [
 ] as const;
 
 const variants = [
-  { key: 'primary', he: 'ראשי', label: 'בנו תוכנית עונה' },
-  { key: 'secondary', he: 'משני', label: 'שלחו לאגרונום' },
+  { key: 'primary', he: 'ראשי', label: 'הזמינו' },
+  { key: 'secondary', he: 'משני', label: 'שלחו' },
   { key: 'ghost', he: 'שקט', label: 'ביטול' },
   { key: 'icon', he: 'אייקון', label: '' },
 ] as const;
@@ -61,7 +61,7 @@ function ButtonMatrix() {
             <span>{v.he}</span>
             <Num className="text-micro font-normal text-ink-3">btn--{v.key}</Num>
           </p>
-          <ul className="grid grid-cols-1 items-start gap-x-6 gap-y-5 min-[26rem]:grid-cols-2 sm:grid-cols-3 xl:grid-cols-6">
+          <ul className="grid grid-cols-2 items-start gap-x-6 gap-y-5 sm:grid-cols-3 xl:grid-cols-6">
             {states.map((s) => (
               <li key={s.key} className="grid justify-items-start gap-2" inert={s.key !== 'rest' || undefined}>
                 <Button
@@ -86,22 +86,29 @@ function ButtonMatrix() {
 
 function ButtonsOnSoil() {
   return (
-    <div data-surface="soil" className="grid gap-8 rounded-xl p-6 sm:p-8 lg:grid-cols-12 lg:items-center lg:p-12">
+    <div
+      data-surface="soil"
+      className="relative grid gap-8 rounded-xl p-6 sm:p-8 lg:grid-cols-12 lg:items-center lg:p-12"
+    >
       <div className="grid gap-3 lg:col-span-4">
-        <h4 className="font-display text-title">על אדמה</h4>
+        <h4 className="font-display text-title">
+          על אדמה<span className="hidden sun:inline"> · במצב שמש הוא לבן</span>
+        </h4>
         <p className="max-w-[44ch] text-caption text-ink-2">
           <NumText>
-            {`העיגול בקצה הכפתור הוא זרע: בריחוף או בפוקוס הוא נובט וממלא את הכפתור תוך 400ms. החץ פונה שמאלה${NB}– קדימה, בעברית.`}
+            {`העיגול בקצה הכפתור הוא זרע: בריחוף או בפוקוס הוא נובט וממלא את הכפתור תוך 400ms. החץ פונה שמאלה${NB}– קדימה, בעברית. פעולה ראשית אחת בכל מסך.`}
           </NumText>
         </p>
       </div>
       <div className="flex flex-wrap items-center gap-4 lg:col-span-8">
         <Button size="lg">בנו תוכנית עונה</Button>
-        <Button>הזמינו את שלב 1</Button>
         <Button variant="secondary" size="lg">
           כמו בעונה שעברה
         </Button>
+        <Button variant="secondary">הזמינו את שלב 1</Button>
         <Button variant="ghost">לכל הסניפים</Button>
+      </div>
+      <div className="absolute end-4 top-4 sm:end-6 sm:top-6">
         <Button variant="icon" aria-label="סגירה">
           <CloseIcon size={20} strokeWidth={2} />
         </Button>
@@ -395,7 +402,7 @@ const stockChip: Record<PlanLine['stock'], { tone: ChipTone; he: string }> = {
   in: { tone: 'in', he: 'במלאי' },
   low: { tone: 'low', he: 'מלאי נמוך' },
   out: { tone: 'out', he: 'אזל' },
-  gated: { tone: 'neutral', he: 'אחרי אישור' },
+  gated: { tone: 'neutral', he: 'לפי אישור' },
 };
 
 const columns: ReadonlyArray<Column<PlanLine>> = [
@@ -457,7 +464,12 @@ const columns: ReadonlyArray<Column<PlanLine>> = [
   {
     key: 'stock',
     header: `מלאי ב${demoFarm.branch.name}`,
-    cell: (r) => <Chip tone={stockChip[r.stock].tone}>{stockChip[r.stock].he}</Chip>,
+    cell: (r) =>
+      r.stock === 'gated' ? (
+        <span className="cell-muted">{stockChip.gated.he}</span>
+      ) : (
+        <Chip tone={stockChip[r.stock].tone}>{stockChip[r.stock].he}</Chip>
+      ),
   },
   {
     key: 'price',
@@ -524,7 +536,7 @@ function Toasts() {
           <span>ארבעת הטונים · דוגמאות סטטיות</span>
           <DemoTag />
         </p>
-        <ul className="grid items-start gap-4 lg:grid-cols-2" inert>
+        <ul className="grid max-w-[28rem] gap-4 lg:ms-auto" inert>
           <li>
             <ToastCard
               isStatic
@@ -599,8 +611,10 @@ export function ComponentsSection() {
         </Block>
 
         <Block title="כרטיס" note="מוצר על נייר · שלב בתוכנית על אדמה · סניף">
-          <div className="grid items-start gap-(--gutter) md:grid-cols-2 xl:grid-cols-3">
-            <ProductCard />
+          <div className="grid items-start gap-(--gutter) md:grid-cols-[5fr_7fr]">
+            <div className="md:row-span-2">
+              <ProductCard />
+            </div>
             <StageCard />
             <BranchCard />
           </div>

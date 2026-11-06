@@ -137,7 +137,7 @@ const weekly = [0.12, 0.15, 0.22, 0.33, 0.45, 0.56, 0.64, 0.71, 0.77, 0.82, 0.84
 const coverage = [
   { label: 'שלוחת טפטוף 16 מ״מ', v: 0.86 },
   { label: 'קרטון ייצוא לפלפל, 5 ק״ג', v: 0.48 },
-  { label: 'שתילי פלפל, מגש 128', v: 0.17 },
+  { label: 'מסנן דיסקים 2״', v: 0.17 },
 ];
 
 /** A label pinned to a value on the ramp: centred, except at the two ends. */
@@ -429,7 +429,10 @@ export function PaletteSection() {
           <Ndvi />
         </Block>
 
-        <Block title="עמוד השדרה של העונה" note="חמישה שלבים, צבע אחד לכל שלב, בכל מסך">
+        <Block
+          title="עמוד השדרה של העונה"
+          note="חמישה שלבים, צבע אחד לכל שלב, בכל מסך. שם השלב לפי הגידול: זריעה לזרע, שתילה לשתיל."
+        >
           <SeasonSpine />
         </Block>
 

@@ -127,7 +127,7 @@ function Specs() {
         </div>
         <p className="text-micro text-ink-2">
           לצילום רגיל אין ערוץ אינפרא־אדום, ולכן כאן המדד מחושב מהפיקסלים:{' '}
-          <Num>
+          <Num className="whitespace-nowrap">
             {ndviProxy.k} × (2G − R − B) + {ndviProxy.c}
           </Num>
           , מכויל כך שאדמה חשופה יושבת סביב <Num>{bareSoil.at}</Num> וחופה צפופה סביב{NB}
@@ -163,13 +163,13 @@ function NdviPair() {
   return (
     <div className="grid gap-x-(--gutter) gap-y-8 lg:grid-cols-12 lg:items-start">
       <div className="grid content-start gap-3 lg:col-span-4">
-        <h4 className="text-lead font-extrabold">NDVI רק לשדה פתוח</h4>
+        <h4 className="text-lead font-extrabold">NDVI לא מעל ניילון</h4>
         <p className="text-body text-ink-2">
-          מעל מנהרה או בית רשת הלוויין קורא את היריעה, לא את הגידול שמתחתיה. במשק של בתי רשת המדד מוצג רק לחלקות
-          הפתוחות, ובית הרשת מסומן כשטח מכוסה.
+          מעל מנהרה או חממה הלוויין קורא את היריעה, לא את הגידול שמתחתיה{'\u00a0'}– שם המדד לא מוצג, והשטח מסומן כמכוסה.
+          רשת נגד חרקים עבירה לאור: מתחתיה המדד מוצג, תמיד עם התווית „מתחת לרשת · מכויל”.
         </p>
       </div>
-      <ul className="grid grid-cols-2 gap-x-(--gutter) gap-y-8 lg:col-span-8">
+      <ul className="grid grid-cols-2 gap-x-(--gutter) gap-y-8 lg:col-span-6 lg:col-start-7">
         {cases.map((c) => (
           <li key={c.head}>
             <figure className="grid content-start gap-3">

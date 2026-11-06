@@ -78,6 +78,7 @@ function Glows() {
             <path
               d="M4 26 C 70 6, 130 34, 190 18 S 290 10, 316 22"
               fill="none"
+              className="glow-halo"
               stroke="var(--color-water)"
               strokeOpacity="0.28"
               strokeWidth="10"
@@ -174,7 +175,10 @@ export function ShapeSection() {
           data-surface="soil"
           className="-mx-(--page-margin) rounded-none px-(--page-margin) py-12 sm:mx-0 sm:rounded-xl sm:px-8 lg:px-12"
         >
-          <Block title="עומק ואור על אדמה" note="הדגשה עליונה + צל עמוק; זוהר רק למים ולפעולה">
+          <Block
+            title="עומק ואור על אדמה"
+            note="הדגשה עליונה + צל עמוק; זוהר רק למים ולפעולה. במצב שמש: לבן, וקו במקום צל וזוהר."
+          >
             <div className="grid gap-12">
               <ElevationRow />
               <Glows />

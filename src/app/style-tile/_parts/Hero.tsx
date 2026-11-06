@@ -31,7 +31,7 @@ export function Hero() {
       id="hero"
       data-surface="soil"
       aria-labelledby="hero-title"
-      className="relative overflow-hidden pb-20 pt-28 lg:pb-28 lg:pt-32"
+      className="relative overflow-hidden pb-20 pt-28 lg:pb-28 lg:pt-24"
     >
       <div className="wrap">
         <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2 border-t border-line pt-4">
@@ -41,19 +41,19 @@ export function Hero() {
           </p>
         </div>
 
-        <h1 id="hero-title" className="mt-8 text-poster lg:mt-10">
-          העונה <span className="text-sprout-ink">שלך</span>
-        </h1>
-
-        <div className="mt-6 grid gap-x-(--gutter) lg:mt-8 lg:grid-cols-12">
-          <p className="max-w-[40ch] text-lead text-ink-2 lg:col-span-5 lg:col-start-8">
+        {/* poster across the measure; the blurb sits in the space the short word "שלך" leaves at inline-end */}
+        <div className="mt-8 grid items-end gap-x-(--gutter) gap-y-6 xl:grid-cols-12">
+          <h1 id="hero-title" className="text-poster xl:col-span-9">
+            העונה <span className="text-sprout-ink">שלך</span>
+          </h1>
+          <p className="max-w-[40ch] text-lead text-ink-2 xl:col-span-3 xl:pb-6">
             מערכת העיצוב של פורטל החקלאי: צבע, תמונה, טיפוגרפיה, מרווח, צורה, תנועה ורכיבים{NB}– לפני שורת קוד אחת של
             האפליקציה.
           </p>
         </div>
       </div>
 
-      <div className="wrap mt-12 lg:mt-16">
+      <div className="wrap mt-10 lg:mt-12">
         <SeasonParcels animate showLabels className="w-full" />
       </div>
 

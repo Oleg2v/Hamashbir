@@ -295,7 +295,7 @@ function Why({ children }: { children: ReactNode }) {
     <details className="group">
       <summary
         className={cn(
-          'absolute end-3 top-3 inline-flex min-h-(--target) min-w-(--target) cursor-pointer list-none items-center justify-center gap-1 rounded-full',
+          'mt-2 inline-flex min-h-(--target) min-w-(--target) cursor-pointer list-none items-center justify-center gap-1 rounded-full',
           'border-(length:--bw) border-line px-3 text-caption font-bold text-ink-2',
           'transition-colors duration-(--dur-fast) ease-out-quint hover:border-ink hover:text-ink',
           'group-open:border-ink group-open:text-ink [&::-webkit-details-marker]:hidden',
@@ -333,8 +333,8 @@ export function Rules() {
               spanCls[span],
             )}
           >
-            {/* room at inline-end for the "למה" summary */}
-            <h4 className="flex items-baseline gap-3 pe-20 font-sans text-lead font-extrabold">
+            {/* titles reserve two lines, so the panes start level across a row */}
+            <h4 className="flex items-baseline gap-3 font-sans text-lead font-extrabold sm:min-h-[2lh]">
               {/* the list already numbers the rules for screen readers: no „1. 01” */}
               <span className="text-caption font-medium text-ink-3" aria-hidden="true">
                 <Num>{String(i + 1).padStart(2, '0')}</Num>

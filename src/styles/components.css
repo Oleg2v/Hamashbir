@@ -564,21 +564,15 @@
   }
 
   /* Agronomist gate — crop protection never ships without it. */
+  /* Drawn in ink (outline + shield) — wheat is the packing stage's colour. */
   .chip--agro {
-    background: color-mix(in oklab, var(--color-wheat) 34%, transparent);
+    background: transparent;
+    border: max(1.5px, var(--bw)) solid var(--ink);
     color: var(--ink);
-  }
-
-  :root[data-theme='sun'] .chip--agro {
-    background: var(--color-wheat);
   }
 
   .chip--agro svg {
     flex: none;
-    color: var(--wheat-ink);
-  }
-
-  :root[data-theme='sun'] .chip--agro svg {
     color: var(--ink);
   }
 
@@ -987,7 +981,9 @@
   }
 
   .toast[data-tone='agro'] .toast__icon {
-    background: var(--color-wheat);
+    background: transparent;
+    box-shadow: inset 0 0 0 1.5px var(--ink);
+    color: var(--ink);
   }
 
   .toast[data-tone='error'] .toast__icon {
@@ -1275,5 +1271,14 @@
 
   .segmented__option:hover .segmented__chip {
     border-color: var(--ink);
+  }
+
+  /* Sun mode has no shadows: emissive glows become a plain ink outline. */
+  :root[data-theme='sun'] :is(.shadow-glow-sprout, .shadow-glow-water) {
+    box-shadow: 0 0 0 var(--bw) var(--ink);
+  }
+
+  :root[data-theme='sun'] .glow-halo {
+    display: none;
   }
 }

@@ -126,10 +126,10 @@ function CropFigure() {
 export function Crops() {
   return (
     <div className="grid gap-x-(--gutter) gap-y-8 lg:grid-cols-12 lg:items-start">
-      <div className="lg:col-span-7 lg:col-start-6 lg:row-start-1">
+      <div className="lg:col-span-6 lg:col-start-7 lg:row-start-1">
         <CropFigure />
       </div>
-      <div className="grid content-start gap-5 lg:col-span-4 lg:col-start-1 lg:row-start-1">
+      <div className="grid content-start gap-5 lg:col-span-5 lg:col-start-1 lg:row-start-1">
         <div className="grid gap-2">
           <h4 className="text-lead font-extrabold">חיתוכים</h4>
           <p className="text-body text-ink-2">שלושה יחסים בלבד, ותמיד מאותה נקודת מוקד.</p>

@@ -2,6 +2,9 @@
 @import '../styles/tokens.css';
 @import '../styles/components.css';
 
+/* `sun:` variant — style something only in מצב שמש. */
+@custom-variant sun (:root[data-theme='sun'] &);
+
 /*
  * Base layer. Everything reads semantic variables (see tokens.css), so a
  * `data-surface` attribute or sun mode re-themes any subtree.
@@ -62,6 +65,7 @@
   h3 {
     font-family: var(--font-display);
     font-weight: 400;
+    font-synthesis-weight: none;
     text-wrap: balance;
   }
 
@@ -116,8 +120,11 @@
     cursor: pointer;
   }
 
+  /* A <bdi dir="ltr"> number aligns like its RTL parent when it becomes a
+     block (grid/flex item) — not to its own left edge. */
   bdi {
     unicode-bidi: isolate;
+    text-align: match-parent;
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -190,6 +197,12 @@
 
   /* Mono at display sizes: every glyph has a 0.6em advance, so separators
      open wide gaps — tighten the run optically. */
+  /* Suez One ships one weight (400): never let the browser fake a bold. */
+  .font-display {
+    font-weight: 400;
+    font-synthesis-weight: none;
+  }
+
   .num-tight {
     letter-spacing: -0.05em;
   }

@@ -76,12 +76,16 @@ function GridFrames() {
               ))}
             </div>
           </div>
+          {/* three lines for every frame (one fact per line), so frames and captions align */}
           <figcaption className="grid gap-1 text-caption">
-            <span className="font-bold">
+            <span className="font-bold whitespace-nowrap">
               {f.label} · <Num>{f.w}</Num>
             </span>
-            <span className="text-ink-2">
-              <NumText>{`${f.columns} עמודות · שוליים ${f.margin} · מרווח ${f.gutter}`}</NumText>
+            <span className="whitespace-nowrap text-ink-2">
+              <NumText>{`${f.columns} עמודות`}</NumText>
+            </span>
+            <span className="whitespace-nowrap text-ink-2">
+              <NumText>{`שוליים ${f.margin} · מרווח ${f.gutter}`}</NumText>
             </span>
           </figcaption>
         </figure>

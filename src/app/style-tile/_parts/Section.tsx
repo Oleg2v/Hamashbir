@@ -10,7 +10,7 @@ import { cn } from '@/lib/cn';
 export const route = {
   palette: { num: '01', branch: 'קריית שמונה', coords: '33.21°N 35.57°E' },
   imagery: { num: '02', branch: 'אבני איתן', coords: '32.82°N 35.77°E' },
-  type: { num: '03', branch: 'מרלו״ג מגדל העמק', coords: '32.67°N 35.24°E' },
+  type: { num: '03', branch: 'עמק יזרעאל', coords: '32.67°N 35.24°E' },
   space: { num: '04', branch: 'בנימינה', coords: '32.52°N 34.95°E' },
   shape: { num: '05', branch: 'בית שאן', coords: '32.50°N 35.50°E' },
   motion: { num: '06', branch: 'השרון (תל מונד)', coords: '32.25°N 34.92°E' },
@@ -95,12 +95,10 @@ export function Block({
 }) {
   return (
     <div className={cn('grid min-w-0 gap-8 [&>*]:min-w-0', className)}>
-      <div className="flex flex-wrap items-end justify-between gap-x-8 gap-y-4">
-        <div className="grid max-w-[46rem] gap-2">
-          <h3 className="text-h3">{title}</h3>
-          {note ? <p className="text-caption text-ink-2">{note}</p> : null}
-        </div>
-        {action ? <div className="flex flex-wrap items-center gap-3">{action}</div> : null}
+      <div className="grid max-w-[46rem] justify-items-start gap-2">
+        <h3 className="text-h3">{title}</h3>
+        {note ? <p className="text-caption text-ink-2">{note}</p> : null}
+        {action ? <div className="mt-2 flex flex-wrap items-center gap-3">{action}</div> : null}
       </div>
       {children}
     </div>
