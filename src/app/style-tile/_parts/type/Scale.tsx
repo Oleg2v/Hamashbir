@@ -138,8 +138,9 @@ function UseLine({ use, clamp }: { use: string; clamp: string }) {
   );
 }
 
+// minmax(0, 1fr) below lg: one long value never widens the row (or the page) at 200% text
 const row =
-  'grid gap-x-(--gutter) gap-y-2 border-t-(length:--bw) py-4 lg:grid-cols-12 lg:items-baseline lg:gap-y-1 lg:py-3';
+  'grid grid-cols-[minmax(0,1fr)] gap-x-(--gutter) gap-y-2 border-t-(length:--bw) py-4 lg:grid-cols-12 lg:items-baseline lg:gap-y-1 lg:py-3';
 
 function StepRow({ s }: { s: (typeof typeScale)[number] }) {
   const id = `type-sample-${s.name}`;
@@ -225,7 +226,7 @@ function SunStrip() {
   return (
     <div
       style={sunPreview}
-      className="grid gap-x-(--gutter) gap-y-2 rounded-lg border-(length:--bw) border-ink bg-canvas p-4 text-ink sm:p-6 lg:grid-cols-12 lg:items-center"
+      className="grid grid-cols-[minmax(0,1fr)] gap-x-(--gutter) gap-y-2 rounded-lg border-(length:--bw) border-ink bg-canvas p-4 text-ink sm:p-6 lg:grid-cols-12 lg:items-center"
     >
       <h4 className="font-display text-title font-normal lg:col-span-6">
         אין טקסט קטן מ־<Num mono={false}>{SUN_FLOOR}px</Num>&nbsp;תחת שמש של צהריים.
@@ -240,8 +241,8 @@ function SunStrip() {
 
 export function Scale() {
   return (
-    <div className="grid gap-10">
-      <div className="grid gap-x-(--gutter) gap-y-8 lg:grid-cols-12">
+    <div className="grid grid-cols-[minmax(0,1fr)] gap-10">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-x-(--gutter) gap-y-8 lg:grid-cols-12">
         <div className="grid content-start gap-4 lg:col-span-5">
           <h4 className="font-display text-title font-normal">סולם אחד ושני קצוות.</h4>
           <p className="text-body text-ink-2">ביניהם כל שלב גדל בקו ישר, כך שאין קפיצות בין נייד לדסקטופ.</p>
@@ -274,7 +275,7 @@ export function Scale() {
             </li>
           </ul>
         </div>
-        <figure className="grid content-start gap-4 self-start rounded-lg border-(length:--bw) border-line bg-surface p-4 sm:p-6 lg:col-span-7">
+        <figure className="grid min-w-0 grid-cols-[minmax(0,1fr)] content-start gap-4 self-start rounded-lg border-(length:--bw) border-line bg-surface p-4 sm:p-6 lg:col-span-7">
           <figcaption className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
             <span className="text-caption font-bold">הסולם נושם עם החלון</span>
             <span className="text-micro text-ink-2">שנו את רוחב החלון&nbsp;– הסמן וערכי „עכשיו” זזים איתו</span>

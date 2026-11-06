@@ -72,7 +72,12 @@ function DisplaySpecimen() {
             <>
               {/* the product's own opening line (the brief, verbatim), at the top step of the scale;
                   the page's one poster headline sits outside the scale (see the scale's footnote row) */}
-              <p className="font-display text-display text-balance">
+              {/* 30cqi keeps the longest word („מתחילה”, 3.2em) inside the column; it only binds at 200% text
+                  on a phone – everywhere else the display step wins */}
+              <p
+                className="font-display text-display text-balance"
+                style={{ fontSize: 'min(var(--text-display), 30cqi)' }}
+              >
                 העונה <span className="text-sprout-ink">שלך</span> מתחילה כאן
               </p>
               <p className="mt-4 text-caption text-ink-2">
@@ -186,7 +191,8 @@ function SansSpecimen() {
 
 const dripCost = season.dripMeters * prices.dripMeter;
 
-/* desktop: two rows of 12; mobile: 2 columns, short values packed densely */
+/* desktop: two rows of 12 (lg, and only while the article holds 54rem – so at 200% text the strip
+   falls back to 2 columns instead of scrolling); mobile: 2 columns, short values packed densely */
 const tiles: Array<{ label: string; value: ReactNode; span: string }> = [
   {
     label: 'שטח החלקה',
@@ -195,7 +201,7 @@ const tiles: Array<{ label: string; value: ReactNode; span: string }> = [
         <Num>{demoFarm.area}</Num>&nbsp;דונם
       </>
     ),
-    span: 'lg:col-span-3',
+    span: 'lg:@min-[54rem]:col-span-3',
   },
   {
     // the quantity, in the trade's own words (the product itself is „שלוחת טפטוף 16 מ״מ”)
@@ -205,20 +211,20 @@ const tiles: Array<{ label: string; value: ReactNode; span: string }> = [
         <Num>{formatNumber(season.dripMeters)}</Num>&nbsp;מ׳
       </>
     ),
-    span: 'col-span-2 lg:col-span-3',
+    span: 'col-span-2 lg:@min-[54rem]:col-span-3',
   },
-  { label: 'עלות הטפטוף', value: <Num>{formatMoney(dripCost)}</Num>, span: 'col-span-2 lg:col-span-4' },
-  { label: 'מדד צמחייה · מתחת לרשת', value: <Num>0.78</Num>, span: 'lg:col-span-2' },
-  { label: 'ממטיר העשושית', value: <Num>AR044</Num>, span: 'lg:col-span-2' },
+  { label: 'עלות הטפטוף', value: <Num>{formatMoney(dripCost)}</Num>, span: 'col-span-2 lg:@min-[54rem]:col-span-4' },
+  { label: 'מדד צמחייה · מתחת לרשת', value: <Num>0.78</Num>, span: 'lg:@min-[54rem]:col-span-2' },
+  { label: 'ממטיר העשושית', value: <Num>AR044</Num>, span: 'lg:@min-[54rem]:col-span-2' },
   // ״ is a strong RTL character: the LRM after it keeps "× 2" on its LTR side
-  { label: 'מסנן דיסקים', value: <Num>{'2״\u200E × 2'}</Num>, span: 'lg:col-span-2' },
+  { label: 'מסנן דיסקים', value: <Num>{'2״\u200E × 2'}</Num>, span: 'lg:@min-[54rem]:col-span-2' },
   // the section's own route stamp (03): the Jezreel Valley branch shares the Migdal HaEmek site
-  { label: 'סניף עמק יזרעאל', value: <Num>32.67°N 35.24°E</Num>, span: 'col-span-2 lg:col-span-5' },
+  { label: 'סניף עמק יזרעאל', value: <Num>32.67°N 35.24°E</Num>, span: 'col-span-2 lg:@min-[54rem]:col-span-5' },
   // the demo farm's branch and the hero's promise: ordered in the morning, picked up today
   {
     label: `איסוף היום ב${demoFarm.branch.name}`,
     value: <Num>{formatDate(new Date(2026, 10, 6))}</Num>,
-    span: 'col-span-2 lg:col-span-3',
+    span: 'col-span-2 lg:@min-[54rem]:col-span-3',
   },
 ];
 
@@ -306,7 +312,7 @@ const proof = ['11,111.11', '88,888.88', '40,141.01'];
 
 function MonoSpecimen() {
   return (
-    <article aria-labelledby="spec-mono" className={cn(card, 'dot-grid bg-sunken')}>
+    <article aria-labelledby="spec-mono" className={cn(card, '@container dot-grid bg-sunken')}>
       <SpecHeader
         id="spec-mono"
         index="ג׳"
@@ -331,7 +337,9 @@ function MonoSpecimen() {
         </span>
       </div>
 
-      <dl className="mt-4 grid grid-flow-row-dense grid-cols-2 gap-(--bw) overflow-hidden rounded-lg border-(length:--bw) border-line bg-line lg:grid-cols-12">
+      {/* tracks never shrink below their value: at 200% text the tiles keep every figure whole and
+          the strip scrolls sideways inside its frame instead of clipping (WCAG 1.4.4) */}
+      <dl className="mt-4 grid grid-flow-row-dense grid-cols-[repeat(2,minmax(min-content,1fr))] gap-(--bw) overflow-x-auto overflow-y-hidden overscroll-x-contain rounded-lg border-(length:--bw) border-line bg-line lg:@min-[54rem]:grid-cols-[repeat(12,minmax(min-content,1fr))]">
         {tiles.map((t) => (
           <div key={t.label} className={cn('grid min-w-0 content-between gap-3 bg-surface p-4', t.span)}>
             <dt className="text-caption text-ink-2">{t.label}</dt>
@@ -353,24 +361,26 @@ function MonoSpecimen() {
           </div>
         </figure>
 
-        <figure className="grid min-w-0 content-start gap-4 rounded-lg border-(length:--bw) border-line bg-surface p-4 sm:p-5 lg:col-span-5">
+        <figure className="grid min-w-0 grid-cols-[minmax(0,1fr)] content-start gap-4 rounded-lg border-(length:--bw) border-line bg-surface p-4 sm:p-5 lg:col-span-5">
           <figcaption className="grid gap-1">
             <span className="text-caption font-bold">למה מונו: אותם מספרים, שני גופנים</span>
             <span className="text-micro text-ink-2">
               באסיסטנט הספרות פרופורציונליות&nbsp;– במדידה <Num>1111</Num>&nbsp;צר בכ־<Num>8%</Num>&nbsp;מ־
-              <Num>8888</Num>,{/* a token never breaks at its own hyphen */}
-              ו־<Code className="whitespace-nowrap">tabular-nums</Code> לא משנה דבר: אין לגופן ספרות טבלאיות. לכן כל
-              מספר עובר לפלקס מונו.
+              <Num>8888</Num>,
+              {/* the token moves to the next line whole; it breaks at its hyphen only when wider than a line */}
+              ו־<Code className="inline-block">tabular-nums</Code> לא משנה דבר: אין לגופן ספרות טבלאיות. לכן כל מספר
+              עובר לפלקס מונו.
             </span>
           </figcaption>
-          <div className="grid grid-cols-2 gap-4">
+          {/* side by side while both columns fit, stacked when the text is large */}
+          <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,9rem),1fr))] gap-4">
             {(
               [
                 { name: 'Assistant', mono: false, ok: false },
                 { name: 'IBM Plex Mono', mono: true, ok: true },
               ] as const
             ).map((f) => (
-              <div key={f.name} className="grid min-w-0 content-start gap-3">
+              <div key={f.name} className="grid min-w-0 content-start gap-3 overflow-x-auto">
                 <p className="grid justify-items-start gap-2 text-micro">
                   <span lang="en" className="font-semibold">
                     {f.name}
@@ -397,7 +407,8 @@ function MonoSpecimen() {
 
 export function Specimens() {
   return (
-    <div className="grid gap-4">
+    // minmax(0, 1fr): one specimen's long content never widens the others (or the page)
+    <div className="grid grid-cols-[minmax(0,1fr)] gap-4">
       <DisplaySpecimen />
       <SansSpecimen />
       <MonoSpecimen />

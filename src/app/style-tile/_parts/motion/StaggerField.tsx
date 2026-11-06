@@ -197,8 +197,9 @@ export function StaggerField({ title, note, className }: { title: string; note?:
           <p className="text-micro text-ink-3">
             <code>
               <Num>
-                <span className="whitespace-nowrap">staggerDelay(i, n) =</span>{' '}
-                <span className="whitespace-nowrap">
+                {/* each half moves whole (inline-block); it wraps inside only at 200% text */}
+                <span className="inline-block">staggerDelay(i, n) =</span>{' '}
+                <span className="inline-block">
                   i × min({stagger.stepMs}, {stagger.maxTotalMs} / (n − 1))
                 </span>
               </Num>

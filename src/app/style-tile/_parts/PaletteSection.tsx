@@ -317,58 +317,62 @@ const surfaceNames: Record<SurfaceKey, string> = { paper: 'נייר', soil: 'א�
 function Matrix({ surface }: { surface: SurfaceKey }) {
   const set = surfaces[surface] as Record<SemanticKey, string>;
   const minRatio = Math.min(...inkRows.flatMap((r) => bgCols.map((c) => contrast(set[r.key], set[c.key]))));
+  // auto layout inside a scroller: at 200% text the columns keep their content and the
+  // table scrolls sideways within its panel instead of overprinting (WCAG 1.4.4)
   return (
-    <table className="w-full table-fixed border-separate border-spacing-0 text-caption">
-      <caption className="pb-3 text-start">
-        <span className="font-display text-title">{surfaceNames[surface]}</span>{' '}
-        <span className="text-micro text-ink-2">
-          · מינימום <Ratio value={minRatio} />
-        </span>
-      </caption>
-      <thead>
-        <tr>
-          <th scope="col" className="w-16 pb-2 text-start font-semibold text-ink-2 sm:w-20">
-            <span className="sr-only">צבע טקסט</span>
-          </th>
-          {bgCols.map((c) => (
-            <th key={c.key} scope="col" className="pb-2 text-start text-micro font-semibold text-ink-2">
-              {c.he}
+    <div className="table-wrap">
+      <table className="w-full border-separate border-spacing-0 text-caption">
+        <caption className="pb-3 text-start">
+          <span className="font-display text-title">{surfaceNames[surface]}</span>{' '}
+          <span className="text-micro text-ink-2">
+            · מינימום <Ratio value={minRatio} />
+          </span>
+        </caption>
+        <thead>
+          <tr>
+            <th scope="col" className="w-16 pb-2 text-start font-semibold text-ink-2 sm:w-20">
+              <span className="sr-only">צבע טקסט</span>
             </th>
-          ))}
-        </tr>
-      </thead>
-      <tbody>
-        {inkRows.map((r) => (
-          <tr key={r.key}>
-            <th scope="row" className="py-1 pe-2 text-start text-micro font-semibold text-ink-2">
-              <NumText>{r.he}</NumText>
-            </th>
-            {bgCols.map((c) => {
-              const ratio = contrast(set[r.key], set[c.key]);
-              const g = grade(ratio);
-              return (
-                <td key={c.key} className="p-0.5">
-                  <span
-                    className="flex min-h-11 items-center justify-between gap-1 rounded-sm px-2"
-                    style={{
-                      backgroundColor: set[c.key],
-                      color: set[r.key],
-                      boxShadow: surface === 'sun' ? `inset 0 0 0 1px ${surfaces.sun.ink}` : undefined,
-                    }}
-                  >
-                    <span className="hidden font-bold sm:inline">אב</span>
-                    <span className="text-end text-micro leading-tight">
-                      <Ratio value={ratio} />
-                      <span className="block font-semibold">{gradeLabel[g]}</span>
-                    </span>
-                  </span>
-                </td>
-              );
-            })}
+            {bgCols.map((c) => (
+              <th key={c.key} scope="col" className="pb-2 text-start text-micro font-semibold text-ink-2">
+                {c.he}
+              </th>
+            ))}
           </tr>
-        ))}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          {inkRows.map((r) => (
+            <tr key={r.key}>
+              <th scope="row" className="py-1 pe-2 text-start text-micro font-semibold text-ink-2">
+                <NumText>{r.he}</NumText>
+              </th>
+              {bgCols.map((c) => {
+                const ratio = contrast(set[r.key], set[c.key]);
+                const g = grade(ratio);
+                return (
+                  <td key={c.key} className="p-0.5">
+                    <span
+                      className="flex min-h-11 items-center justify-between gap-1 rounded-sm px-2"
+                      style={{
+                        backgroundColor: set[c.key],
+                        color: set[r.key],
+                        boxShadow: surface === 'sun' ? `inset 0 0 0 1px ${surfaces.sun.ink}` : undefined,
+                      }}
+                    >
+                      <span className="hidden font-bold sm:inline">אב</span>
+                      <span className="text-end text-micro leading-tight">
+                        <Ratio value={ratio} />
+                        <span className="block font-semibold">{gradeLabel[g]}</span>
+                      </span>
+                    </span>
+                  </td>
+                );
+              })}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 }
 
@@ -399,7 +403,7 @@ function RawColourRule() {
                 מלאי
               </text>
             </svg>
-            <span className="flex items-baseline justify-between gap-2 text-caption">
+            <span className="flex flex-wrap items-baseline justify-between gap-2 text-caption">
               <span className="font-semibold">{c.note}</span>
               <span className="inline-flex items-center gap-2">
                 <Verdict ok={c.ok} />
@@ -453,13 +457,13 @@ export function PaletteSection() {
 
         <Block title="מטריצת ניגודיות" note={<NumText>{'כל זוג טקסט לפחות 4.5:1 על המשטח שלו · WCAG 2.0 AA'}</NumText>}>
           <div className="grid gap-x-(--gutter) gap-y-12 lg:grid-cols-3">
-            <div className="rounded-lg border border-line p-4" data-surface="paper">
+            <div className="min-w-0 rounded-lg border border-line p-4" data-surface="paper">
               <Matrix surface="paper" />
             </div>
-            <div className="rounded-lg p-4" data-surface="soil">
+            <div className="min-w-0 rounded-lg p-4" data-surface="soil">
               <Matrix surface="soil" />
             </div>
-            <div className="rounded-lg border-2 border-black bg-white p-4 text-black">
+            <div className="min-w-0 rounded-lg border-2 border-black bg-white p-4 text-black">
               <Matrix surface="sun" />
             </div>
           </div>

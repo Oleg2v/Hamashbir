@@ -228,8 +228,9 @@ function StageCard() {
   const coverage = 0.86;
   return (
     <div data-surface="soil" className="card border-line">
+      {/* every row wraps: at 200% text nothing is cut by the card's rounded clip */}
       <CardBody className="gap-6 py-6">
-        <div className="flex items-center justify-between gap-4">
+        <div className="flex flex-wrap items-center justify-between gap-4">
           <p className="flex items-center gap-3 text-caption font-bold">
             <span className="grid size-10 place-items-center rounded-full bg-water text-soil" aria-hidden="true">
               <StageIcon stage="irrigate" size={22} />
@@ -244,7 +245,7 @@ function StageCard() {
           <DemoTag />
         </div>
         <div className="grid gap-1">
-          <p className="flex items-baseline gap-2">
+          <p className="flex flex-wrap items-baseline gap-x-2">
             <Num className="num-tight text-h2 font-medium leading-none">{formatNumber(season.dripMeters)}</Num>
             <span className="text-lead font-bold">מ׳</span>
           </p>
@@ -253,7 +254,7 @@ function StageCard() {
           </h4>
         </div>
         <div className="grid gap-2">
-          <div className="flex items-baseline justify-between gap-4 text-caption">
+          <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 text-caption">
             <span className="inline-flex items-center gap-2 font-semibold">
               <span className="size-2 rounded-full bg-ink" aria-hidden="true" />
               <span>

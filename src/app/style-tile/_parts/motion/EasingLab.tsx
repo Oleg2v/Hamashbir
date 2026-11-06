@@ -133,6 +133,26 @@ function CodeValue({ children, title }: { children: ReactNode; title?: string })
   );
 }
 
+/**
+ * Keyboard focus inside the swipeable row: bring the focused card fully into view (inside the
+ * row's scroll padding), or just the focused control when the card is wider than the row.
+ * Chrome alone scrolls only a fully hidden target, so a half-visible card stayed half off-screen.
+ */
+function revealFocused(e: React.FocusEvent<HTMLUListElement>) {
+  const row = e.currentTarget;
+  if (row.scrollWidth <= row.clientWidth) return; // the desktop grid does not scroll
+  const card = (e.target as HTMLElement).closest('li');
+  if (!card) return;
+  const pad = parseFloat(getComputedStyle(row).scrollPaddingInlineStart) || 0;
+  const box = row.getBoundingClientRect();
+  const lo = box.left + pad;
+  const hi = box.right - pad;
+  const cr = card.getBoundingClientRect();
+  const r = cr.width <= hi - lo ? cr : (e.target as HTMLElement).getBoundingClientRect();
+  const dx = r.left < lo ? r.left - lo : r.right > hi ? r.right - hi : 0;
+  if (dx) row.scrollBy({ left: dx, behavior: prefersReducedMotion() ? 'auto' : 'smooth' });
+}
+
 function CurveCard({ c, signal, pace }: { c: CurveSpec; signal: Signal; pace: Pace }) {
   const id = useId();
   const card = useRef<HTMLElement>(null);
@@ -216,6 +236,7 @@ function CurveCard({ c, signal, pace }: { c: CurveSpec; signal: Signal; pace: Pa
         </div>
         <Button
           variant="icon"
+          className="shrink-0"
           onClick={() => play(ms)}
           aria-label={`הפעלת העקומה ${c.token}`}
           aria-describedby={`${id}-readout`}
@@ -391,15 +412,17 @@ export function EasingLab({ title, note }: { title: string; note?: ReactNode }) 
         <ul
           className={cn(
             s.curveList,
-            // phones and tablets: one swipeable row, bleeding to the page edges
-            'grid snap-x snap-mandatory auto-cols-[min(85%,22rem)] grid-flow-col gap-(--gutter) overflow-x-auto overscroll-x-contain',
+            // phones and tablets: one swipeable row, bleeding to the page edges. No scroll snapping
+            // (it pulled a focused card back off-screen); cards grow with the text (15rem floor)
+            'grid auto-cols-[max(min(85%,22rem),15rem)] grid-flow-col gap-(--gutter) overflow-x-auto overscroll-x-contain',
             '-mx-(--page-margin) px-(--page-margin) scroll-px-(--page-margin) pb-2',
             // desktop: three columns
             'lg:mx-0 lg:grid-flow-row lg:grid-cols-3 lg:overflow-visible lg:px-0 lg:pb-0',
           )}
+          onFocus={revealFocused}
         >
           {curves.map((c) => (
-            <li key={c.key} className="row-span-4 grid min-w-0 snap-start grid-rows-subgrid gap-y-0">
+            <li key={c.key} className="row-span-4 grid min-w-0 grid-rows-subgrid gap-y-0">
               <CurveCard c={c} signal={signal} pace={pace} />
             </li>
           ))}

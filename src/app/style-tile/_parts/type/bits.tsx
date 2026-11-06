@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { Num } from '@/components/ui/Num';
 import { cn } from '@/lib/cn';
+import { NB } from '@/lib/typography';
 
 /**
  * Small typographic helpers for the type section.
@@ -22,10 +23,11 @@ export function RoleText({ children }: { children: string }) {
       {children.split(ROLE_PARTS).map((p, i) => {
         if (i % 2 === 0) return p;
         if (/^[a-z]/.test(p)) return <Code key={i}>{p}</Code>;
-        // a list is one token: it never breaks across lines
+        // a list is one token: it moves to the next line whole (inline-block); only when it is
+        // wider than the line (200% text) does it wrap, and then after a slash, never before one
         return (
-          <Num key={i} className="whitespace-nowrap">
-            {p}
+          <Num key={i} className="inline-block">
+            {p.replace(/\s+\/\s*/g, `${NB}/ `)}
           </Num>
         );
       })}

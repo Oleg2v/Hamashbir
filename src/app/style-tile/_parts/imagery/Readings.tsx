@@ -23,8 +23,11 @@ const canopy = ndvi.stops[ndvi.stops.length - 1];
 
 function SpecTitle({ n, children }: { n: string; children: ReactNode }) {
   return (
+    // the index is the photo tag's, shown for the eye; the heading's name is the treatment alone
     <h4 className="flex items-baseline gap-3 text-lead font-extrabold">
-      <Num className="text-caption font-medium text-ink-3">{n}</Num>
+      <Num className="text-caption font-medium text-ink-3" aria-hidden="true">
+        {n}
+      </Num>
       <span>{children}</span>
     </h4>
   );
@@ -61,7 +64,14 @@ function Bands() {
             className={cn(css.bandImg, b.treatment && css[b.treatment])}
             style={{ objectPosition: `${p.focus.x}% ${p.focus.y}%` }}
           />
-          <span className={cn(css.tag, css.tagStart, 'text-micro font-bold')}>
+          {/* the tag wraps inside its band at large text instead of being cut at the band edge */}
+          <span
+            className={cn(
+              css.tag,
+              css.tagStart,
+              'max-w-[calc(100%-1.5rem)] flex-wrap whitespace-normal text-micro font-bold',
+            )}
+          >
             <Num className={css.tagMuted}>{b.n}</Num>
             <span>{b.name}</span>
           </span>
@@ -126,7 +136,8 @@ function Specs() {
         </div>
         <p className="text-micro text-ink-2">
           לצילום רגיל אין ערוץ אינפרא־אדום, ולכן כאן המדד מחושב מהפיקסלים:{' '}
-          <Num className="whitespace-nowrap">
+          {/* inline-block: the formula moves to the next line whole; it wraps inside only at 200% text */}
+          <Num className="inline-block">
             {ndviProxy.k} × (2G − R − B) + {ndviProxy.c}
           </Num>
           , מכויל כך שאדמה חשופה יושבת סביב <Num>{bareSoil.at}</Num> וחופה צפופה סביב{NB}

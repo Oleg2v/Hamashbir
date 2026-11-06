@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useRef, type ReactNode, type RefObject } from 'react';
+import { useCallback, useEffect, useRef, type CSSProperties, type ReactNode, type RefObject } from 'react';
 import { DemoTag } from '@/components/ui/Chip';
 import { Num } from '@/components/ui/Num';
 import { coefficients, demoFarm, season } from '@/data/demo-farm';
@@ -25,13 +25,15 @@ function Figure({
   value,
   liveRef,
   className,
+  style,
 }: {
   value: number;
   liveRef: RefObject<HTMLSpanElement | null>;
   className?: string;
+  style?: CSSProperties;
 }) {
   return (
-    <Num className={cn(s.figure, className)} aria-hidden="true">
+    <Num className={cn(s.figure, className)} style={style} aria-hidden="true">
       <span className={s.figureGhost}>{formatNumber(value)}</span>
       <span ref={liveRef} className={s.figureLive}>
         {formatNumber(value)}
@@ -131,13 +133,20 @@ export function CountUp({ title, note, className }: { title: string; note?: Reac
           <DemoTag />
         </div>
 
-        <div className="grid gap-5">
+        {/* a size container: the display figure may shrink to fit it (34cqi ≈ "8,000" at 2.9em), which
+            only happens at 200% text on a phone – everywhere else the type scale wins */}
+        <div className="@container grid gap-5">
           {/* screen readers get the final value first, then the visible unit */}
           <p className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
             <span className="sr-only">
               <Num>{formatNumber(YIELD)}</Num>
             </span>
-            <Figure value={YIELD} liveRef={yieldRef} className="text-display font-normal" />
+            <Figure
+              value={YIELD}
+              liveRef={yieldRef}
+              className="text-display font-normal"
+              style={{ fontSize: 'min(var(--text-display), 34cqi)' }}
+            />
             <span className="text-lead text-ink-2">ק״ג לדונם</span>
           </p>
           <span className={s.yieldBar} aria-hidden="true">

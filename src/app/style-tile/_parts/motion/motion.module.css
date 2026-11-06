@@ -335,6 +335,8 @@
   :global(.card).curveCard {
     display: grid;
     grid-row: 1 / -1;
+    /* one column that never grows past the card: long code values wrap inside */
+    grid-template-columns: minmax(0, 1fr);
     grid-template-rows: subgrid;
     row-gap: 0;
   }
@@ -694,7 +696,10 @@
     --h: 3.5rem;
     position: relative;
     display: grid;
-    /* status · the field · readout — rows, so nothing overlaps in any theme */
+    /* status · the field · readout — rows, so nothing overlaps in any theme;
+       one column no wider than the stage, so at 200% text the button wraps
+       its label (and the zone, sized from it, follows) instead of being cut */
+    grid-template-columns: minmax(0, 1fr);
     grid-template-rows: auto minmax(11rem, 1fr) auto;
     gap: 0.75rem;
     padding-block: 0.75rem;

@@ -116,7 +116,8 @@ export function GlyphInspector({ lead }: { lead?: ReactNode }) {
 
   return (
     <div className="grid gap-x-(--gutter) gap-y-6 lg:grid-cols-12">
-      {lead ? <div className="min-w-0 lg:col-span-12 xl:col-span-7">{lead}</div> : null}
+      {/* a size container, so the lead line can cap its display size to the column (see Specimens) */}
+      {lead ? <div className="@container min-w-0 lg:col-span-12 xl:col-span-7">{lead}</div> : null}
 
       {/* ── anatomy ── */}
       <figure

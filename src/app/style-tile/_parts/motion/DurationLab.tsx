@@ -144,9 +144,10 @@ export function DurationLab({ title, note }: { title: string; note?: ReactNode }
             return (
               <li
                 key={k}
-                className="grid grid-cols-4 items-center gap-x-(--gutter) gap-y-3 border-b-(length:--bw) border-line py-4 sm:grid-cols-8 lg:grid-cols-12"
+                // phones: name | value (auto, so "1200ms" never overflows at 200% text) | the lane under both
+                className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-(--gutter) gap-y-3 border-b-(length:--bw) border-line py-4 sm:grid-cols-8 lg:grid-cols-12"
               >
-                <div className="col-span-3 grid gap-1">
+                <div className="col-span-1 grid gap-1 sm:col-span-3">
                   <p className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
                     <span className="text-body font-bold">{names[k]}</span>
                     <Token className="text-micro text-ink-3">--dur-{k}</Token>
@@ -156,7 +157,7 @@ export function DurationLab({ title, note }: { title: string; note?: ReactNode }
                 <p className="col-span-1 self-start text-end sm:self-center sm:text-start">
                   <Num className="text-body font-medium">{d.ms}ms</Num>
                 </p>
-                <div className="col-span-4 lg:col-span-8" aria-hidden="true">
+                <div className="col-span-2 sm:col-span-4 lg:col-span-8" aria-hidden="true">
                   <span className={s.lane} data-lane={d.ms} style={{ '--at': pct(d.ms) } as CSSProperties}>
                     <span className={s.laneBar} data-bar="" />
                     <span className={s.laneEnd} data-end="" />

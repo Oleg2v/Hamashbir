@@ -97,7 +97,8 @@ export function Block({
     <div className={cn('grid min-w-0 gap-8 [&>*]:min-w-0', className)}>
       <div className="grid max-w-[46rem] justify-items-start gap-2">
         <h3 className="text-h3">{title}</h3>
-        {note ? <p className="text-caption text-ink-2">{note}</p> : null}
+        {/* min-w-0 + anywhere: a long token in a note wraps instead of widening the page (200% text) */}
+        {note ? <p className="min-w-0 text-caption text-ink-2 [overflow-wrap:anywhere]">{note}</p> : null}
         {action ? <div className="mt-2 flex flex-wrap items-center gap-3">{action}</div> : null}
       </div>
       {children}

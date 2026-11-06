@@ -45,14 +45,15 @@ export function ViewportGauge({ minLabel, maxLabel }: { minLabel: React.ReactNod
           : null;
 
   return (
-    <div className="grid gap-4">
-      <div className="flex items-start justify-between gap-6">
+    <div className="grid grid-cols-[minmax(0,1fr)] gap-4">
+      {/* the two ends share a line while they fit; at large text the max end wraps under, still at inline-end */}
+      <div className="flex flex-wrap items-start justify-between gap-x-6 gap-y-3">
         <div className="grid gap-1">
           <Num className="text-title font-medium leading-none">{typeViewport.min}px</Num>
           {/* ratio on one line, its musical name on the next */}
           <span className="grid text-caption text-ink-2">{minLabel}</span>
         </div>
-        <div className="grid justify-items-end gap-1 text-end">
+        <div className="ms-auto grid justify-items-end gap-1 text-end">
           <Num className="text-title font-medium leading-none">{typeViewport.max}px</Num>
           <span className="grid justify-items-end text-caption text-ink-2">{maxLabel}</span>
         </div>
