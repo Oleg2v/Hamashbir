@@ -149,7 +149,17 @@ export function TileHeader() {
         )}
       >
         <div className="min-h-0 overflow-hidden">
-          <div ref={railRef} className="wrap section-rail" inert={railHidden || undefined}>
+          <div
+            ref={railRef}
+            className="wrap section-rail"
+            inert={railHidden || undefined}
+            // Chrome scrolls a focused chip into view only when it is fully
+            // hidden; a half-visible one stayed half off-screen
+            onFocus={(e) => {
+              const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+              e.target.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: reduce ? 'auto' : 'smooth' });
+            }}
+          >
             {keys.map((k) => (
               <a key={k} data-key={k} href={`#${k}`} aria-current={active === k ? 'true' : undefined}>
                 <Num className="text-micro text-ink-2">{route[k].num}</Num>

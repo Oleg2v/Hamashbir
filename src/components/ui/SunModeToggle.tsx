@@ -6,6 +6,13 @@ import { bezierCss, durations, easings } from '@/design/tokens';
 import { setThemeColor, SUN_STORAGE_KEY } from '@/lib/sun-mode';
 import { SunIcon } from './icons';
 
+/**
+ * The server cannot know the stored theme, so it renders aria-pressed="false".
+ * This runs as soon as the button is parsed – long before hydration on a slow
+ * phone – and copies the theme the head script already set onto the button.
+ */
+const SYNC_PRESSED = `(function(s){var b=s&&s.previousElementSibling;if(b)b.setAttribute('aria-pressed',String(document.documentElement.dataset.theme==='sun'))})(document.currentScript)`;
+
 type DocWithVT = Document & {
   startViewTransition?: (cb: () => void) => { ready: Promise<void> };
 };
@@ -71,14 +78,19 @@ export function SunModeToggle({ className }: { className?: string }) {
   };
 
   return (
-    <button
-      type="button"
-      className={['sun-toggle', className].filter(Boolean).join(' ')}
-      aria-pressed={on}
-      onClick={onClick}
-    >
-      <SunIcon size={20} strokeWidth={2} />
-      <span className="sun-toggle__label">מצב שמש</span>
-    </button>
+    <>
+      <button
+        type="button"
+        className={['sun-toggle', className].filter(Boolean).join(' ')}
+        aria-pressed={on}
+        onClick={onClick}
+        // the inline script below may already have set aria-pressed="true"
+        suppressHydrationWarning
+      >
+        <SunIcon size={20} strokeWidth={2} />
+        <span className="sun-toggle__label">מצב שמש</span>
+      </button>
+      <script dangerouslySetInnerHTML={{ __html: SYNC_PRESSED }} />
+    </>
   );
 }

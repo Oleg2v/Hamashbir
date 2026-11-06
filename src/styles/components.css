@@ -1181,12 +1181,15 @@
   }
 
   /* Section rail: the 01–08 navigation as a scrolling chip row below xl. */
+  /* No scroll snapping: it pulled a focused chip back off-screen after the
+     browser scrolled it into view. Scroll padding keeps the page margin
+     when a chip is scrolled to (focus, scroll-spy). */
   .section-rail {
     display: flex;
     gap: 0.5rem;
     overflow-x: auto;
     padding-block: 0.5rem 0.75rem;
-    scroll-snap-type: x proximity;
+    scroll-padding-inline: var(--page-margin);
     scrollbar-width: none;
   }
 
@@ -1207,7 +1210,6 @@
     font-size: var(--text-caption);
     font-weight: 600;
     text-decoration: none;
-    scroll-snap-align: start;
     white-space: nowrap;
   }
 
