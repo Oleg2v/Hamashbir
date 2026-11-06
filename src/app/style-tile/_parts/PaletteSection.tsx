@@ -456,8 +456,9 @@ export function PaletteSection() {
         </Block>
 
         <Block title="מטריצת ניגודיות" note={<NumText>{'כל זוג טקסט לפחות 4.5:1 על המשטח שלו · WCAG 2.0 AA'}</NumText>}>
-          {/* three across only from xl: below it a matrix needs the full measure for its ratios */}
-          <div className="grid gap-x-(--gutter) gap-y-12 xl:grid-cols-3">
+          {/* three across only from xl (85rem in sun mode, whose type floors are larger): below that a
+              matrix needs the full measure for its ratios */}
+          <div className="grid gap-x-(--gutter) gap-y-12 xl:grid-cols-3 sun:xl:grid-cols-1 sun:min-[85rem]:grid-cols-3">
             <div className="min-w-0 rounded-lg border border-line p-4" data-surface="paper">
               <Matrix surface="paper" />
             </div>
