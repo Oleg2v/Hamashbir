@@ -2,9 +2,8 @@ import type { CSSProperties } from 'react';
 import { Num } from '@/components/ui/Num';
 import { NumText } from '@/components/ui/NumText';
 import { ergonomics, layout, space } from '@/design/tokens';
+import { NB } from '@/lib/typography';
 import { Block, Section } from './Section';
-
-const NB = ' ';
 
 /** A 1:1 ruler: minor tick every 4px, major tick every 16px — the grid itself. */
 const ruler: CSSProperties = {
@@ -118,7 +117,9 @@ function Targets() {
                 <Num>{t.px}</Num>
                 {NB}פיקסלים · {t.title}
               </span>
-              <span className="text-ink-2">{t.note}</span>
+              <span className="text-ink-2">
+                <NumText>{t.note}</NumText>
+              </span>
             </span>
           </li>
         ))}
@@ -168,7 +169,7 @@ export function SpaceSection() {
         <p>
           <NumText>
             {
-              'רשת של 4 פיקסלים, כמו שורות שתילה: מרווח קבוע, צמיחה צפויה. כל ריפוד, רווח וגודל מטרה הוא כפולה של 4. הסולם שלמטה מוצג בקנה מידה 1:1.'
+              'רשת של 4 פיקסלים, כמו שורות שתילה: מרווח קבוע, צמיחה צפויה. כל ריפוד, רווח וגודל אזור מגע הוא כפולה של 4. הסולם שלמטה מוצג בקנה מידה 1:1.'
             }
           </NumText>
         </p>
@@ -178,7 +179,7 @@ export function SpaceSection() {
         <Block title="סולם המרווחים" note={<NumText>{'קנה מידה 1:1 · שנתות כל 4 ו־16 פיקסלים'}</NumText>}>
           <SpaceScale />
         </Block>
-        <Block title="רשת עמודות" note={<NumText>{'4 · 8 · 12 עמודות · רוחב מרבי 1440'}</NumText>}>
+        <Block title="רשת עמודות" note={<NumText>{'4 · 8 · 12 עמודות · רוחב מרבי 1440px'}</NumText>}>
           <GridFrames />
           <p className="max-w-[62ch] text-caption text-ink-2">
             <NumText>

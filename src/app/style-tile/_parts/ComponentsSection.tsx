@@ -22,12 +22,11 @@ import {
   type PlanLine,
 } from '@/data/demo-farm';
 import { sampleRamp } from '@/design/color';
-import { ndvi, stages } from '@/design/tokens';
+import { ndvi, stages, toastLifetime } from '@/design/tokens';
 import { formatMoney, formatNumber } from '@/lib/format';
+import { NB } from '@/lib/typography';
 import { ToastDemo } from './components/ToastDemo';
 import { Block, Section } from './Section';
-
-const NB = ' ';
 
 /* ───────────────────────── Buttons ───────────────────────── */
 
@@ -92,7 +91,7 @@ function ButtonsOnSoil() {
     >
       <div className="grid gap-3 lg:col-span-4">
         <h4 className="font-display text-title">
-          על אדמה<span className="hidden sun:inline"> · במצב שמש הוא לבן</span>
+          על אדמה<span className="hidden sun:inline"> · במצב שמש: רקע לבן</span>
         </h4>
         <p className="max-w-[44ch] text-caption text-ink-2">
           <NumText>
@@ -105,7 +104,10 @@ function ButtonsOnSoil() {
         <Button variant="secondary" size="lg">
           כמו בעונה שעברה
         </Button>
-        <Button variant="secondary">הזמינו את שלב 1</Button>
+        <Button variant="secondary">
+          הזמינו את שלב{NB}
+          <Num>1</Num>
+        </Button>
         <Button variant="ghost">לכל הסניפים</Button>
       </div>
       <div className="absolute end-4 top-4 sm:end-6 sm:top-6">
@@ -373,7 +375,7 @@ function Chips() {
         </div>
       </div>
       <div className="grid gap-3">
-        <p className="text-caption font-bold">סימון אמת</p>
+        <p className="text-caption font-bold">תוויות שקיפות</p>
         <div className="flex flex-wrap items-center gap-3">
           <DemoTag />
           <DemoTag>מחירי דמו</DemoTag>
@@ -414,7 +416,7 @@ const columns: ReadonlyArray<Column<PlanLine>> = [
         <Num className="cell-num">{r.week}</Num>
       ) : (
         <span className="cell-muted">
-          <span aria-hidden="true">—</span>
+          <span aria-hidden="true">–</span>
           <span className="sr-only">לפי האגרונום</span>
         </span>
       ),
@@ -492,7 +494,7 @@ const columns: ReadonlyArray<Column<PlanLine>> = [
         <Num className="cell-num font-semibold">{formatNumber(t, 2)}</Num>
       ) : (
         <span className="cell-muted">
-          <span aria-hidden="true">—</span>
+          <span aria-hidden="true">–</span>
           <span className="sr-only">ללא מחיר</span>
         </span>
       );
@@ -580,9 +582,7 @@ function Toasts() {
         <ToastDemo />
         <p className="max-w-[62ch] text-caption text-ink-2">
           <NumText>
-            {
-              'הודעה פשוטה נעלמת אחרי 6 שניות ועוצרת בריחוף או בפוקוס. הודעה עם פעולה, ושגיאה, נשארות עד שסוגרים אותן – אף אחד לא צריך להתחרות בשעון כדי ללחוץ „ביטול”. ההכרזה לקורא המסך יוצאת מאזור חי קבוע, והסגירה מחזירה את הפוקוס למקום שבו הייתם.'
-            }
+            {`הודעה פשוטה נעלמת אחרי ${toastLifetime / 1000} שניות ועוצרת בריחוף או בפוקוס. הודעה עם פעולה, ושגיאה, נשארות עד שסוגרים אותן – אף אחד לא צריך להתחרות בשעון כדי ללחוץ „ביטול”. ההכרזה לקורא המסך יוצאת מאזור חי קבוע, והסגירה מחזירה את הפוקוס למקום שבו הייתם.`}
           </NumText>
         </p>
       </div>
@@ -596,7 +596,9 @@ export function ComponentsSection() {
       id="components"
       intro={
         <p>
-          {`שישה רכיבים שנושאים את כל האפליקציה. כל אחד נבנה קודם כול למקלדת ולכיוון ימין־לשמאל, עם מצבי ריחוף, פוקוס, לחיצה, השבתה וטעינה${NB}– ועובד על נייר, על אדמה ובמצב שמש.`}
+          שישה רכיבים שנושאים את כל האפליקציה. כל אחד נבנה קודם כול למקלדת ולכיוון{' '}
+          <span className="whitespace-nowrap">ימין־לשמאל</span>, עם מצבי ריחוף, פוקוס, לחיצה, השבתה וטעינה{NB}– ועובד על
+          נייר, על אדמה ובמצב שמש.
         </p>
       }
     >

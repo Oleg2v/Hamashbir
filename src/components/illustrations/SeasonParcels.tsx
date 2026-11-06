@@ -6,6 +6,7 @@ import { mixOklab, sampleRamp } from '@/design/color';
 import { durations, ndvi, palette, stages, staggerDelay, surfaces, type StageId } from '@/design/tokens';
 import { cn } from '@/lib/cn';
 import { formatNumber } from '@/lib/format';
+import { NB } from '@/lib/typography';
 import css from './SeasonParcels.module.css';
 
 /**
@@ -718,7 +719,6 @@ const season = stages.map((s, i) => ({
   datum: DATA[s.id],
 }));
 
-const NB = ' ';
 const coords = `${demoFarm.coords.lat.toFixed(2)}°N ${demoFarm.coords.lon.toFixed(2)}°E`;
 const field = `${demoFarm.area}${NB}דונם ${demoFarm.crop} ב${demoFarm.method} ב${demoFarm.region}`;
 
@@ -738,7 +738,7 @@ function DatumLine({ d }: { d: Datum }) {
 
 function ariaLabel(withData: boolean) {
   const parts = season.map((s) => `${s.num} ${s.name}${NB}– ${LOOK[s.id]}${withData ? `, ${datumText(s.datum)}` : ''}`);
-  return `העונה מלמעלה: איור אווירי סכמטי של אותה חלקה, ${field}, בחמישה רגעים של עונה אחת, זה לצד זה לפי סדר העונה. ${parts.join('; ')}.${withData ? ' נתוני דמו.' : ''}`;
+  return `העונה מלמעלה: איור אווירי סכמטי של אותה חלקה, ${field}, בחמישה רגעים של עונה אחת, זה לצד זה לפי סדר העונה. ${parts.join('; ')}.${withData ? ' מדד הצמחייה נמדד מתחת לרשת, מכויל. נתוני דמו.' : ''}`;
 }
 
 const vars = (o: Record<string, string>) => o as CSSProperties;

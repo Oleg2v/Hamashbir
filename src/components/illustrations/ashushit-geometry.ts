@@ -28,6 +28,8 @@
  * into the coupler.
  */
 
+import { NB } from '@/lib/typography';
+
 export type Pt = { x: number; y: number };
 
 /**
@@ -1431,8 +1433,8 @@ export function assembledLayout({ labels }: { labels: boolean }): Layout {
     at(4, { x: m + dims.nutU + 10, y: -dims.nutR }, { x: row[2], y: rowY });
     at(5, { x: m + dims.ringU + dims.ringW / 2, y: -dims.ringR }, { x: row[3], y: rowY });
     at(3, { x: m + dims.nutU + dims.nutW + 40, y: -dims.pipeR }, { x: 0, y: rowY }, true);
-    at(7, { x: rs.anchor.x, y: rs.anchor.y + riserSeat }, { x: 0, y: rs.anchor.y + riserSeat }, true);
-    at(8, { x: spr.anchor.x, y: spr.anchor.y + sprinklerSeat }, { x: 0, y: spr.anchor.y + sprinklerSeat }, true);
+    at(8, { x: rs.anchor.x, y: rs.anchor.y + riserSeat }, { x: 0, y: rs.anchor.y + riserSeat }, true);
+    at(9, { x: spr.anchor.x, y: spr.anchor.y + sprinklerSeat }, { x: 0, y: spr.anchor.y + sprinklerSeat }, true);
     // the stabiliser's leader rises off its receding side into the clear
     // band between the pipe and the ground, so it never doubles the ground line
     const sideX = dims.plateHalf + K * dims.barHalf * 0.45;
@@ -1546,12 +1548,10 @@ export function explodedLayout(): Layout {
 /** Rich text: plain Hebrew runs and numbers/codes (rendered through <Num>). */
 export type Text = ReadonlyArray<string | { num: string }>;
 
-const NB = ' ';
-
 /**
- * The installed parts, numbered in the order of the client's own list
- * („מרכיבי עמדת ההשקיה”). The key (מפתח עשושית) is a tool, not an installed
- * part: it appears in the storyboard at step 03.
+ * The parts, numbered exactly as the client's own list („מרכיבי עמדת
+ * ההשקיה”). The key (מפתח עשושית, 7) is a tool, not an installed part: it has
+ * no callout in the assembled view and appears in the storyboard at step 03.
  */
 export const ashushitParts: ReadonlyArray<{ n: number; id: string; name: Text; spec?: Text }> = [
   { n: 1, id: 'stabilizer', name: ['מייצב'] },
@@ -1565,8 +1565,9 @@ export const ashushitParts: ReadonlyArray<{ n: number; id: string; name: Text; s
   { n: 4, id: 'nut', name: ['אום אפור'] },
   { n: 5, id: 'ring', name: ['טבעת לבנה'], spec: ['בתוך האום'] },
   { n: 6, id: 'hoop', name: ['חישוק עגול סוגר'] },
-  { n: 7, id: 'riser', name: ['זקף משושה UV שחור ', { num: '3/4״' }] },
-  { n: 8, id: 'sprinkler', name: ['ממטיר ', { num: 'AR044' }] },
+  { n: 7, id: 'key', name: ['מפתח עשושית'], spec: ['כלי הרכבה · בשלב ', { num: '03' }] },
+  { n: 8, id: 'riser', name: ['זקף משושה UV שחור ', { num: '3/4״' }] },
+  { n: 9, id: 'sprinkler', name: ['ממטיר ', { num: 'AR044' }] },
 ];
 
 /** The guide's five assembly steps, in the house voice (plural imperative). */

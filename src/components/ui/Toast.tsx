@@ -1,8 +1,9 @@
 'use client';
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import { durations } from '@/design/tokens';
+import { durations, toastLifetime } from '@/design/tokens';
 import { AlertIcon, CheckIcon, CloseIcon, InfoIcon, ShieldIcon } from './icons';
+import { NumText } from './NumText';
 
 export type ToastTone = 'success' | 'info' | 'agro' | 'error';
 
@@ -15,7 +16,7 @@ export type ToastInput = {
   /** The action closes the toast after running. */
   action?: { label: string; onClick?: () => void };
   /**
-   * Lifetime in ms. Defaults: 6000 for plain success/info; sticky (null) for
+   * Lifetime in ms. Defaults: `toastLifetime` (6000) for plain success/info; sticky (null) for
    * errors and for any toast that carries an action — nobody should have to
    * race a timer to press "undo" (WCAG 2.2.1).
    */
@@ -73,8 +74,8 @@ export function ToastCard({
         {icons[tone]}
       </span>
       <div>
-        <p className="toast__title">{title}</p>
-        {body ? <p className="toast__body">{body}</p> : null}
+        <p className="toast__title">{typeof title === 'string' ? <NumText>{title}</NumText> : title}</p>
+        {body ? <p className="toast__body">{typeof body === 'string' ? <NumText>{body}</NumText> : body}</p> : null}
         {action ? (
           <div className="toast__actions">
             <button type="button" className="toast__action" onClick={onAction}>
@@ -169,7 +170,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
 
 function LiveToast({ item, onDismiss }: { item: ToastItem; onDismiss: (restoreFocus: boolean) => void }) {
   const sticky = item.tone === 'error' || item.action != null;
-  const duration = item.duration === undefined ? (sticky ? null : 6000) : item.duration;
+  const duration = item.duration === undefined ? (sticky ? null : toastLifetime) : item.duration;
   const timer = useRef<HTMLSpanElement>(null);
   const hovering = useRef(false);
   const focused = useRef(false);

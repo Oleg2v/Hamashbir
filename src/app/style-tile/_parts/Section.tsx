@@ -59,7 +59,7 @@ export function Section({ id, title, intro, surface = 'paper', className, childr
           <div className="flex items-baseline justify-between gap-4 border-t border-line pt-4 lg:col-span-12">
             <Num className="text-caption font-medium text-ink">{r.num}</Num>
             <span className="text-micro text-ink-2">
-              {r.branch} · <Num>{r.coords}</Num>
+              {r.branch} · <Num className="whitespace-nowrap">{r.coords}</Num>
             </span>
           </div>
           <h2 id={`${id}-title`} className="text-h2 lg:col-span-5">

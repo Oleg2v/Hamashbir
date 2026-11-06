@@ -305,7 +305,7 @@ export const radii = {
 
 export const elevations = [
   { name: 'raised', varName: 'elevRaised', he: 'מורם', use: 'כרטיסים, שורות פעילות' },
-  { name: 'float', varName: 'elevFloat', he: 'צף', use: 'תפריטים, טוסטים, מגנטי' },
+  { name: 'float', varName: 'elevFloat', he: 'צף', use: 'תפריטים, טוסטים, כפתור מגנטי' },
   { name: 'overlay', varName: 'elevOverlay', he: 'שכבה', use: 'מודאלים, גיליונות' },
   { name: 'inset', varName: 'elevInset', he: 'שקוע', use: 'שדות קלט, תאים שקועים' },
 ] as const;
@@ -329,12 +329,15 @@ export const zIndex = {
 
 /* ───────────────────────────── Motion ───────────────────────────── */
 
+/** How long a plain toast stays, in ms. A toast with an action, and an error, stay until closed. */
+export const toastLifetime = 6000;
+
 /** Durations in ms. Organic but precise: nothing UI-level exceeds 400ms. */
 export const durations = {
   instant: { ms: 80, use: 'לחיצה, החלפת מצב' },
   fast: { ms: 160, use: 'ריחוף, צבע, יציאה' },
   base: { ms: 240, use: 'מעברי ממשק' },
-  slow: { ms: 400, use: 'פאנלים, מילוי CTA' },
+  slow: { ms: 400, use: 'פאנלים, מילוי כפתור הפעולה' },
   grow: { ms: 720, use: 'חשיפה, צמיחת נתונים' },
   season: { ms: 1200, use: 'פרילואדר, רגעי חתימה' },
 } as const;
@@ -427,7 +430,7 @@ export const spring = {
   gsapPath: springGsapPath(),
   gsap: 'CustomEase("spring", spring.gsapPath)',
   he: 'קפיץ',
-  use: 'חזרת CTA מגנטי למקום',
+  use: 'חזרת הכפתור המגנטי למקומו',
 } as const;
 
 /** Magnetic CTA tuning — what the style tile documents is what <Magnetic> runs. */

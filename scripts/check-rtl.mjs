@@ -13,6 +13,8 @@
  * 2. Hebrew typesetting: a breaking space between </Num> and a Hebrew unit,
  *    a breaking space before an en dash, ≥/≤ glyphs in Hebrew text, gershayim
  *    used as quotation marks, em dashes in copy.
+ * 3. Shared characters: NB (no-break space) is declared once, as an escape,
+ *    in src/lib/typography.ts – a local copy can hold a plain space unseen.
  *
  * Exempt: SVG geometry attributes, comments, generated tokens.css, and any
  * line carrying `rtl-ok` (with a reason) for an intentional physical value.
@@ -120,6 +122,9 @@ for (const file of files) {
         break;
       }
       if (translateX.test(line)) report(file, i, 'translateX() without var(--dir-sign)');
+    }
+    if (!isCss && /^\s*(?:export\s+)?const\s+NB\s*=/.test(line) && !file.endsWith('lib/typography.ts')) {
+      report(file, i, "local NB constant (import { NB } from '@/lib/typography')");
     }
     if (!isCss) {
       for (const t of typo) {

@@ -2,6 +2,7 @@
 
 import { useId, useState, type ReactNode } from 'react';
 import { MinusIcon, PlusIcon } from './icons';
+import { NumText } from './NumText';
 
 type NumberFieldProps = {
   label: ReactNode;
@@ -140,7 +141,9 @@ export function NumberField({
       ) : null}
       {invalid ? (
         <p className="field__error" id={errId} role="alert">
-          <span>{rangeMessage.replace('{min}', fmt(min)).replace('{max}', fmt(max))}</span>
+          <span>
+            <NumText>{rangeMessage.replace('{min}', fmt(min)).replace('{max}', fmt(max))}</NumText>
+          </span>
         </p>
       ) : null}
     </div>

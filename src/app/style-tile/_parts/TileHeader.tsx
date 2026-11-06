@@ -20,7 +20,37 @@ export function TileHeader() {
   const [overHero, setOverHero] = useState(true);
   const [active, setActive] = useState<RouteKey | null>(null);
   const [railHidden, setRailHidden] = useState(false);
+  const headerRef = useRef<HTMLElement>(null);
+  const barRef = useRef<HTMLDivElement>(null);
   const railRef = useRef<HTMLDivElement>(null);
+
+  // Scroll padding follows the header's full height – bar plus rail, the rail
+  // counted even while tucked away (a reverse focus walk brings it back) – so
+  // anchors and focused controls never land under it, in sun mode or at 200%
+  // text too. globals.css reads --header-h.
+  useEffect(() => {
+    const header = headerRef.current;
+    const bar = barRef.current;
+    if (!header || !bar) return;
+    const root = document.documentElement;
+    const measure = () => {
+      const border = parseFloat(getComputedStyle(header).borderBlockEndWidth) || 0;
+      const rail = railRef.current?.offsetHeight ?? 0; // 0 at xl, where the rail is display: none
+      root.style.setProperty('--header-h', `${Math.ceil(bar.offsetHeight + rail + border)}px`);
+    };
+    const ro = new ResizeObserver(measure);
+    ro.observe(bar);
+    if (railRef.current) ro.observe(railRef.current);
+    // the sun-mode border width changes no box size: listen to the theme too
+    const mo = new MutationObserver(measure);
+    mo.observe(root, { attributes: true, attributeFilter: ['data-theme'] });
+    measure();
+    return () => {
+      ro.disconnect();
+      mo.disconnect();
+      root.style.removeProperty('--header-h');
+    };
+  }, []);
 
   useEffect(() => {
     const hero = document.getElementById('hero');
@@ -78,13 +108,14 @@ export function TileHeader() {
 
   return (
     <header
+      ref={headerRef}
       data-surface={overHero ? 'soil' : 'paper'}
       className={cn(
         'fixed inset-x-0 top-0 z-(--z-header)',
         overHero ? 'border-b border-transparent bg-transparent' : 'border-b border-line bg-canvas/95 backdrop-blur-md',
       )}
     >
-      <div className="wrap flex min-h-16 items-center justify-between gap-6 lg:min-h-18">
+      <div ref={barRef} className="wrap flex min-h-16 items-center justify-between gap-3 sm:gap-6 lg:min-h-18">
         <a href="#hero" className="inline-flex min-h-(--target) shrink-0 items-center no-underline">
           <Wordmark />
           <span className="sr-only"> – לראש העמוד</span>

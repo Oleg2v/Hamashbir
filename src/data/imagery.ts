@@ -48,7 +48,7 @@ export const desertEdge: AerialPhoto = {
   height: 1200,
   alt: 'צילום אוויר מגובה רב: מדבר חשוף בגווני חול, חצוי בערוצי ניקוז ובשבילים, נפגש באלכסון ברצועה של חלקות מעובדות ירוקות – מטעים, שורות וערוגות. בפינה התחתונה ערוץ נחל יבש וכהה.',
   title: 'שולי המדבר',
-  why: 'חלקות מושקות לצד קרקע מדברית חשופה: גבול המים הוא גבול השדה. ממלא מקום ממרוקו לדפוס שמוכר מהערבה.',
+  why: 'חלקות מושקות לצד קרקע מדברית חשופה: גבול המים הוא גבול השדה. תמונה חלופית ממרוקו, לדפוס המוכר מהערבה.',
   place: 'מרקש, מרוקו',
   view: 'מטוס',
   photographer: 'Bernd Dittrich',
@@ -67,7 +67,7 @@ export const orchard: AerialPhoto = {
   alt: 'צילום רחפן אנכי: בחצי השמאלי שדה חרוש בחום כהה עם תלמים ישרים ודקים; בחצי הימני מטע צעיר בשורות ישרות של עצים ירוקים; דרך עפר צרה ומתפתלת מפרידה ביניהם.',
   title: 'מטע מול שדה חרוש',
   why: 'שורות עצים, תלמים ודרך עפר אחת: הדפוס שחקלאי מזהה מיד, כי כך נראה המשק שלו במפה.',
-  place: 'רם־און, חבל תענך',
+  place: 'רם און, חבל תענך',
   view: 'רחפן',
   photographer: 'Oren Beitan',
   source: 'Pexels',
@@ -136,10 +136,11 @@ export const orchardSurvey = {
   gridM: 40,
   scaleBarM: 20,
   rowSpacingM: 6,
-  /** mean of the NDVI stand-in over each side of the track (computed on the file) */
+  /** mean of the NDVI stand-in over each side of the track (computed on the file);
+   *  lettered in reading order, so א is the parcel on the right */
   parcels: [
-    { id: 'א', name: 'שדה חרוש', index: 0.16, at: { x: 18, y: 16 } },
-    { id: 'ב', name: 'מטע צעיר', index: 0.53, at: { x: 64, y: 58 } },
+    { id: 'א', name: 'מטע צעיר', index: 0.53, at: { x: 64, y: 58 } },
+    { id: 'ב', name: 'שדה חרוש', index: 0.16, at: { x: 18, y: 16 } },
   ],
   coords: '32.53°N 35.26°E',
 } as const;

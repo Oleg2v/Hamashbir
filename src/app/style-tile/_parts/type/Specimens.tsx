@@ -208,7 +208,7 @@ const tiles: Array<{ label: string; value: ReactNode; span: string }> = [
     span: 'col-span-2 lg:col-span-3',
   },
   { label: 'עלות הטפטוף', value: <Num>{formatMoney(dripCost)}</Num>, span: 'col-span-2 lg:col-span-4' },
-  { label: 'מדד צמחייה', value: <Num>0.78</Num>, span: 'lg:col-span-2' },
+  { label: 'מדד צמחייה · מתחת לרשת', value: <Num>0.78</Num>, span: 'lg:col-span-2' },
   { label: 'ממטיר העשושית', value: <Num>AR044</Num>, span: 'lg:col-span-2' },
   // ״ is a strong RTL character: the LRM after it keeps "× 2" on its LTR side
   { label: 'מסנן דיסקים', value: <Num>{'2״\u200E × 2'}</Num>, span: 'lg:col-span-2' },

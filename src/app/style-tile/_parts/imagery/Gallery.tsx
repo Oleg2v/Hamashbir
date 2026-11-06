@@ -1,4 +1,5 @@
 import { Num } from '@/components/ui/Num';
+import { NumText } from '@/components/ui/NumText';
 import { aerialPhotos, covered, desertEdge, orchard, type AerialPhoto } from '@/data/imagery';
 import { cn } from '@/lib/cn';
 import { Credit, Photo } from './photo';
@@ -55,7 +56,7 @@ function Sources() {
               <bdi lang="en" dir="ltr">
                 {p.licence}
               </bdi>{' '}
-              · {p.edit}
+              · <NumText>{p.edit}</NumText>
             </span>
           </li>
         ))}

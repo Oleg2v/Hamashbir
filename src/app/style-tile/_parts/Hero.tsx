@@ -2,8 +2,7 @@ import { SeasonParcels } from '@/components/illustrations/SeasonParcels';
 import { Num } from '@/components/ui/Num';
 import { NumText } from '@/components/ui/NumText';
 import { formatDate } from '@/lib/format';
-
-const NB = ' ';
+import { NB } from '@/lib/typography';
 
 /** The concept in three lines (Stage-0 deliverable 1). */
 export const concept = [
@@ -15,7 +14,7 @@ export const concept = [
   {
     num: '02',
     line: ['כל שלב בעונה', 'הוא סל אחד.'],
-    sub: `זריעה, השקיה, הגנה, קטיף ואריזה${NB}– כל שלב עם המוצרים, הכמויות והמלאי בסניף הקרוב.`,
+    sub: `זריעה, השקיה, הגנה, קטיף ואריזה${NB}– כל שלב עם המוצרים, הכמויות והמלאי בסניף הקרוב; מוצרי הגנה באישור אגרונום.`,
   },
   {
     num: '03',
@@ -35,7 +34,10 @@ export function Hero() {
     >
       <div className="wrap">
         <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2 border-t border-line pt-4">
-          <p className="eyebrow">שלב 0 · כיוון אמנותי · לוח סגנון</p>
+          <p className="eyebrow">
+            שלב{NB}
+            <Num>0</Num> · כיוון אמנותי · לוח סגנון
+          </p>
           <p className="text-micro text-ink-2">
             <Num>{formatDate(new Date(2026, 10, 6))}</Num> · גרסה <Num>0.2</Num>
           </p>

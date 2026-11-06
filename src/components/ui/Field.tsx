@@ -1,5 +1,6 @@
 import type { ComponentPropsWithoutRef, ReactNode } from 'react';
 import { AlertIcon } from './icons';
+import { NumText } from './NumText';
 
 type FieldProps = Omit<ComponentPropsWithoutRef<'input'>, 'prefix'> & {
   id: string;
@@ -76,7 +77,7 @@ export function TextField({
       {error ? (
         <p className="field__error" id={errId}>
           <AlertIcon size={18} strokeWidth={2} />
-          <span>{error}</span>
+          <span>{typeof error === 'string' ? <NumText>{error}</NumText> : error}</span>
         </p>
       ) : null}
     </div>

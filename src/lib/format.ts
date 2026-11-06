@@ -1,3 +1,5 @@
+import { NNBSP } from './typography';
+
 /**
  * Hebrew (he-IL) number formatting. Always render the result inside <Num>
  * (a <bdi>) so digits never reorder inside RTL text.
@@ -21,7 +23,7 @@ export function formatNumber(n: number, digits?: number) {
 
 /** 18420 → "₪ 18,420.00" (narrow no-break space keeps the sign attached). */
 export function formatMoney(n: number, { decimals = 2 }: { decimals?: number } = {}) {
-  return `₪ ${formatNumber(n, decimals)}`;
+  return `₪${NNBSP}${formatNumber(n, decimals)}`;
 }
 
 /** 6 Nov 2026 → "06.11.2026" – the Israeli numeric date. */

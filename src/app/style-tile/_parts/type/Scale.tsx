@@ -232,7 +232,7 @@ function SunStrip() {
       </h4>
       <p className="text-caption text-ink-2 lg:col-span-6">
         כך נראה מצב שמש: לבן, דיו שחור, קווים של <Num>{ergonomics.sun.borderWidth}px</Num>&nbsp;וגוף טקסט במשקל{' '}
-        <Num>500</Num>. הפעילו אותו בכותרת העליונה, וערכי „עכשיו” בסולם יעלו לרצפות „בשמש”.
+        <Num>500</Num>. הפעילו אותו בסרגל העליון, וערכי „עכשיו” בסולם יעלו לרצפות „בשמש”.
       </p>
     </div>
   );
@@ -302,8 +302,8 @@ export function Scale() {
 
       <div className="grid gap-3">
         <p className="text-caption text-ink-2">
-          מהקטן לגדול, כמו צמח: <Num>{typeScale.length}</Num>&nbsp;שלבים, כל אחד עם מחרוזת אמיתית מהמוצר בגודל האמיתי
-          שלה. הערך „בשמש” הוא הרצפה של השלב במצב שמש.
+          מהקטן לגדול, כמו צמח: <Num>{typeScale.length}</Num>&nbsp;שלבים, כל אחד עם טקסט אמיתי מהמוצר בגודל האמיתי שלו.
+          הערך „בשמש” הוא הרצפה של השלב במצב שמש.
         </p>
         <div>
           <ol aria-label="תשעת שלבי הסולם, מהקטן לגדול">

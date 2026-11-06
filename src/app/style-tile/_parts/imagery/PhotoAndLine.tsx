@@ -6,10 +6,10 @@ import { NumText } from '@/components/ui/NumText';
 import { desertEdge } from '@/data/imagery';
 import { stages } from '@/design/tokens';
 import { cn } from '@/lib/cn';
+import { NB } from '@/lib/typography';
 import css from './imagery.module.css';
 import { Credit, Photo } from './photo';
 
-const NB = ' ';
 const irrigate = stages.findIndex((s) => s.id === 'irrigate');
 
 /** Block c – the photo system meets the line system: field in photo, product in line, the stage icon between. */
@@ -34,7 +34,7 @@ export function PhotoAndLine() {
         </ul>
         <p className="text-micro text-ink-2">
           <NumText>
-            {'קו 1.75 ברשת של 24 באייקון, 1.5px בשרטוט · בצבע הדיו · מים הם הצבע היחיד · בלי מילוי צבעוני'}
+            {'קו של 1.75px על רשת של 24px באייקון, 1.5px בשרטוט · בצבע הדיו · מים הם הצבע היחיד · בלי מילוי צבעוני'}
           </NumText>
         </p>
       </div>

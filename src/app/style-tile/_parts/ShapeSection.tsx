@@ -165,7 +165,7 @@ export function ShapeSection() {
       }
     >
       <div className="grid gap-20 lg:gap-28">
-        <Block title="רדיוסים" note={<NumText>{'7 ערכים · כולם כפולות של 4'}</NumText>}>
+        <Block title="רדיוסים" note={<NumText>{'7 ערכים · שישה בכפולות של 4, ועוד „מלא”'}</NumText>}>
           <Radii />
         </Block>
         <Block title="עומק על נייר" note="צל חם, בגוון אדמה">

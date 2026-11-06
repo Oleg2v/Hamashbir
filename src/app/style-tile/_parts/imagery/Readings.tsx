@@ -6,11 +6,10 @@ import { Verdict } from '@/components/ui/Verdict';
 import { covered, desertEdge, ndviProxy, orchard } from '@/data/imagery';
 import { ndvi, palette } from '@/design/tokens';
 import { cn } from '@/lib/cn';
+import { NB } from '@/lib/typography';
 import { soilGrade } from './filters';
 import css from './imagery.module.css';
 import { coverScale, Credit, Photo, sizesFor, type Treatment } from './photo';
-
-const NB = ' ';
 
 const bands: ReadonlyArray<{ n: string; name: string; treatment?: Treatment }> = [
   { n: '01', name: 'צילום' },

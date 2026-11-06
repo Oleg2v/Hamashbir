@@ -241,13 +241,17 @@ const rules: Rule[] = [
     title: (
       <>
         {/* Assistant digits in a heading: Plex's full-cell period reads "1 . 6" at this size */}
-        גובה שורה <Num mono={false}>1.6</Num>, ושורות של <Num mono={false}>45–75</Num>&nbsp;תווים
+        גובה שורה <Num mono={false}>1.6</Num>, ושורות של{' '}
+        <Num mono={false} className="whitespace-nowrap">
+          45–75
+        </Num>
+        &nbsp;תווים
       </>
     ),
     why: (
       <>
-        גוף טקסט נקרא בגובה שורה <Num>1.6</Num>&nbsp;ובשורות של <Num>45–75</Num>&nbsp;תווים. שורה ארוכה מדי מאבדת את
-        העין בדרך חזרה לתחילת השורה; שורה צפופה נדבקת לשכנה שלה.
+        גוף טקסט נקרא בגובה שורה <Num>1.6</Num>&nbsp;ובשורות של <Num className="whitespace-nowrap">45–75</Num>
+        &nbsp;תווים. בשורה ארוכה מדי העין הולכת לאיבוד בדרך חזרה לתחילת השורה; שורה צפופה נדבקת לשכנה שלה.
       </>
     ),
     good: (

@@ -6,10 +6,10 @@ import { orchard, orchardSurvey as survey } from '@/data/imagery';
 import { contrast, sampleRamp } from '@/design/color';
 import { ndvi, palette } from '@/design/tokens';
 import { cn } from '@/lib/cn';
+import { NB } from '@/lib/typography';
 import css from './imagery.module.css';
 import { Credit, Photo } from './photo';
 
-const NB = ' ';
 const W = orchard.width;
 const H = orchard.height;
 const r1 = (v: number) => Math.round(v * 10) / 10;

@@ -57,7 +57,7 @@ export function Range({
     );
   }
   return (
-    <Num className={className}>
+    <Num className={cn('whitespace-nowrap', className)}>
       {from}
       <span aria-hidden="true">–</span>
       <span className="sr-only"> עד </span>

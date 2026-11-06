@@ -34,8 +34,9 @@
     color: var(--ink);
     font-family: var(--font-sans);
     /* anchors and focus-scrolling clear the fixed header (+ section rail)
-       at the top and the fixed demo badge at the bottom */
-    scroll-padding-block-start: 8.5rem;
+       at the top – its measured height, set by TileHeader, plus room for a
+       focus ring – and the fixed demo badge at the bottom */
+    scroll-padding-block-start: calc(var(--header-h, 7.75rem) + 0.75rem);
     scroll-padding-block-end: 5rem;
   }
 

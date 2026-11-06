@@ -24,7 +24,7 @@ The bare `transition` utilities default to `--dur-fast` + `ease-out-quint`.
 | Kind                                      | Utilities                                                                                                                                                                                                                                                                                                   |
 | ----------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Type                                      | `text-micro` `text-caption` `text-body` `text-lead` `text-title` `text-h3` `text-h2` `text-h1` `text-display` (fluid `clamp()`, line-height built in) — plus `text-poster`, the single hero headline per page, deliberately outside the nine-step UI scale                                                  |
-| Fonts                                     | `font-display` (Suez One — `text-title` (25px) and larger only, never body text), `font-sans` (Assistant), `font-mono` / `.num` (IBM Plex Mono)                                                                                                                                                             |
+| Fonts                                     | `font-display` (Suez One — `text-title` (25px) and larger only, never body text; the one exception is the wordmark, 20–24px), `font-sans` (Assistant), `font-mono` / `.num` (IBM Plex Mono)                                                                                                                 |
 | Semantic colour                           | `bg-canvas` `bg-surface` `bg-sunken` `bg-input` `text-ink` `text-ink-2` `text-ink-3` `border-line` `border-line-strong` `bg-tint-hover` `bg-tint-press` `text-link` `text-sprout-ink` `text-water-ink` `text-harvest-ink` `text-wheat-ink` `bg-cta` `text-cta-ink` `bg-bud` `bg-inverse` `text-inverse-ink` |
 | Raw brand colour (fills, data marks only) | `soil` `loam` `paper` `field` `sprout` `water` `harvest` `wheat` `white` `black`                                                                                                                                                                                                                            |
 | Radius                                    | `rounded-none` `-xs` (4) `-sm` (8) `-md` (12) `-lg` (20) `-xl` (32) `-full`                                                                                                                                                                                                                                 |
@@ -53,6 +53,10 @@ specimens. Anything that reads as a heading is marked up as one.
 - `<NumText>` sets running text with the number rules applied (every numeric
   run in `<Num>`, no-break space before the Hebrew unit). Use it for any
   string that contains digits.
+- `NB` (no-break space) and `NNBSP` (narrow no-break space, for ₪) come from
+  `src/lib/typography.ts`, written as escapes. Never declare a local copy: a
+  literal U+00A0 and a plain space look the same in an editor
+  (`npm run lint:rtl` flags it).
 - `<Verdict ok />` is the one right/wrong marker (✓ נכון / ✕ שגוי).
 - `<SegmentedControl>` for single choice (native radios); `<FilterChip>` for
   independent toggles (aria-pressed).
@@ -87,9 +91,12 @@ specimens. Anything that reads as a heading is marked up as one.
   measure 45–75 characters.
 - A number and its unit or counted noun are joined by a no-break space:
   `<Num>40</Num>&nbsp;דונם`.
+- An inch mark stays inside the number's isolate, like `%`: `<Num>3/4״</Num>`,
+  `<NumText>{'מסנן 2״'}</NumText>`. Outside it, bidi moves the mark to the
+  other side of the digits (״2).
 - Numbers are set in IBM Plex Mono for a functional reason: Assistant's digits
   are proportional and the font has no `tnum`, so `tabular-nums` does nothing
-  there (measured: 1111 is ~9% narrower than 8888).
+  there (measured: 1111 is ~8% narrower than 8888).
 - Bidi: without isolation a frost alert "−2°" renders as "2°−" and a range
   "40–60" flips to "60–40". That is why every number is a `<bdi>`.
 - **The `<Num>` positioning trap:** `<Num>` renders `<bdi dir="ltr">`, so

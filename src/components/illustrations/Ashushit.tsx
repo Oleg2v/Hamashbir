@@ -1,6 +1,7 @@
 import type { CSSProperties, ReactNode } from 'react';
 import { Num } from '@/components/ui/Num';
 import { cn } from '@/lib/cn';
+import { NB } from '@/lib/typography';
 import styles from './Ashushit.module.css';
 import { AshushitJet } from './AshushitJet';
 import {
@@ -40,8 +41,6 @@ type AshushitProps = {
   labels?: boolean;
   title?: string;
 };
-
-const NB = ' ';
 
 const pct = (v: number) => `${Math.round(v * 10000) / 100}%`;
 
@@ -207,7 +206,7 @@ export function Ashushit({ className, variant = 'assembled', labels = true, titl
 
       {labels && !exploded ? (
         <figcaption className="mt-6 grid gap-4 border-t-(length:--bw) border-line pt-5">
-          <ol className="m-0 grid list-none gap-x-8 gap-y-3 p-0 @md:grid-flow-col @md:grid-rows-4">
+          <ol className="m-0 grid list-none gap-x-8 gap-y-3 p-0 @md:grid-flow-col @md:grid-rows-5">
             {ashushitParts.map((p) => (
               <li key={p.n} className="flex items-start gap-3 text-caption">
                 <Dot n={p.n} />
@@ -255,8 +254,7 @@ export function Ashushit({ className, variant = 'assembled', labels = true, titl
             ))}
           </ol>
           <p className="m-0 text-micro text-ink-2">
-            לפי „עשושית הוראות הרכבה”, המשביר לחקלאי. הפתח השני של המצמד מקבל את המשך השלוחה באותו אופן, או פקק סופי
-            בסוף הקו.
+            לפי „עשושית הוראות הרכבה”, המשביר לחקלאי. הפתח השני של המצמד מקבל את המשך השלוחה באותו אופן.
           </p>
         </figcaption>
       ) : null}

@@ -1,10 +1,10 @@
 'use client';
 
 import { Button } from '@/components/ui/Button';
+import { Num } from '@/components/ui/Num';
 import { useToast } from '@/components/ui/Toast';
 import { demoFarm, dripAvailability } from '@/data/demo-farm';
-
-const NB = ' ';
+import { NB } from '@/lib/typography';
 
 /** Live triggers: the real toasts through the provider in the root layout. Every action does something. */
 export function ToastDemo() {
@@ -25,7 +25,8 @@ export function ToastDemo() {
           })
         }
       >
-        הזמינו את שלב 1
+        הזמינו את שלב{NB}
+        <Num>1</Num>
       </Button>
       <Button
         variant="secondary"
@@ -50,7 +51,6 @@ export function ToastDemo() {
             tone: 'info',
             title: 'המלאי עודכן',
             body: `שלוחת טפטוף 16 מ״מ במלאי ב־${dripAvailability.branchesWithStock}${NB}סניפים`,
-            duration: 5000,
           })
         }
       >

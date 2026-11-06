@@ -78,7 +78,7 @@ export function SunModeToggle({ className }: { className?: string }) {
       onClick={onClick}
     >
       <SunIcon size={20} strokeWidth={2} />
-      <span>מצב שמש</span>
+      <span className="sun-toggle__label">מצב שמש</span>
     </button>
   );
 }

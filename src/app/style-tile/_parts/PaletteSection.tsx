@@ -14,6 +14,7 @@ import {
   type SemanticKey,
   type SurfaceKey,
 } from '@/design/tokens';
+import { NB } from '@/lib/typography';
 import { Block, Section } from './Section';
 
 const INK = palette.soil.hex;
@@ -200,22 +201,29 @@ function Ndvi() {
       <div className="grid gap-x-(--gutter) gap-y-12 lg:grid-cols-12">
         <figure className="grid content-start gap-3 lg:col-span-7">
           <figcaption className="flex flex-wrap items-baseline justify-between gap-2">
-            <span className="text-caption font-bold">שימוש: מפת חום שבועית · חלקה 3 · תפוח אדמה, שדה פתוח, אביב</span>
+            <span className="text-caption font-bold">
+              שימוש: מפת חום שבועית · חלקה{NB}
+              <Num>3</Num> · תפוח אדמה, שדה פתוח, אביב
+            </span>
             <DemoTag />
           </figcaption>
-          <ol className="grid grid-cols-7 gap-1 sm:grid-cols-14" aria-label="NDVI לפי שבוע, נתוני דמו">
+          {/* 5 then 7 per row: every cell holds its label and value, sun-mode type floors included */}
+          <ol className="grid grid-cols-5 gap-1 sm:grid-cols-7" aria-label="NDVI לפי שבוע, נתוני דמו">
             {weekly.map((v, i) => {
               const bg = sampleRamp(ndvi.stops, v);
               const fg = bestText(bg);
               return (
                 <li
                   key={i}
-                  className="grid aspect-[3/4] content-between rounded-xs p-2"
+                  className="grid aspect-[4/5] content-between rounded-xs p-2"
                   style={{ backgroundColor: bg, color: fg.color }}
                 >
                   <span className="text-micro font-semibold leading-none">
-                    <span aria-hidden="true">שב׳</span>
-                    <span className="sr-only">שבוע</span>&nbsp;<Num>{i + 1}</Num>
+                    <span aria-hidden="true" className="max-sm:hidden">
+                      שב׳{NB}
+                    </span>
+                    <span className="sr-only">שבוע{NB}</span>
+                    <Num>{i + 1}</Num>
                   </span>
                   <Num className="text-micro leading-none">{v.toFixed(2)}</Num>
                 </li>
@@ -289,8 +297,8 @@ function SeasonSpine() {
 
 const inkRows: Array<{ key: SemanticKey; he: string }> = [
   { key: 'ink', he: 'דיו' },
-  { key: 'ink2', he: 'דיו 2' },
-  { key: 'ink3', he: 'דיו 3' },
+  { key: 'ink2', he: `דיו${NB}2` },
+  { key: 'ink3', he: `דיו${NB}3` },
   { key: 'link', he: 'קישור' },
   { key: 'sproutInk', he: 'דיו־נבט' },
   { key: 'waterInk', he: 'דיו־מים' },
@@ -333,7 +341,7 @@ function Matrix({ surface }: { surface: SurfaceKey }) {
         {inkRows.map((r) => (
           <tr key={r.key}>
             <th scope="row" className="py-1 pe-2 text-start text-micro font-semibold text-ink-2">
-              {r.he}
+              <NumText>{r.he}</NumText>
             </th>
             {bgCols.map((c) => {
               const ratio = contrast(set[r.key], set[c.key]);
@@ -417,7 +425,14 @@ export function PaletteSection() {
       }
     >
       <div className="grid gap-20 lg:gap-28">
-        <Block title="גלעין קרקע" note="שמונת הצבעים לפי היקף השימוש · HEX · OKLCH · ניגודיות טקסט">
+        <Block
+          title="גלעין קרקע"
+          note={
+            <>
+              שמונת הצבעים לפי היקף השימוש · <bdi lang="en">HEX</bdi> · <bdi lang="en">OKLCH</bdi> · ניגודיות טקסט
+            </>
+          }
+        >
           <SoilCore />
         </Block>
 
