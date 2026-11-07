@@ -246,6 +246,19 @@
     translate: none;
   }
 
+  /* With enlarged text on a phone the six labels would run into each other:
+     every other one drops to a second row, each still at its value. (At normal
+     text size 15rem is a 240px figure, narrower than any phone.) */
+  @container (max-width: 15rem) {
+    .ticks {
+      block-size: 3rem;
+    }
+
+    .tick:nth-child(even) {
+      inset-block-start: 1.5rem;
+    }
+  }
+
   .meta {
     display: flex;
     flex-wrap: wrap;

@@ -108,8 +108,11 @@
     inset-block-start: var(--y);
   }
 
-  /* centred on its point – a label sitting on a frame line */
+  /* centred on its point – a label sitting on a frame line. Near the photo's
+     edge, with enlarged text, it moves inward rather than being cut: its box is
+     one line (1lh) plus the tag's 0.25rem padding above and below */
   .pinCentre {
+    inset-block-start: clamp(0.5lh + 0.25rem, var(--y), 100% - 0.5lh - 0.25rem);
     translate: -50% -50%; /* rtl-ok: photo coordinates are physical */
   }
 
@@ -158,6 +161,71 @@
 
   .corner::before {
     content: none;
+  }
+
+  /* ───────────── survey: plates over the photo, or a key under it ───────────── */
+
+  /*
+   * The survey's plates lie in a layer over the photo, outside its clipping
+   * frame, so a plate is never cut. A plate is about 7.2em wide (em of the body
+   * text, which sun mode enlarges along with the plates) and plate א starts at
+   * 64% of the photo, so they fit on the ground while the photo is about 20em
+   * wide. Narrower – a 320px phone, a phone in sun mode, or enlarged text – they
+   * reflow into a key under the photo and only the parcel letters stay on the
+   * ground. At 19.75em a 390px phone keeps them on the photo in both themes.
+   */
+  .survey {
+    position: relative;
+    container-type: inline-size;
+  }
+
+  /* the frame is the layer's only in-flow sibling, so inset 0 is the photo's box */
+  .plates {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  .plates > * {
+    pointer-events: auto;
+  }
+
+  .marker {
+    display: none;
+  }
+
+  @container (max-width: 19.75em) {
+    .plates {
+      position: static;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-start;
+      gap: 0.5rem;
+      margin-block-start: 0.5rem;
+    }
+
+    .plates > .pin,
+    .plates > .corner {
+      position: static;
+    }
+
+    /* in the key a plate has a line of its own: it may wrap */
+    .plates .plate > span {
+      white-space: normal;
+    }
+
+    .marker {
+      display: inline-flex;
+    }
+  }
+
+  /* the scale leaves the corner under plate א while the two could still meet
+     (at normal text size this only happens where the phone rule above applies) */
+  @container (max-width: 26em) {
+    .corner {
+      inset-inline-start: auto;
+      inset-inline-end: 0.75rem;
+    }
   }
 
   /* ───────────── survey layer and crop frames ───────────── */
