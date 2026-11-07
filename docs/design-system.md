@@ -143,8 +143,13 @@ specimens. Anything that reads as a heading is marked up as one.
 - Decorative SVG: `aria-hidden`. Informative SVG: `role="img"` + Hebrew `aria-label`.
 - Fixed chrome never hides focus: `scroll-padding-block-start` follows the
   header's measured height (`--header-h`, set by TileHeader, rail included),
-  `scroll-padding-block-end` the toast stack (`--toast-stack-h`). Don't
-  hard-code either.
+  `scroll-padding-block-end` the larger of the toast stack
+  (`--toast-stack-h`) and the demo badge (`--badge-h`), both measured by
+  ToastProvider. Don't hard-code any of them. The toast stack sits above the
+  badge; a live toast caps its height and scrolls inside at large text.
+- The header bar is a size container (`@container/bar`): the sun toggle goes
+  icon-only by the bar's own width, so 200% text switches it too, and the bar
+  may wrap rather than push anything off-screen.
 - In-page navigation moves focus to the target section's h2 after the jump
   (the browser's own fragment navigation would leave it on `<body>`). A
   container that holds focus is never collapsed or made `inert`.
