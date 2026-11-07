@@ -1,3 +1,4 @@
+import type { CSSProperties } from 'react';
 import { Ashushit } from '@/components/illustrations/Ashushit';
 import { StageIcon } from '@/components/illustrations/StageIcons';
 import { Button } from '@/components/ui/Button';
@@ -47,6 +48,19 @@ const variants = [
 ] as const;
 
 /**
+ * A row of states: two, three or six to a row (by breakpoint, set as --cols),
+ * but never a cell narrower than the widest specimen – the primary pill, about
+ * 7.6rem in sun mode. At normal size every breakpoint keeps its count; with
+ * 200% text the row reflows to fewer columns instead of letting the pills
+ * overlap. (`- 1px` keeps sub-pixel rounding from dropping a column.)
+ */
+const stateGap = 'calc(var(--spacing) * 6)';
+const stateRow: CSSProperties = {
+  columnGap: stateGap,
+  gridTemplateColumns: `repeat(auto-fill, minmax(max(8rem, (100% - (var(--cols) - 1) * ${stateGap}) / var(--cols) - 1px), 1fr))`,
+};
+
+/**
  * Six states per variant. Only the resting sample is a live control; the
  * frozen states are specimens — inert, so keyboard and screen-reader users
  * don't meet 18 buttons that do nothing.
@@ -60,7 +74,7 @@ function ButtonMatrix() {
             <span>{v.he}</span>
             <Num className="text-micro font-normal text-ink-3">btn--{v.key}</Num>
           </p>
-          <ul className="grid grid-cols-2 items-start gap-x-6 gap-y-5 sm:grid-cols-3 xl:grid-cols-6">
+          <ul className="grid items-start gap-y-5 [--cols:2] sm:[--cols:3] xl:[--cols:6]" style={stateRow}>
             {states.map((s) => (
               <li key={s.key} className="grid justify-items-start gap-2" inert={s.key !== 'rest' || undefined}>
                 <Button
@@ -506,7 +520,10 @@ const columns: ReadonlyArray<Column<PlanLine>> = [
 function PlanTable() {
   return (
     <div className="overflow-hidden rounded-lg border border-line bg-surface">
+      {/* relative: the scroller holds its sr-only cell notes; positioned against <body>
+          they sat outside it and widened the page whenever the table scrolled (200% text) */}
       <DataTable
+        className="relative"
         caption={
           <span className="flex flex-wrap items-center gap-x-3 gap-y-2 px-4 pt-4 sm:px-5">
             <span>
@@ -539,7 +556,9 @@ function Toasts() {
           <span>ארבעת הטונים · דוגמאות סטטיות</span>
           <DemoTag />
         </p>
-        <ul className="grid max-w-[28rem] gap-4 lg:ms-auto" inert>
+        {/* a toast-list container: a narrow list (a phone at 200% text) stacks each
+            toast's text under its icon and close button instead of widening the page */}
+        <ul className="@container/toast-list grid w-full max-w-[28rem] gap-4 lg:ms-auto" inert>
           <li>
             <ToastCard
               isStatic

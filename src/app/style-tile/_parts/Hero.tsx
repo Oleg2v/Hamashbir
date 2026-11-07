@@ -48,9 +48,14 @@ export function Hero() {
 
         {/* poster across the measure; the blurb sits in the space the short word "שלך" leaves at inline-end */}
         <div className="mt-8 grid items-end gap-x-(--gutter) gap-y-6 xl:grid-cols-12">
-          <h1 id="hero-title" className="text-poster xl:col-span-9">
-            העונה <span className="text-sprout-ink">שלך</span>
-          </h1>
+          {/* a size container: the poster may shrink to fit its own column. 41cqi holds the longer word
+              („העונה”, 2.33em) at 95% of the column; the 128px floor is 39cqi at 360px, so the cap only
+              binds on narrower phones or with enlarged text – everywhere else the poster step wins */}
+          <div className="@container xl:col-span-9">
+            <h1 id="hero-title" className="text-poster" style={{ fontSize: 'min(var(--text-poster), 41cqi)' }}>
+              העונה <span className="text-sprout-ink">שלך</span>
+            </h1>
+          </div>
           <p className="max-w-[40ch] text-lead text-ink-2 xl:col-span-3 xl:pb-6">
             מערכת העיצוב של פורטל החקלאי: צבע, תמונה, טיפוגרפיה, מרווח, צורה, תנועה ורכיבים{NB}– לפני שורת קוד אחת של
             האפליקציה.

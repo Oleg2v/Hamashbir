@@ -101,17 +101,22 @@
   /* The fill is a circle centred on the bud (btn-h/2 from the inline-end edge,
      concentric with the pill's end cap). RTL default: inline-end = left.
      Opacity 0 at rest: contrast checkers ignore clip-path; it turns opaque
-     instantly as the sprout starts and clears only after it has shrunk back. */
+     instantly as the sprout starts and clears only after it has shrunk back.
+     Its copy of the label must sit exactly on the real one: the fill covers
+     the pill's padding box and takes the pill's own padding, gap and
+     alignment (inherit), and the type (weight, size, letter-spacing) inherits
+     from the pill too – so no size, variant, sun-mode or className change
+     can move or widen one copy without the other. */
   .btn__fill {
     --fill-x: calc(var(--btn-h) / 2);
     position: absolute;
     inset: 0;
     z-index: 1;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--btn-gap);
-    padding-inline: var(--btn-px) var(--btn-inset);
+    display: flex;
+    align-items: inherit;
+    justify-content: inherit;
+    gap: inherit;
+    padding: inherit;
     background: var(--bud);
     color: var(--bud-ink);
     pointer-events: none;
@@ -212,7 +217,9 @@
     opacity: 1;
   }
 
-  .btn[aria-busy='true'] > .btn__label {
+  /* both copies: a focused busy pill sprouts, and its fill must not show the
+     label the pill itself has hidden */
+  .btn[aria-busy='true'] .btn__label {
     opacity: 0;
   }
 
@@ -229,6 +236,12 @@
 
   .btn--primary .btn__loader {
     inset-inline-end: calc(var(--btn-inset) + var(--btn-bud));
+  }
+
+  /* a focused busy pill has sprouted: its seeds take the bud ink */
+  .btn--primary:focus-visible .btn__loader,
+  .btn--primary[data-force='focus'] .btn__loader {
+    color: var(--bud-ink);
   }
 
   .btn--icon .btn__loader {
@@ -954,6 +967,29 @@
 
   .toast[data-static] {
     inline-size: 100%;
+  }
+
+  /* A toast in a narrow list – a phone at 200% text – keeps its message
+     whole: the icon and the close button share the first row and the text
+     (title, body, actions) takes the full width under them, instead of the
+     three-column row overflowing the list. A list opts in with a
+     `toast-list` container (`@container/toast-list`); 16rem clears the
+     side-by-side row's own minimum (about 14rem in sun mode), and the
+     narrowest list at normal size (a 320px phone) is 18rem. */
+  @container toast-list (inline-size < 16rem) {
+    .toast {
+      grid-template-columns: 1fr auto;
+    }
+
+    .toast__close {
+      grid-row: 1;
+      grid-column: 2;
+    }
+
+    .toast > div {
+      grid-row: 2;
+      grid-column: 1 / -1;
+    }
   }
 
   .toast[data-state='open'] {

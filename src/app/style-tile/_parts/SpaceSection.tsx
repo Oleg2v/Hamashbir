@@ -16,24 +16,27 @@ const ruler: CSSProperties = {
   backgroundRepeat: 'no-repeat',
 };
 
-/** Reads down, then across (CSS columns), so the series grows in one direction. */
+/**
+ * Reads down, then across (CSS columns), so the series grows in one direction.
+ * A row is a wrapping line (name · px · bar): at normal size it sits on one
+ * line, as a grid would; with 200% text a bar that no longer fits beside its
+ * labels moves under them at full 1:1 length, and only a line still narrower
+ * than the bar (a phone) caps it — nothing runs out of its column.
+ */
 function SpaceScale() {
   const entries = Object.entries(space).filter(([k]) => k !== '0') as Array<[string, number]>;
   return (
     <ol className="gap-x-(--gutter) lg:columns-2" aria-label="סולם המרווחים">
       {entries.map(([k, px]) => (
-        <li
-          key={k}
-          className="grid break-inside-avoid grid-cols-[minmax(5.5rem,auto)_minmax(4rem,auto)_1fr] items-end gap-x-4 gap-y-2 border-b border-line py-3 max-sm:grid-cols-[auto_1fr]"
-        >
-          <Num className="whitespace-nowrap text-caption font-medium">space-{k}</Num>
-          <span className="flex items-baseline justify-end gap-3 whitespace-nowrap sm:justify-start">
+        <li key={k} className="flex break-inside-avoid flex-wrap items-end gap-x-4 gap-y-2 border-b border-line py-3">
+          <Num className="whitespace-nowrap text-caption font-medium sm:min-w-[5.5rem]">space-{k}</Num>
+          <span className="flex flex-wrap items-baseline justify-end gap-x-3 gap-y-1 whitespace-nowrap max-sm:flex-1 sm:min-w-[4rem] sm:justify-start">
             <Num className="text-caption text-ink-2">{px}px</Num>
             <Num className="text-micro text-ink-3 sm:hidden">p-{k}</Num>
           </span>
-          <span className="flex items-end gap-2 max-sm:col-span-2">
+          <span className="flex min-w-0 flex-wrap items-end gap-2 max-sm:basis-full sm:flex-auto">
             <span
-              className="block h-3 shrink-0 bg-[color-mix(in_oklab,var(--color-sprout)_45%,transparent)]"
+              className="block h-3 max-w-full shrink-0 bg-[color-mix(in_oklab,var(--color-sprout)_45%,transparent)]"
               style={{ inlineSize: `${px / 16}rem`, ...ruler }}
               aria-hidden="true"
             />

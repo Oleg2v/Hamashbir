@@ -59,48 +59,66 @@ const rules = [
 function SurveyFigure() {
   const g = geometry();
   const scale = survey.scaleBarM / survey.metresPerPx / W;
+  const at = (p: (typeof survey.parcels)[number]) => ({ '--x': `${p.at.x}%`, '--y': `${p.at.y}%` }) as CSSProperties;
   return (
     <figure className="grid content-start gap-4">
-      <Photo photo={orchard} ratio="4/3" slot="wide7">
-        <svg
-          className={css.overlay}
-          viewBox={`0 0 ${W} ${H}`}
-          preserveAspectRatio="none"
-          aria-hidden="true"
-          focusable="false"
-        >
-          {(['casing', 'line'] as const).map((layer) => (
-            <g key={layer} className={css[layer]}>
-              <path d={g.ticks} className={css.faint} />
-              <path d={g.grid} className={css.faint} />
-              <path d={g.boundary} className={css.boundary} />
-              <path d={g.vertices} className={css.vertex} />
-              {survey.vertices.map(([x, y]) => (
-                <circle key={`${x}-${y}`} cx={x} cy={y} r={10} className={css.vertex} />
-              ))}
-            </g>
+      {/* the plates lie over the photo, outside its clipping frame; when they no longer fit there
+          (a narrow phone, or enlarged text) they reflow into a key under it, and only the parcel
+          letters stay on the ground (.survey in imagery.module.css) */}
+      <div className={css.survey}>
+        <Photo photo={orchard} ratio="4/3" slot="wide7">
+          <svg
+            className={css.overlay}
+            viewBox={`0 0 ${W} ${H}`}
+            preserveAspectRatio="none"
+            aria-hidden="true"
+            focusable="false"
+          >
+            {(['casing', 'line'] as const).map((layer) => (
+              <g key={layer} className={css[layer]}>
+                <path d={g.ticks} className={css.faint} />
+                <path d={g.grid} className={css.faint} />
+                <path d={g.boundary} className={css.boundary} />
+                <path d={g.vertices} className={css.vertex} />
+                {survey.vertices.map(([x, y]) => (
+                  <circle key={`${x}-${y}`} cx={x} cy={y} r={10} className={css.vertex} />
+                ))}
+              </g>
+            ))}
+          </svg>
+          {survey.parcels.map((p) => (
+            <span
+              key={p.id}
+              className={cn(css.pin, css.tag, css.marker, 'text-micro font-bold')}
+              style={at(p)}
+              aria-hidden="true"
+            >
+              {p.id}
+            </span>
           ))}
-        </svg>
-        {survey.parcels.map((p) => (
-          <div key={p.id} className={css.pin} style={{ '--x': `${p.at.x}%`, '--y': `${p.at.y}%` } as CSSProperties}>
-            <p className={css.plate} style={{ '--swatch': sampleRamp(ndvi.stops, p.index) } as CSSProperties}>
-              <span className="text-micro font-bold">
-                {p.id} · {p.name}
-              </span>
-              <span className={cn(css.plateMeta, 'text-micro')}>
-                מדד ממוצע <Num>{p.index.toFixed(2)}</Num>
-              </span>
-            </p>
-          </div>
-        ))}
-        <p className={cn(css.plate, css.corner)}>
-          <span className={css.scaleBar} style={{ '--scale': scale.toFixed(4) } as CSSProperties} />
-          <span className="text-micro">
-            <Num>{survey.scaleBarM}</Num>
-            {NB}מ׳ · משוער
-          </span>
-        </p>
-      </Photo>
+        </Photo>
+        <div className={css.plates}>
+          {survey.parcels.map((p) => (
+            <div key={p.id} className={css.pin} style={at(p)}>
+              <p className={css.plate} style={{ '--swatch': sampleRamp(ndvi.stops, p.index) } as CSSProperties}>
+                <span className="text-micro font-bold">
+                  {p.id} · {p.name}
+                </span>
+                <span className={cn(css.plateMeta, 'text-micro')}>
+                  מדד ממוצע <Num>{p.index.toFixed(2)}</Num>
+                </span>
+              </p>
+            </div>
+          ))}
+          <p className={cn(css.plate, css.corner)}>
+            <span className={css.scaleBar} style={{ '--scale': scale.toFixed(4) } as CSSProperties} />
+            <span className="text-micro">
+              <Num>{survey.scaleBarM}</Num>
+              {NB}מ׳ · משוער
+            </span>
+          </p>
+        </div>
+      </div>
       <figcaption className="flex flex-wrap items-center gap-x-4 gap-y-2 text-micro text-ink-2">
         <span>
           {orchard.place} · <Num>{survey.coords}</Num>

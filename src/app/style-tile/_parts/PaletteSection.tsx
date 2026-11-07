@@ -1,3 +1,4 @@
+import { Fragment, type CSSProperties } from 'react';
 import { StageIcon } from '@/components/illustrations/StageIcons';
 import { DemoTag } from '@/components/ui/Chip';
 import { Num } from '@/components/ui/Num';
@@ -14,6 +15,7 @@ import {
   type SemanticKey,
   type SurfaceKey,
 } from '@/design/tokens';
+import { cn } from '@/lib/cn';
 import { NB } from '@/lib/typography';
 import { Block, Section } from './Section';
 
@@ -58,22 +60,25 @@ function SoilCore() {
             className="grid grid-cols-2 items-end gap-x-6 gap-y-3 px-5 py-5 sm:grid-cols-4 lg:min-h-28 lg:grid-cols-12 lg:items-center lg:px-8"
             style={{ backgroundColor: c.hex, color: text.color }}
           >
-            <div className="col-span-2 flex items-baseline gap-3 sm:col-span-4 lg:col-span-3">
+            <div className="col-span-2 flex flex-wrap items-baseline gap-x-3 gap-y-1 sm:col-span-4 lg:col-span-3">
               <span className="font-display text-h3 leading-none">{c.he}</span>
               <span className="text-caption font-semibold" lang="en" dir="ltr">
                 {c.en}
               </span>
             </div>
             <dl className="contents">
-              <div className="col-span-2 grid gap-0.5 sm:col-span-2 lg:col-span-3">
+              {/* the value lines wrap between their numbers (200% text). From lg they may first run on
+                  into the gutter, as the longest oklch() does in sun mode at 1024px, so a line wraps
+                  only where it would reach the next column */}
+              <div className="col-span-2 grid gap-0.5 sm:col-span-2 lg:col-span-3 lg:-me-6">
                 <dt className="sr-only">ערכי צבע</dt>
                 <dd>
                   <Num className="text-body font-semibold">{c.hex}</Num>
                 </dd>
-                <dd className="whitespace-nowrap">
+                <dd>
                   <Num className="text-micro">rgb {rgbString(c.hex)}</Num>
                 </dd>
-                <dd className="whitespace-nowrap">
+                <dd>
                   <Num className="text-micro">{oklchString(c.hex)}</Num>
                 </dd>
               </div>
@@ -81,7 +86,7 @@ function SoilCore() {
                 <dt className="sr-only">תפקיד</dt>
                 <dd className="text-caption font-semibold">{c.role}</dd>
               </div>
-              <div className="col-span-2 flex items-baseline justify-between gap-4 sm:col-span-2 lg:col-span-2 lg:grid lg:justify-items-end lg:gap-1">
+              <div className="col-span-2 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 sm:col-span-2 lg:col-span-2 lg:grid lg:justify-items-end lg:gap-1">
                 <dt className="sr-only">היקף שימוש וניגודיות</dt>
                 <dd>
                   <Num className="text-caption font-semibold">{share}%</Num>&nbsp;
@@ -141,7 +146,7 @@ const coverage = [
   { label: 'מסנן דיסקים 2״', v: 0.17 },
 ];
 
-/** A label pinned to a value on the ramp: centred, except at the two ends. */
+/** A tick pinned to a value on the ramp: centred, except at the two ends, which sit flush with its edges. */
 function Pin({ at, edge, children }: { at: number; edge?: 'start' | 'end'; children: React.ReactNode }) {
   return (
     <span
@@ -159,34 +164,141 @@ function Pin({ at, edge, children }: { at: number; edge?: 'start' | 'end'; child
   );
 }
 
+const vars = (o: Record<string, string>) => o as CSSProperties;
+const pct = (x: number) => `${Math.round(x * 1e5) / 1e3}%`;
+
+/** A stretch of the ramp, as fractions of its length from inline-start. */
+type Span = { from: number; to: number };
+type Edge = 'start' | 'end' | null;
+
+/**
+ * The room a stop label has on its row: halfway to the next label on that row, or up to the
+ * ramp's edge. On two rows the lower row also keeps clear of the upper row's marks, which run
+ * down past it.
+ */
+function room(i: number, rows: 1 | 2): Span {
+  const at = (j: number) => (j >= 0 && j < ndvi.stops.length ? ndvi.stops[j].at : undefined);
+  const here = ndvi.stops[i].at;
+  const prev = at(i - rows);
+  const next = at(i + rows);
+  let from = prev === undefined ? 0 : (prev + here) / 2;
+  let to = next === undefined ? 1 : (here + next) / 2;
+  if (rows === 2 && i % 2 === 1) {
+    from = Math.max(from, at(i - 1) ?? 0);
+    to = Math.min(to, at(i + 1) ?? 1);
+  }
+  return { from, to };
+}
+
+/**
+ * A label's box in its room (stops sit inside the ramp): the widest stretch centred on the stop,
+ * so the label centres on it. A label whose room reaches a ramp edge may run past that box toward
+ * its other side, flush against the edge – the first label flush start, the last flush end –
+ * instead of crossing it; past its room's width a label wraps.
+ */
+function place(at: number, { from, to }: Span) {
+  const half = Math.min(at - from, to - at);
+  const edge: Edge = at - from <= to - at ? (from === 0 ? 'start' : null) : to === 1 ? 'end' : null;
+  return {
+    start: pct(at - half),
+    end: pct(1 - at - half),
+    max: edge ? pct((to - from) / (2 * half)) : '100%',
+    edge,
+  };
+}
+
+const textAlign = { start: 'text-start', end: 'text-end', none: 'text-center' } as const;
+const textAlignTwoRows = {
+  start: '@max-[12em]:text-start',
+  end: '@max-[12em]:text-end',
+  none: '@max-[12em]:text-center',
+} as const;
+
+/**
+ * The stop labels over their marks, in one row while the ramp is at least 12em of label text
+ * across; narrower (200% text on a phone) every other label drops to a second row, which doubles
+ * each label's room. A mark always stands on its stop, wherever its label sits.
+ */
+function StopLabels() {
+  return (
+    <div className="grid min-h-12 grid-cols-1 content-start gap-y-1">
+      {ndvi.stops.map((s, i) => {
+        const one = place(s.at, room(i, 1));
+        const two = place(s.at, room(i, 2));
+        const lower = i % 2 === 1;
+        return (
+          <Fragment key={s.at}>
+            <span
+              className={cn(
+                'col-start-1 row-start-1 flex self-end ms-(--ms) me-(--me) @max-[12em]:ms-(--ms-2) @max-[12em]:me-(--me-2)',
+                lower && '@max-[12em]:row-start-2',
+                one.edge === 'end' && 'flex-row-reverse',
+                two.edge === 'end' ? '@max-[12em]:flex-row-reverse' : one.edge === 'end' && '@max-[12em]:flex-row',
+              )}
+              style={vars({ '--ms': one.start, '--me': one.end, '--ms-2': two.start, '--me-2': two.end })}
+            >
+              {/* auto margins centre it; wider than its box, it sits flush at the box's start (end) */}
+              <span
+                className={cn(
+                  'mx-auto max-inline-(--max) shrink-0 font-semibold @max-[12em]:max-inline-(--max-2)',
+                  textAlign[one.edge ?? 'none'],
+                  textAlignTwoRows[two.edge ?? 'none'],
+                )}
+                style={vars({ '--max': one.max, '--max-2': two.max })}
+              >
+                {s.label}
+              </span>
+            </span>
+            <span
+              className={cn(
+                'col-start-1 row-start-2 min-h-3 w-px justify-self-start bg-ink-2',
+                lower ? '@max-[12em]:row-start-3' : '@max-[12em]:row-end-4',
+              )}
+              style={{ marginInlineStart: `calc(${pct(s.at)} - 0.5px)` }}
+            />
+          </Fragment>
+        );
+      })}
+    </div>
+  );
+}
+
 function Ndvi() {
   return (
     <div className="grid gap-12">
       <figure className="grid gap-2">
-        <div className="relative h-12 text-micro" aria-hidden="true">
-          {ndvi.stops.map((s) => (
-            <Pin key={s.at} at={s.at}>
-              <span className="font-semibold">{s.label}</span>
-              <span className="mx-auto h-3 w-px bg-ink-2" />
-            </Pin>
-          ))}
-        </div>
-        <div className="h-8 rounded-full" style={{ backgroundImage: 'var(--ndvi-inline)' }} aria-hidden="true" />
-        <div className="relative h-8 text-micro text-ink-2" aria-hidden="true">
-          {ndvi.ticks.map((t, i) => (
-            <Pin key={t} at={t} edge={i === 0 ? 'start' : i === ndvi.ticks.length - 1 ? 'end' : undefined}>
-              <span
-                className={
-                  i === 0
-                    ? 'ms-0 h-2 w-px bg-line-strong'
-                    : i === ndvi.ticks.length - 1
-                      ? 'ms-auto h-2 w-px bg-line-strong'
-                      : 'mx-auto h-2 w-px bg-line-strong'
-                }
-              />
-              <Num>{t.toFixed(1)}</Num>
-            </Pin>
-          ))}
+        {/* a size container in label text: the stop labels and figures lay out by how much fits across */}
+        <div className="@container grid gap-2 text-micro" aria-hidden="true">
+          <StopLabels />
+          <div className="h-8 rounded-full" style={{ backgroundImage: 'var(--ndvi-inline)' }} />
+          <div className="relative h-8 text-ink-2">
+            {ndvi.ticks.map((t, i) => (
+              <Pin key={t} at={t} edge={i === 0 ? 'start' : i === ndvi.ticks.length - 1 ? 'end' : undefined}>
+                <span
+                  className={
+                    i === 0
+                      ? 'ms-0 h-2 w-px bg-line-strong'
+                      : i === ndvi.ticks.length - 1
+                        ? 'ms-auto h-2 w-px bg-line-strong'
+                        : 'mx-auto h-2 w-px bg-line-strong'
+                  }
+                />
+                {/* a figure gives way before it touches a neighbour – under 16em across the two beside
+                    the end figures, under 11em the middle pair too; every mark stays */}
+                <Num
+                  className={
+                    i === 1 || i === ndvi.ticks.length - 2
+                      ? '@max-[16em]:invisible'
+                      : i > 0 && i < ndvi.ticks.length - 1
+                        ? '@max-[11em]:invisible'
+                        : undefined
+                  }
+                >
+                  {t.toFixed(1)}
+                </Num>
+              </Pin>
+            ))}
+          </div>
         </div>
         <figcaption className="mt-2 max-w-[64ch] text-caption text-ink-2">
           <NumText>
@@ -207,20 +319,30 @@ function Ndvi() {
             </span>
             <DemoTag />
           </figcaption>
-          {/* 5 then 7 per row: every cell holds its label and value, sun-mode type floors included */}
-          <ol className="grid grid-cols-5 gap-1 sm:grid-cols-7" aria-label="NDVI לפי שבוע, נתוני דמו">
+          {/* 5 then 7 per row (sun-mode type floors included), but never a tile narrower than its
+              value – four mono figures, 2.4em – and its padding: at 200% text a row takes fewer,
+              wider tiles. (The 0.1px keeps exactly 5 or 7 from rounding down to one fewer.) */}
+          <ol
+            className="grid gap-1 text-micro [--cols:5] [--pad:calc(var(--spacing)*2)] sm:[--cols:7]"
+            style={{
+              gridTemplateColumns:
+                'repeat(auto-fill, minmax(max((100% - (var(--cols) - 1) * var(--spacing)) / var(--cols) - 0.1px, 2.4em + 2 * var(--pad)), 1fr))',
+            }}
+            aria-label="NDVI לפי שבוע, נתוני דמו"
+          >
             {weekly.map((v, i) => {
               const bg = sampleRamp(ndvi.stops, v);
               const fg = bestText(bg);
               return (
                 <li
                   key={i}
-                  className="grid aspect-[4/5] content-between rounded-xs p-2"
+                  className="grid aspect-[4/5] content-between rounded-xs p-(--pad)"
                   style={{ backgroundColor: bg, color: fg.color }}
                 >
                   <span className="text-micro font-semibold leading-none">
+                    {/* a plain space: where a tile is too narrow (200% text), the number drops under שב׳ */}
                     <span aria-hidden="true" className="max-sm:hidden">
-                      שב׳{NB}
+                      שב׳{' '}
                     </span>
                     <span className="sr-only">שבוע{NB}</span>
                     <Num>{i + 1}</Num>
