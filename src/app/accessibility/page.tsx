@@ -20,7 +20,7 @@ export default function AccessibilityPage() {
   return (
     <div data-surface="paper" className="min-h-dvh">
       {/* the statement offers the same outdoor mode it describes */}
-      <header className="wrap flex items-center justify-between gap-4 pt-6 lg:pt-10">
+      <header className="wrap @container/bar flex flex-wrap items-center justify-between gap-x-4 gap-y-2 pt-6 lg:pt-10">
         <Link href="/style-tile" className="inline-flex min-h-(--target) items-center no-underline">
           <Wordmark compact />
           <span className="sr-only"> – חזרה ללוח הסגנון</span>

@@ -136,9 +136,12 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   const itemsRef = useRef(items);
   itemsRef.current = items;
   const viewportRef = useRef<HTMLDivElement>(null);
-  const hovered = useRef(false);
-  const focused = useRef(false);
-  const paused = useCallback(() => hovered.current || focused.current, []);
+  // read live, not tracked with enter/leave flags: a toast removed under the
+  // pointer never sends pointerleave, which left every later timer stuck
+  const paused = useCallback(() => {
+    const vp = viewportRef.current;
+    return !!vp && (vp.matches(':hover') || vp.contains(document.activeElement));
+  }, []);
 
   const dismiss = useCallback((id: number, restoreFocus = false) => {
     const item = itemsRef.current.find((t) => t.id === id);
@@ -190,6 +193,9 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       }
       if (e.key !== 'Escape') return;
       const host = (document.activeElement as HTMLElement | null)?.closest<HTMLElement>('[data-toast-id]');
+      // Escape in a text field belongs to the field (a search clears itself), not to the toasts
+      const target = e.target as HTMLElement | null;
+      if (!host && target?.closest('input, textarea, select, [contenteditable="true"]')) return;
       const own = host ? open.find((t) => String(t.id) === host.dataset.toastId) : undefined;
       dismiss((own ?? open[open.length - 1]).id, own != null);
     };
@@ -197,37 +203,44 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     return () => document.removeEventListener('keydown', onKey);
   }, [dismiss]);
 
-  // the stack's footprint from the bottom edge, for scroll-padding-block-end
+  // The fixed chrome at the bottom, measured for globals.css: the demo badge
+  // (--badge-h; the stack sits above it) and the toast stack (--toast-stack-h),
+  // each from the bottom edge. They feed scroll-padding-block-end, so a
+  // focused control is never scrolled behind either, and the page's end
+  // padding, so its last controls can still scroll clear of an open toast.
   useEffect(() => {
     const vp = viewportRef.current;
     if (!vp) return;
     const root = document.documentElement;
-    const ro = new ResizeObserver(() => {
+    const fromBottom = (el: Element) => window.innerHeight - el.getBoundingClientRect().bottom;
+    const measure = () => {
+      const badge = document.querySelector('.demo-badge');
+      if (badge) {
+        const bh = (badge as HTMLElement).offsetHeight;
+        root.style.setProperty('--badge-h', `${Math.ceil(bh + fromBottom(badge))}px`);
+      }
       const h = vp.offsetHeight;
-      if (!h) return root.style.removeProperty('--toast-stack-h');
-      const fromBottom = window.innerHeight - vp.getBoundingClientRect().bottom;
-      root.style.setProperty('--toast-stack-h', `${Math.ceil(h + fromBottom)}px`);
-    });
+      if (!h) root.style.removeProperty('--toast-stack-h');
+      else root.style.setProperty('--toast-stack-h', `${Math.ceil(h + fromBottom(vp))}px`);
+    };
+    const ro = new ResizeObserver(measure);
     ro.observe(vp);
+    const badge = document.querySelector('.demo-badge');
+    if (badge) ro.observe(badge);
+    window.addEventListener('resize', measure);
+    measure();
     return () => {
       ro.disconnect();
+      window.removeEventListener('resize', measure);
       root.style.removeProperty('--toast-stack-h');
+      root.style.removeProperty('--badge-h');
     };
   }, []);
 
   return (
     <ToastContext.Provider value={value}>
       {children}
-      <div
-        ref={viewportRef}
-        className="toast-viewport"
-        onPointerEnter={() => (hovered.current = true)}
-        onPointerLeave={() => (hovered.current = false)}
-        onFocus={() => (focused.current = true)}
-        onBlur={(e) => {
-          if (!e.currentTarget.contains(e.relatedTarget as Node | null)) focused.current = false;
-        }}
-      >
+      <div ref={viewportRef} className="toast-viewport">
         {items.map((t) => (
           <LiveToast key={t.id} item={t} paused={paused} onDismiss={(restore) => dismiss(t.id, restore)} />
         ))}

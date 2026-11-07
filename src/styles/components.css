@@ -920,23 +920,37 @@
 
   /* ───────────────────────────── Toast ───────────────────────────── */
 
+  /* The live stack sits above the demo badge (its measured height, set by
+     ToastProvider) and is a toast-list container, so live toasts reflow like
+     the static list when they are narrow (a phone at 200% text). */
   .toast-viewport {
     position: fixed;
     z-index: var(--z-toast);
-    inset-block-end: 4rem;
+    inset-block-end: calc(var(--badge-h, 3.25rem) + 0.5rem);
     inset-inline: 1rem;
     display: grid;
     gap: 0.75rem;
     justify-items: center;
+    container: toast-list / inline-size;
     pointer-events: none;
   }
 
   @media (min-width: 40rem) {
     .toast-viewport {
-      inset-block-end: 1.5rem;
       inset-inline: 1.5rem auto;
+      /* a size container needs a definite width (shrink-to-fit would be 0) */
+      inline-size: min(28rem, calc(100vw - 3rem));
       justify-items: start;
     }
+  }
+
+  /* A live toast never runs off the top of the screen: at large text it
+     scrolls inside itself (its own shadow is not clipped by its own
+     overflow). It may cover the header – it sits above it and can be closed. */
+  .toast-viewport > .toast {
+    max-block-size: calc(100dvh - var(--badge-h, 3.25rem) - 1.5rem);
+    overflow-y: auto;
+    overscroll-behavior: contain;
   }
 
   /* A phone shows one toast at a time: the newest. Older sticky ones wait
@@ -1206,9 +1220,11 @@
     transform: rotate(90deg);
   }
 
-  /* Narrow phones (under 352px, 320 included): the toggle keeps its icon and
-     its name stays in the accessibility tree, so the header never clips it. */
-  @media (max-width: 21.99rem) {
+  /* A narrow header bar (a 320px phone, or a phone at 200% text): the toggle
+     keeps its icon and its name stays in the accessibility tree. The query
+     reads the bar's own width (container "bar", rem = the page's text size),
+     so large text switches it too; the bar may still wrap as a last resort. */
+  @container bar (max-width: 21rem) {
     .sun-toggle {
       position: relative;
       justify-content: center;
@@ -1285,8 +1301,14 @@
     background-image: var(--ndvi-inline);
     transform-origin: var(--start) center;
     transform: scaleX(0);
-    animation: season-progress linear both;
-    animation-timeline: scroll(root block);
+  }
+
+  /* scroll-linked, but still travel: only without a reduced-motion preference */
+  @media (prefers-reduced-motion: no-preference) {
+    .season-progress {
+      animation: season-progress linear both;
+      animation-timeline: scroll(root block);
+    }
   }
 
   @keyframes season-progress {

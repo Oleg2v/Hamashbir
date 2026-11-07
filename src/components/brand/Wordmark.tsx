@@ -35,7 +35,10 @@ export function Wordmark({ className, compact = false }: { className?: string; c
     <span className={cn('inline-flex items-center gap-3 text-ink', className)}>
       <SproutMark size={compact ? 28 : 34} />
       <span className="flex flex-col leading-none">
-        <span className="font-display text-lead leading-none whitespace-nowrap">המשביר לחקלאי</span>{' '}
+        {/* one line; it may break into two only inside a header bar too narrow for it (a phone at 200% text) */}
+        <span className="font-display text-lead leading-none whitespace-nowrap @max-[19rem]/bar:whitespace-normal">
+          המשביר לחקלאי
+        </span>{' '}
         {compact ? null : <span className="mt-1 text-micro font-bold leading-none text-ink-2">העונה שלך</span>}
       </span>
     </span>

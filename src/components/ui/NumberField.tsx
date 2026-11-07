@@ -82,7 +82,9 @@ export function NumberField({
   const precision = (String(step).split('.')[1] ?? '').length;
   /** k steps along the grid; from an off-grid value the first step lands on the grid */
   const nudge = (dir: 1 | -1, k = 1) => {
-    const base = Number.isNaN(value) || empty ? min : value;
+    // from an empty field the first step lands on min, as ArrowUp/ArrowDown do
+    if (Number.isNaN(value) || empty) return commit(String(min));
+    const base = value;
     const n = gridPos(base);
     const idx = onGrid(base) ? Math.round(n) + dir * k : dir > 0 ? Math.ceil(n) + k - 1 : Math.floor(n) - k + 1;
     commit(clamp(Number((min + idx * step).toFixed(precision))).toString());
@@ -101,11 +103,20 @@ export function NumberField({
       <label className="field__label" htmlFor={id}>
         {label}
       </label>
-      <div className="field__control stepper">
+      {/* the field counts as touched only when focus leaves the whole stepper, so moving
+          between the value and its − / + never sets off the error */}
+      <div
+        className="field__control stepper"
+        onBlur={(e) => {
+          if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setTouched(true);
+        }}
+      >
         <button
           type="button"
           className="stepper__btn"
           aria-label={`הפחתה: ${stepWords}`}
+          // a mouse press keeps focus where it is (no blur, no flash of the error)
+          onMouseDown={(e) => e.preventDefault()}
           aria-controls={id}
           aria-disabled={disabled || atMin || undefined}
           onClick={() => !disabled && !atMin && nudge(-1)}
@@ -126,7 +137,6 @@ export function NumberField({
           disabled={disabled}
           onChange={(e) => commit(e.target.value)}
           onFocus={() => setTouched(false)}
-          onBlur={() => setTouched(true)}
           onKeyDown={(e) => {
             if (e.key === 'e' || e.key === 'E' || e.key === '+') e.preventDefault();
             if (e.key === 'PageUp' || e.key === 'PageDown') {
@@ -144,6 +154,7 @@ export function NumberField({
           type="button"
           className="stepper__btn"
           aria-label={`הוספה: ${stepWords}`}
+          onMouseDown={(e) => e.preventDefault()}
           aria-controls={id}
           aria-disabled={disabled || atMax || undefined}
           onClick={() => !disabled && !atMax && nudge(1)}

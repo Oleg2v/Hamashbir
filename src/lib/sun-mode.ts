@@ -39,11 +39,23 @@ export function holdPlace() {
   probe: for (const dy of [16, 64, 160, 320]) {
     for (const fx of [0.5, 0.25, 0.75]) {
       const el = document.elementFromPoint(innerWidth * fx, Math.min(innerHeight - 1, headerH + dy));
-      if (!el || el === root || el === document.body || el.closest('header, .toast-viewport, .demo-badge')) continue;
+      // skip only the fixed page chrome; a section's own <header> is a fine anchor
+      if (!el || el === root || el === document.body || el.closest('[data-page-header], .toast-viewport, .demo-badge'))
+        continue;
       const h = el.getBoundingClientRect().height;
       if (h > 0 && h < innerHeight * 0.75) {
         anchor = el;
         break probe;
+      }
+    }
+  }
+  // fallback: the first heading or paragraph that starts below the header
+  if (!anchor) {
+    for (const el of document.querySelectorAll('main :is(h2, h3, h4, p, li, figure)')) {
+      const r = el.getBoundingClientRect();
+      if (r.top >= headerH && r.height > 0 && r.height < innerHeight * 0.75) {
+        anchor = el;
+        break;
       }
     }
   }

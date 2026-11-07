@@ -118,9 +118,10 @@ export function TileHeader() {
     };
   }, []);
 
-  // keep the current chip visible inside the rail
+  // keep the current chip visible inside the rail – unless the rail holds
+  // focus: then the focused chip stays where the user is
   useEffect(() => {
-    if (!active) return;
+    if (!active || railRef.current?.contains(document.activeElement)) return;
     const chip = railRef.current?.querySelector<HTMLElement>(`[data-key="${active}"]`);
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     chip?.scrollIntoView({ block: 'nearest', inline: 'center', behavior: reduce ? 'auto' : 'smooth' });
@@ -129,19 +130,27 @@ export function TileHeader() {
   return (
     <header
       ref={headerRef}
+      // the page chrome, not a section's own <header> (holdPlace skips only this)
+      data-page-header=""
       data-surface={overHero ? 'soil' : 'paper'}
       className={cn(
         'fixed inset-x-0 top-0 z-(--z-header)',
         overHero ? 'border-b border-transparent bg-transparent' : 'border-b border-line bg-canvas/95 backdrop-blur-md',
       )}
     >
-      <div ref={barRef} className="wrap flex min-h-16 items-center justify-between gap-3 sm:gap-6 lg:min-h-18">
+      {/* a size container: the sun toggle goes icon-only when the bar itself is narrow (also at
+          200% text), and the bar may wrap to a second row before anything leaves the screen */}
+      <div
+        ref={barRef}
+        className="wrap @container/bar flex min-h-16 flex-wrap items-center justify-between gap-x-3 gap-y-2 sm:gap-x-6 lg:min-h-18 sun:py-2"
+      >
         <a href="#hero" className="inline-flex min-h-(--target) shrink-0 items-center no-underline">
           <Wordmark />
           <span className="sr-only"> – לראש העמוד</span>
         </a>
         <nav aria-label="סעיפי לוח הסגנון" className="hidden min-w-0 flex-1 justify-center xl:flex">
-          <ul className="flex min-w-0 items-center gap-1 overflow-x-auto">
+          {/* wraps instead of scrolling: a scroller clipped the links' focus rings and hid the last ones */}
+          <ul className="flex min-w-0 flex-wrap items-center justify-center gap-1 py-1">
             {keys.map((k) => (
               <li key={k} className="shrink-0">
                 <a
@@ -170,12 +179,12 @@ export function TileHeader() {
         )}
       >
         <div className="min-h-0 overflow-hidden">
+          {/* never inert while tucked away: Tab and Shift+Tab still reach the chips, and focus
+              brings the rail back (onFocus). Chrome scrolls a focused chip into view only when
+              it is fully hidden; a half-visible one stayed half off-screen, hence scrollIntoView */}
           <div
             ref={railRef}
             className="wrap section-rail"
-            inert={railHidden || undefined}
-            // Chrome scrolls a focused chip into view only when it is fully
-            // hidden; a half-visible one stayed half off-screen
             onFocus={(e) => {
               setRailHidden(false);
               const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;

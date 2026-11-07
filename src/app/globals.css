@@ -37,11 +37,13 @@
        at the top – its measured height, set by TileHeader, plus room for a
        focus ring – and the fixed demo badge at the bottom */
     scroll-padding-block-start: calc(var(--header-h, 7.75rem) + 0.75rem);
-    scroll-padding-block-end: max(5rem, calc(var(--toast-stack-h, 0px) + 1rem));
+    scroll-padding-block-end: max(5rem, calc(var(--badge-h, 0px) + 1rem), calc(var(--toast-stack-h, 0px) + 1rem));
   }
 
   body {
     min-block-size: 100dvh;
+    /* while toasts are open, the page's last controls can still scroll clear of them */
+    padding-block-end: var(--toast-stack-h, 0px);
     font-size: var(--text-body);
     line-height: var(--text-body--line-height);
     font-weight: 400;
