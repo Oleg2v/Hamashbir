@@ -25,8 +25,14 @@ export function ToastDemo() {
           })
         }
       >
-        הזמינו את שלב{NB}
-        <Num>1</Num>
+        {/* one inline run (.btn__label is a flex box: as two items, the „1” broke away from „שלב”) */}
+        <span>
+          {'הזמינו את '}
+          <span className="whitespace-nowrap">
+            שלב{NB}
+            <Num>1</Num>
+          </span>
+        </span>
       </Button>
       <Button
         variant="secondary"

@@ -19,22 +19,33 @@ const ruler: CSSProperties = {
 /**
  * Reads down, then across (CSS columns), so the series grows in one direction.
  * A row is a wrapping line (name · px · bar): at normal size it sits on one
- * line, as a grid would; with 200% text a bar that no longer fits beside its
- * labels moves under them at full 1:1 length, and only a line still narrower
- * than the bar (a phone) caps it — nothing runs out of its column.
+ * line, as a grid would. With large text every row reflows the same way, never
+ * some rows one way and their neighbours another:
+ * - phone: the bar has its own line; the px value and its p- label are one
+ *   unbreakable pair. Each row is a size container in caption em, and once the
+ *   widest row (space-40: 8 + 5 + 4 mono characters at 0.6em, the p- label in
+ *   micro, at most 0.9375 of caption, plus the two gaps) no longer fits on one
+ *   line, every row puts the pair on its own line, under the name.
+ * - sm and up: the bar's slot is reserved at the widest bar (space-40, 10rem,
+ *   with its gap and label), so every row moves its bar under the labels at the
+ *   same width, at full 1:1 length; only a line still narrower than the bar
+ *   caps it. Nothing runs out of its column.
  */
 function SpaceScale() {
   const entries = Object.entries(space).filter(([k]) => k !== '0') as Array<[string, number]>;
   return (
     <ol className="gap-x-(--gutter) lg:columns-2" aria-label="סולם המרווחים">
       {entries.map(([k, px]) => (
-        <li key={k} className="flex break-inside-avoid flex-wrap items-end gap-x-4 gap-y-2 border-b border-line py-3">
+        <li
+          key={k}
+          className="@container/row flex break-inside-avoid flex-wrap items-end gap-x-4 gap-y-2 border-b border-line py-3 text-caption max-sm:items-baseline"
+        >
           <Num className="whitespace-nowrap text-caption font-medium sm:min-w-[5.5rem]">space-{k}</Num>
-          <span className="flex flex-wrap items-baseline justify-end gap-x-3 gap-y-1 whitespace-nowrap max-sm:flex-1 sm:min-w-[4rem] sm:justify-start">
+          <span className="flex items-baseline justify-end gap-x-3 whitespace-nowrap max-sm:flex-1 max-sm:@max-[calc(10.1em+1.75rem)]/row:basis-full max-sm:@max-[calc(10.1em+1.75rem)]/row:justify-start sm:min-w-[4rem] sm:justify-start">
             <Num className="text-caption text-ink-2">{px}px</Num>
             <Num className="text-micro text-ink-3 sm:hidden">p-{k}</Num>
           </span>
-          <span className="flex min-w-0 flex-wrap items-end gap-2 max-sm:basis-full sm:flex-auto">
+          <span className="flex min-w-0 flex-wrap items-end gap-2 max-sm:basis-full sm:flex-[1_1_calc(10.5rem+2.3em)]">
             <span
               className="block h-3 max-w-full shrink-0 bg-[color-mix(in_oklab,var(--color-sprout)_45%,transparent)]"
               style={{ inlineSize: `${px / 16}rem`, ...ruler }}
@@ -59,7 +70,13 @@ function GridFrames() {
   return (
     <div className="flex flex-wrap items-end gap-x-10 gap-y-8">
       {frames.map((f) => (
-        <figure key={f.w} className="grid min-w-0 gap-3" style={{ inlineSize: `min(100%, ${(f.w * scale) / 16}rem)` }}>
+        // grid-cols-1 (a minmax(0, 1fr) column): the figure's scaled width holds the frame and its
+        // caption; a caption wraps inside it instead of widening the frame off scale
+        <figure
+          key={f.w}
+          className="grid min-w-0 grid-cols-1 gap-3"
+          style={{ inlineSize: `min(100%, ${(f.w * scale) / 16}rem)` }}
+        >
           <div
             className="relative w-full overflow-hidden rounded-sm border border-line-strong bg-surface"
             style={{ aspectRatio: `${f.w} / ${Math.min(f.h, 900)}` }}
@@ -78,16 +95,21 @@ function GridFrames() {
               ))}
             </div>
           </div>
-          {/* three lines for every frame (one fact per line), so frames and captions align */}
+          {/* four lines for every frame, one fact per line, each short enough for the phone
+              frame's quarter-scale 90px, so frames stay to scale and frames and captions align */}
           <figcaption className="grid gap-1 text-caption">
-            <span className="font-bold whitespace-nowrap">
-              {f.label} · <Num>{f.w}</Num>
+            <span className="font-bold">
+              {`${f.label}${NB}· `}
+              <Num>{f.w}</Num>
             </span>
-            <span className="whitespace-nowrap text-ink-2">
+            <span className="text-ink-2">
               <NumText>{`${f.columns} עמודות`}</NumText>
             </span>
-            <span className="whitespace-nowrap text-ink-2">
-              <NumText>{`שוליים ${f.margin} · מרווח ${f.gutter}`}</NumText>
+            <span className="text-ink-2">
+              <NumText>{`שוליים ${f.margin}`}</NumText>
+            </span>
+            <span className="text-ink-2">
+              <NumText>{`מרווח ${f.gutter}`}</NumText>
             </span>
           </figcaption>
         </figure>

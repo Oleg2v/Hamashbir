@@ -124,8 +124,14 @@ function ButtonsOnSoil() {
           כמו בעונה שעברה
         </Button>
         <Button variant="secondary">
-          הזמינו את שלב{NB}
-          <Num>1</Num>
+          {/* one inline run (.btn__label is a flex box: as two items, the „1” broke away from „שלב”) */}
+          <span>
+            {'הזמינו את '}
+            <span className="whitespace-nowrap">
+              שלב{NB}
+              <Num>1</Num>
+            </span>
+          </span>
         </Button>
         <Button variant="ghost">לכל הסניפים</Button>
       </div>
@@ -140,9 +146,22 @@ function ButtonsOnSoil() {
 
 /* ───────────────────────── Inputs ───────────────────────── */
 
+/**
+ * One, two or three fields to a row (by breakpoint, set as --cols), but never a
+ * column narrower than the stepper (its two targets with their margins, the
+ * value and the unit: at most 2 × --target + 5rem) unless the whole row is. At
+ * normal size every breakpoint keeps its count; with 200% text the row drops to
+ * fewer columns instead of pushing the stepper past its column and the page
+ * edge. (`- 1px` keeps sub-pixel rounding from dropping a column.)
+ */
+const fieldRow: CSSProperties = {
+  gridTemplateColumns:
+    'repeat(auto-fill, minmax(min(100%, max(2 * var(--target) + 5rem, (100% - (var(--cols) - 1) * var(--gutter)) / var(--cols) - 1px)), 1fr))',
+};
+
 function Inputs() {
   return (
-    <div className="grid items-start gap-x-(--gutter) gap-y-8 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="grid items-start gap-x-(--gutter) gap-y-8 [--cols:1] sm:[--cols:2] lg:[--cols:3]" style={fieldRow}>
       <TextField id="st-farm" label="שם המשק" placeholder="לדוגמה: משק השדות" hint="יופיע בחשבוניות ובתעודות המשלוח" />
       {/* a frozen keyboard-focus specimen, not a live field */}
       <div inert>
@@ -566,14 +585,15 @@ function PlanTable() {
 function Toasts() {
   return (
     <div className="grid gap-10">
-      <div className="grid gap-3">
+      {/* the caption heads the list's own column: from lg the column sits at inline-end */}
+      <div className="grid w-full max-w-[28rem] gap-3 lg:ms-auto">
         <p className="flex flex-wrap items-center gap-3 text-caption font-bold">
           <span>ארבעת הטונים · דוגמאות סטטיות</span>
           <DemoTag />
         </p>
         {/* a toast-list container: a narrow list (a phone at 200% text) stacks each
             toast's text under its icon and close button instead of widening the page */}
-        <ul className="@container/toast-list grid w-full max-w-[28rem] gap-4 lg:ms-auto" inert>
+        <ul className="@container/toast-list grid gap-4" inert>
           <li>
             <ToastCard
               isStatic
