@@ -6,7 +6,14 @@
  */
 
 /** No-break space: before an en dash, between a number and its Hebrew unit. */
-export const NB = ' ';
+export const NB = '\u00a0';
 
 /** Narrow no-break space: keeps ₪ attached to its amount. */
-export const NNBSP = ' ';
+export const NNBSP = '\u202f';
+
+/**
+ * Word joiner (zero width, silent for screen readers): forbids a line break
+ * where there is no space to protect, e.g. between an inline-block token or
+ * formula and the comma after it, so the comma never opens a line.
+ */
+export const WJ = '\u2060';

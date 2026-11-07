@@ -31,9 +31,10 @@ export function Hero() {
       data-surface="soil"
       aria-labelledby="hero-title"
       // clears the fixed header: bar (4rem, 4.5rem at lg) + section rail
-      // (1.25rem + one target, so sun mode grows with it) + 1.75rem air;
-      // from xl the rail is gone and only the bar remains
-      className="relative overflow-hidden pb-20 pt-[calc(7rem+var(--target))] lg:pb-28 lg:pt-[calc(7.5rem+var(--target))] xl:pt-24"
+      // (1.25rem + one target, so sun mode grows with it) + 1.75rem air; from
+      // xl the rail is gone and only the bar remains. After hydration the
+      // measured --header-h wins when the header is taller (large text wraps it).
+      className="relative overflow-hidden pb-20 pt-[max(calc(7rem+var(--target)),calc(var(--header-h,0px)+1.75rem))] lg:pb-28 lg:pt-[max(calc(7.5rem+var(--target)),calc(var(--header-h,0px)+1.75rem))] xl:pt-[max(6rem,calc(var(--header-h,0px)+1.5rem))]"
     >
       <div className="wrap">
         <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2 border-t border-line pt-4">
