@@ -18,11 +18,30 @@ in stock at the nearest branch.
 | 3     | Polish pass                                                                             | —              |
 | 4     | QA (Lighthouse, axe, RTL) and the 30-second demo path                                   | —              |
 
+Live (unlisted, `noindex`): **https://hamashbir.kikkey.com** → `/style-tile`.
+
 ## Run
 
 ```bash
 npm install
 npm run dev        # http://localhost:3000 → /style-tile
+```
+
+## Build and deploy
+
+The site is a static export (`out/`) served on Cloudflare by an assets-only
+Worker, `hamashbir`, on the agency account, with the custom domain
+`hamashbir.kikkey.com` (`wrangler.jsonc`). `public/_headers` carries the
+`noindex` / `nosniff` headers and `public/_redirects` sends `/` to
+`/style-tile`. Photos are pre-cut to WebP for every `srcset` width
+(`npm run images`, run automatically before dev and build).
+
+```bash
+npm run build && npm run preview   # the export on http://localhost:3100, same headers and redirects as production
+```
+
+```bash
+npm run deploy     # build + wrangler deploy; needs CLOUDFLARE_API_TOKEN in the environment
 ```
 
 ```bash
