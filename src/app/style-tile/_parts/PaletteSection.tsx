@@ -342,7 +342,7 @@ function Ndvi() {
                   <span className="text-micro font-semibold leading-none">
                     {/* a plain space: where a tile is too narrow (200% text), the number drops under שב׳ */}
                     <span aria-hidden="true" className="max-sm:hidden">
-                      שב׳{' '}
+                      {'שב׳ '}
                     </span>
                     <span className="sr-only">שבוע{NB}</span>
                     <Num>{i + 1}</Num>

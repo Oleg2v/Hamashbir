@@ -314,7 +314,8 @@ export function MotionSection() {
           >
             <ReducedPolicy />
             <p className="max-w-[60ch] text-caption text-ink-2">
-              איך: ב־CSS כל <Token>--dur-*</Token> קורס ל־<Num>1ms</Num>, וכל אנימציית JS בודקת את{' '}
+              איך: ב־CSS כל <Token>--dur-*</Token> קורס ל־<Num>1ms</Num>
+              {', וכל אנימציית JS בודקת את '}
               <Token>matchMedia</Token> וקופצת למצב הסופי. מה שנשאר תמיד הוא המצב הסופי&nbsp;– אף פעם לא תוכן חסר.
             </p>
           </Block>

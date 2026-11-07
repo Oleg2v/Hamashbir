@@ -15,6 +15,12 @@
  *    used as quotation marks, em dashes in copy.
  * 3. Shared characters: NB (no-break space) is declared once, as an escape,
  *    in src/lib/typography.ts – a local copy can hold a plain space unseen.
+ * 4. Spaces screen readers lose: a lone JSX {' '} (or `{a} {b}`) beside text
+ *    becomes its own text node; after server rendering React puts a <!-- -->
+ *    marker next to it and Chrome drops the space from the accessibility tree
+ *    („בסניףעין תמר”). Put the space inside the neighbouring string literal:
+ *    {'… במשקל '}<Num>500</Num>. Prettier re-wraps plain text back into
+ *    {' '}, so only a string literal survives.
  *
  * Exempt: SVG geometry attributes, comments, generated tokens.css, and any
  * line carrying `rtl-ok` (with a reason) for an intentional physical value.
@@ -122,6 +128,24 @@ for (const file of files) {
         break;
       }
       if (translateX.test(line)) report(file, i, 'translateX() without var(--dir-sign)');
+    }
+    if (file.endsWith('.tsx')) {
+      const lone = "{' '}";
+      const at = line.indexOf(lone);
+      if (at !== -1) {
+        const before = line.slice(0, at).trimEnd();
+        const after = line.slice(at + lone.length).trim();
+        const next = (lines.slice(i + 1).find((l) => l.trim()) ?? '').trim();
+        const textBefore = before !== '' && before === line.slice(0, at) && !/[>}{(]$/.test(before);
+        const textAfter = after !== '' && !/^[<{)]/.test(after);
+        const textNext = after === '' && next !== '' && !/^[<{)}/]/.test(next);
+        if (textBefore || textAfter || textNext) {
+          report(file, i, "lone {' '} beside JSX text (dropped from the accessibility tree; use {'… '})");
+        }
+      }
+      if (/\{[^{}\n]+\} \{[^{}\n]+\}/.test(line) && !/=\s*\{/.test(line)) {
+        report(file, i, 'lone space between two JSX expressions (dropped from the accessibility tree; use one string)');
+      }
     }
     if (!isCss && /^\s*(?:export\s+)?const\s+NB\s*=/.test(line) && !file.endsWith('lib/typography.ts')) {
       report(file, i, "local NB constant (import { NB } from '@/lib/typography')");

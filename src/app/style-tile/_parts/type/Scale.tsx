@@ -232,7 +232,8 @@ function SunStrip() {
         אין טקסט קטן מ־<Num mono={false}>{SUN_FLOOR}px</Num>&nbsp;תחת שמש של צהריים.
       </h4>
       <p className="text-caption text-ink-2 lg:col-span-6">
-        כך נראה מצב שמש: לבן, דיו שחור, קווים של <Num>{ergonomics.sun.borderWidth}px</Num>&nbsp;וגוף טקסט במשקל{' '}
+        כך נראה מצב שמש: לבן, דיו שחור, קווים של <Num>{ergonomics.sun.borderWidth}px</Num>&nbsp;
+        {'וגוף טקסט במשקל '}
         <Num>500</Num>. הפעילו אותו בסרגל העליון, וערכי „עכשיו” בסולם יעלו לרצפות „בשמש”.
       </p>
     </div>
@@ -249,7 +250,8 @@ export function Scale() {
           <ul className="grid border-b-(length:--bw) border-line text-caption text-ink-2">
             <li className="border-t-(length:--bw) border-line py-2">
               <Code className="text-ink">clamp()</Code> אחד לכל שלב, ב־<Code className="text-ink">rem + vw</Code>, והיחס
-              בין הקצוות לכל היותר <Num>{MAX_RATIO}</Num>&nbsp;– כך שזום <Num>200%</Num>&nbsp;עדיין מגדיל טקסט{' '}
+              בין הקצוות לכל היותר <Num>{MAX_RATIO}</Num>&nbsp;– כך שזום <Num>200%</Num>&nbsp;
+              {'עדיין מגדיל טקסט '}
               <Num lang="en">(WCAG 1.4.4)</Num>.
             </li>
             <li className="border-t-(length:--bw) border-line py-2">
@@ -257,14 +259,14 @@ export function Scale() {
               &nbsp;בשלב <Code>title</Code>, <Num>{top.leading}</Num>&nbsp;בתצוגה.
             </li>
             <li className="border-t-(length:--bw) border-line py-2">
-              שני השלבים הקטנים מוגבהים לרצפת קריאוּת:{' '}
+              {'שני השלבים הקטנים מוגבהים לרצפת קריאוּת: '}
               {floored.map((s, i) => (
                 <span key={s.name}>
                   {i > 0 ? ' ו־' : null}
                   <Num>{s.min}px</Num>
                 </span>
-              ))}{' '}
-              במקום{' '}
+              ))}
+              {' במקום '}
               {floored.map((s, i) => (
                 <span key={s.name}>
                   {i > 0 ? ' ו־' : null}

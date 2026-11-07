@@ -91,6 +91,13 @@ specimens. Anything that reads as a heading is marked up as one.
   measure 45–75 characters.
 - A number and its unit or counted noun are joined by a no-break space:
   `<Num>40</Num>&nbsp;דונם`.
+- A space next to an element lives inside a string literal, never as a lone
+  JSX `{' '}` (or between two expressions, `{a} {b}`): after server
+  rendering React puts a `<!-- -->` marker beside such a node and Chrome
+  drops the space from the accessibility tree, so screen readers hear
+  „בסניףעין תמר”. Write `{'… במשקל '}<Num>500</Num>`; Prettier re-wraps plain
+  text back into `{' '}`, so only a literal survives. `npm run lint:rtl`
+  flags it.
 - An inch mark stays inside the number's isolate, like `%`: `<Num>3/4״</Num>`,
   `<NumText>{'מסנן 2״'}</NumText>`. Outside it, bidi moves the mark to the
   other side of the digits (״2).

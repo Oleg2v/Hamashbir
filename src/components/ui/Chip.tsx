@@ -65,7 +65,8 @@ export function StockChip({
   return (
     <Chip tone={status} className={className}>
       <span>
-        {stockCopy[status]} {branch}
+        {/* one text node: a lone space between two expressions is dropped from the accessibility tree */}
+        {`${stockCopy[status]} ${branch}`}
         {km != null ? (
           <>
             {' · '}

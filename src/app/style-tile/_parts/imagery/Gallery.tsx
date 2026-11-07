@@ -46,8 +46,10 @@ function Sources() {
               <span>
                 <bdi lang="en" dir="ltr">
                   {p.photographer}
-                </bdi>{' '}
-                ב־
+                </bdi>
+                {/* the space shares a text node with ב־: a lone {' '} beside text is dropped from
+                    Chrome's accessibility tree after server rendering */}
+                {' ב־'}
                 <bdi lang="en" dir="ltr">
                   {p.source}
                 </bdi>
@@ -56,8 +58,9 @@ function Sources() {
             <span className="text-micro text-ink-2">
               <bdi lang="en" dir="ltr">
                 {p.licence}
-              </bdi>{' '}
-              · <NumText>{p.edit}</NumText>
+              </bdi>
+              {' · '}
+              <NumText>{p.edit}</NumText>
             </span>
           </li>
         ))}

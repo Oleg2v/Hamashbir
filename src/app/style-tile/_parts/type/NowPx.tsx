@@ -38,7 +38,7 @@ export function NowPx({ target, className }: { target: string; className?: strin
 
   return (
     <span className={className}>
-      עכשיו:{' '}
+      {'עכשיו: '}
       {/* a fixed box (sized in mono ch) holds the digits against the label, so
           rows of readouts line up. The box is positioned, never the <Num>. */}
       <span className="num inline-block min-w-[6ch] text-start">

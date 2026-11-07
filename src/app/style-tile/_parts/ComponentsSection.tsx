@@ -113,7 +113,12 @@ function ButtonsOnSoil() {
           </NumText>
         </p>
       </div>
-      <div className="flex flex-wrap items-center gap-4 lg:col-span-8">
+      {/* specimens that do nothing: the group name tells them apart from the live demo buttons */}
+      <div
+        role="group"
+        aria-label="דוגמאות לסוגי כפתור על אדמה"
+        className="flex flex-wrap items-center gap-4 lg:col-span-8"
+      >
         <Button size="lg">בנו תוכנית עונה</Button>
         <Button variant="secondary" size="lg">
           כמו בעונה שעברה
@@ -598,8 +603,12 @@ function Toasts() {
         </ul>
       </div>
       <div className="grid gap-3">
-        <p className="text-caption font-bold">נסו בעצמכם – ההודעות האמיתיות של המערכת</p>
-        <ToastDemo />
+        <p id="toast-demo-title" className="text-caption font-bold">
+          נסו בעצמכם – ההודעות האמיתיות של המערכת
+        </p>
+        <div role="group" aria-labelledby="toast-demo-title">
+          <ToastDemo />
+        </div>
         <p className="max-w-[62ch] text-caption text-ink-2">
           <NumText>
             {`הודעה פשוטה נעלמת אחרי ${toastLifetime / 1000} שניות ועוצרת בריחוף או בפוקוס. הודעה עם פעולה, ושגיאה, נשארות עד שסוגרים אותן – אף אחד לא צריך להתחרות בשעון כדי ללחוץ „ביטול”. ההכרזה לקורא המסך יוצאת מאזור חי קבוע, והסגירה מחזירה את הפוקוס למקום שבו הייתם.`}
@@ -616,7 +625,7 @@ export function ComponentsSection() {
       id="components"
       intro={
         <p>
-          שישה רכיבים שנושאים את כל האפליקציה. כל אחד נבנה קודם כול למקלדת ולכיוון{' '}
+          {'שישה רכיבים שנושאים את כל האפליקציה. כל אחד נבנה קודם כול למקלדת ולכיוון '}
           <span className="whitespace-nowrap">ימין־לשמאל</span>, עם מצבי ריחוף, פוקוס, לחיצה, השבתה וטעינה{NB}– ועובד על
           נייר, על אדמה ובמצב שמש.
         </p>

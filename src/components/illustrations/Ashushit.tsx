@@ -225,7 +225,7 @@ export function Ashushit({ className, variant = 'assembled', labels = true, titl
           </ol>
           <p className="m-0 text-caption text-ink-2">
             {/* each spec stays whole; a separator may end a line, never start one */}
-            מתאים לצינור{' '}
+            {'מתאים לצינור '}
             <span className="whitespace-nowrap">
               PE <Num>50</Num>
               {NB}מ״מ ·

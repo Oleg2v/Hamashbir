@@ -135,13 +135,14 @@ function Specs() {
           />
         </div>
         <p className="text-micro text-ink-2">
-          לצילום רגיל אין ערוץ אינפרא־אדום, ולכן כאן המדד מחושב מהפיקסלים:{' '}
+          {'לצילום רגיל אין ערוץ אינפרא־אדום, ולכן כאן המדד מחושב מהפיקסלים: '}
           {/* inline-block: the formula moves to the next line whole; it wraps inside only at 200% text */}
           <Num className="inline-block">
             {ndviProxy.k} × (2G − R − B) + {ndviProxy.c}
           </Num>
           , מכויל כך שאדמה חשופה יושבת סביב <Num>{bareSoil.at}</Num> וחופה צפופה סביב{NB}
-          <Num>{canopy.at}</Num>. במוצר: NDVI אמיתי מלוויין{' '}
+          <Num>{canopy.at}</Num>
+          {'. במוצר: NDVI אמיתי מלוויין '}
           <bdi lang="en" dir="ltr">
             Sentinel-2
           </bdi>

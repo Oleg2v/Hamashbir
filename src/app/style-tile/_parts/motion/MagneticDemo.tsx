@@ -117,15 +117,15 @@ export function MagneticDemo() {
       <span className={s.stageStatus}>{status}</span>
       <span className={`${s.readout} text-micro leading-none`} aria-hidden="true">
         <Num>
-          x{' '}
+          {'x '}
           <span ref={rx} className={s.readoutValue}>
             +0.0
-          </span>{' '}
-          · y{' '}
+          </span>
+          {' · y '}
           <span ref={ry} className={s.readoutValue}>
             +0.0
-          </span>{' '}
-          px
+          </span>
+          {' px'}
         </Num>
       </span>
     </div>

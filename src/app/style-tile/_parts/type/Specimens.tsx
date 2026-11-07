@@ -120,7 +120,8 @@ function SansSpecimen() {
         role={fonts.sans.role}
         credit={
           <>
-            בן נתן · עברית לצד <span lang="en">Source Sans</span> · גופן משתנה <Range from={200} to={800} /> ·{' '}
+            בן נתן · עברית לצד <span lang="en">Source Sans</span> · גופן משתנה <Range from={200} to={800} />
+            {' · '}
             <span lang="en">SIL OFL</span>
           </>
         }
@@ -321,7 +322,8 @@ function MonoSpecimen() {
         role={fonts.mono.role}
         credit={
           <>
-            <span lang="en">Mike Abbink, Bold Monday</span> · לטינית וספרות בלבד, משקלים <Num>400/500/600</Num> ·{' '}
+            <span lang="en">Mike Abbink, Bold Monday</span> · לטינית וספרות בלבד, משקלים <Num>400/500/600</Num>
+            {' · '}
             <span lang="en">SIL OFL</span>
           </>
         }
@@ -329,7 +331,8 @@ function MonoSpecimen() {
 
       <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
         <p className="max-w-[68ch] text-caption text-ink-2">
-          ספרות במונו ויחידות בעברית, מחוץ ל־<Code>&lt;Num&gt;</Code>, ורווח בלתי שביר ביניהן:{' '}
+          ספרות במונו ויחידות בעברית, מחוץ ל־<Code>&lt;Num&gt;</Code>
+          {', ורווח בלתי שביר ביניהן: '}
           <Num>{demoFarm.area}</Num>&nbsp;דונם לא נפרדים בסוף שורה.
         </p>
         <span className="flex flex-wrap gap-2">

@@ -198,7 +198,10 @@ export function StaggerField({ title, note, className }: { title: string; note?:
             <code>
               <Num>
                 {/* each half moves whole (inline-block); it wraps inside only at 200% text */}
-                <span className="inline-block">staggerDelay(i, n) =</span>{' '}
+                {/* the space sits outside both inline-blocks with the „=”, so it stays in the
+                    accessibility tree (a lone space between two inline-blocks is dropped) */}
+                <span className="inline-block">staggerDelay(i, n)</span>
+                {' = '}
                 <span className="inline-block">
                   i × min({stagger.stepMs}, {stagger.maxTotalMs} / (n − 1))
                 </span>

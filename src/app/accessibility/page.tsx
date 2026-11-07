@@ -45,13 +45,16 @@ export default function AccessibilityPage() {
                   המחויבות שלנו
                 </h2>
                 <p>
+                  {/* spaces next to elements live inside string literals: a lone {' '} is dropped from
+                      Chrome's accessibility tree after server rendering (lint:rtl flags it) */}
                   הפורטל נבנה מהיום הראשון לפי תקן ישראלי ת״י{NB}
-                  <Num>5568</Num> (המבוסס על{' '}
+                  <Num>5568</Num>
+                  {' (המבוסס על '}
                   <span lang="en" dir="ltr">
                     WCAG 2.0
-                  </span>{' '}
-                  ברמה AA), ובעברית מימין לשמאל. המטרה: שכל חקלאי יוכל לתכנן עונה, לבדוק מלאי ולהזמין{NB}– גם בשטח, בשמש
-                  של צהריים, עם כפפות או עם קורא מסך.
+                  </span>
+                  {' ברמה AA), ובעברית מימין לשמאל. המטרה: שכל חקלאי יוכל לתכנן עונה, לבדוק מלאי ולהזמין'}
+                  {NB}– גם בשטח, בשמש של צהריים, עם כפפות או עם קורא מסך.
                 </p>
               </section>
 
@@ -72,15 +75,15 @@ export default function AccessibilityPage() {
                     ניגודיות טקסט של <Num>4.5:1</Num> לפחות על כל משטח, ומספרים מבודדים כך שלא יתהפכו בטקסט עברי.
                   </li>
                   <li>
-                    הודעות מוקראות בקורא המסך, ופעולות בהודעות אינן נעלמות לפני שאפשר להגיע אליהן:{' '}
+                    {'הודעות מוקראות בקורא המסך, ופעולות בהודעות אינן נעלמות לפני שאפשר להגיע אליהן: '}
                     <kbd className="num" dir="ltr">
                       Alt+T
-                    </kbd>{' '}
-                    מעביר אליהן את הפוקוס, ו־
+                    </kbd>
+                    {' מעביר אליהן את הפוקוס, ו־'}
                     <kbd className="num" dir="ltr">
                       Esc
-                    </kbd>{' '}
-                    סוגר אותן.
+                    </kbd>
+                    {' סוגר אותן.'}
                   </li>
                 </ul>
               </section>

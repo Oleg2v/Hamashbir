@@ -152,11 +152,11 @@ const mdRatio: Record<Exclude<Ratio, 'native'>, string> = {
 export function Credit({ photo, className }: { photo: AerialPhoto; className?: string }) {
   return (
     <span className={className}>
-      צילום:{' '}
+      {'צילום: '}
       <bdi lang="en" dir="ltr">
         {photo.photographer}
-      </bdi>{' '}
-      ·{' '}
+      </bdi>
+      {' · '}
       <bdi lang="en" dir="ltr">
         {photo.source}
       </bdi>
