@@ -46,6 +46,35 @@ function Ratio({ value, className }: { value: number; className?: string }) {
 
 /* ───────────────────────── Soil core: the eight colours ───────────────────────── */
 
+/**
+ * The width a value tuple of n figures takes on a line of its own, as a query on its column: the
+ * column's font is the mono value text, so 1ch is one figure (+0.02ch for rounding). One literal
+ * per length – an rgb triple runs 5–11, an oklch one with its „)” 15–19 – so Tailwind sees each.
+ */
+const wholeFrom: Partial<Record<number, string>> = {
+  5: '@min-[5.02ch]:inline-block',
+  6: '@min-[6.02ch]:inline-block',
+  7: '@min-[7.02ch]:inline-block',
+  8: '@min-[8.02ch]:inline-block',
+  9: '@min-[9.02ch]:inline-block',
+  10: '@min-[10.02ch]:inline-block',
+  11: '@min-[11.02ch]:inline-block',
+  15: '@min-[15.02ch]:inline-block',
+  16: '@min-[16.02ch]:inline-block',
+  17: '@min-[17.02ch]:inline-block',
+  18: '@min-[18.02ch]:inline-block',
+  19: '@min-[19.02ch]:inline-block',
+};
+
+/**
+ * A colour's numbers after their space's name („rgb ”, „oklch(”): wherever the tuple fits on a line
+ * of its own it moves there whole (an inline-block), so a line breaks only after the name; in a
+ * column narrower than the tuple (200% text) it wraps between its numbers like plain text.
+ */
+function Tuple({ children }: { children: string }) {
+  return <span className={wholeFrom[children.length]}>{children}</span>;
+}
+
 function SoilCore() {
   const order = proportions.map((p) => p.key);
   return (
@@ -54,6 +83,8 @@ function SoilCore() {
         const c = palette[key];
         const text = bestText(c.hex);
         const share = proportions.find((p) => p.key === key)?.share ?? 0;
+        const oklch = oklchString(c.hex);
+        const open = oklch.indexOf('(') + 1;
         return (
           <li
             key={key}
@@ -67,19 +98,28 @@ function SoilCore() {
               </span>
             </div>
             <dl className="contents">
-              {/* the value lines wrap between their numbers (200% text). From lg they may first run on
-                  into the gutter, as the longest oklch() does in sun mode at 1024px, so a line wraps
-                  only where it would reach the next column */}
-              <div className="col-span-2 grid gap-0.5 sm:col-span-2 lg:col-span-3 lg:-me-6">
+              {/* at 200% text a value line breaks after its space's name, its numbers kept whole on the
+                  next line (Tuple), and between them only where they are wider than the column. From
+                  lg the lines may first run on into the gutter, as the longest oklch() does in sun mode
+                  at 1024px, so a line wraps only where it would reach the next column. The column is a
+                  size container in the mono value text, for Tuple's queries; its lines keep the body
+                  text they were set in */}
+              <div className="@container col-span-2 grid gap-0.5 font-mono text-micro sm:col-span-2 lg:col-span-3 lg:-me-6 [&>dd]:font-sans [&>dd]:text-body">
                 <dt className="sr-only">ערכי צבע</dt>
                 <dd>
                   <Num className="text-body font-semibold">{c.hex}</Num>
                 </dd>
                 <dd>
-                  <Num className="text-micro">rgb {rgbString(c.hex)}</Num>
+                  <Num className="text-micro">
+                    {'rgb '}
+                    <Tuple>{rgbString(c.hex)}</Tuple>
+                  </Num>
                 </dd>
                 <dd>
-                  <Num className="text-micro">{oklchString(c.hex)}</Num>
+                  <Num className="text-micro">
+                    {oklch.slice(0, open)}
+                    <Tuple>{oklch.slice(open)}</Tuple>
+                  </Num>
                 </dd>
               </div>
               <div className="col-span-2 sm:col-span-2 lg:col-span-4">
@@ -168,44 +208,90 @@ function Pin({ at, edge, children }: { at: number; edge?: 'start' | 'end'; child
 
 const vars = (o: Record<string, string>) => o as CSSProperties;
 const pct = (x: number) => `${Math.round(x * 1e5) / 1e3}%`;
+/** a fraction of the ramp in container units (the ramp spans the label container) */
+const cq = (x: number) => `${Math.round(x * 1e5) / 1e3}cqi`;
 
 /** A stretch of the ramp, as fractions of its length from inline-start. */
 type Span = { from: number; to: number };
 type Edge = 'start' | 'end' | null;
+/** A label's room, and whether an upper-row mark (two rows) bounds it on either side. */
+type Room = Span & { markFrom: boolean; markTo: boolean };
+
+/** How far a lower-row label keeps from an upper-row mark beside it. */
+const CLEAR = '0.4em';
+/** How far an end label may run on past the ramp's end, in one row: into the page margin, short of the viewport. */
+const RUN = 'calc(var(--page-margin) - 4px)';
 
 /**
  * The room a stop label has on its row: halfway to the next label on that row, or up to the
  * ramp's edge. On two rows the lower row also keeps clear of the upper row's marks, which run
  * down past it.
  */
-function room(i: number, rows: 1 | 2): Span {
+function room(i: number, rows: 1 | 2): Room {
   const at = (j: number) => (j >= 0 && j < ndvi.stops.length ? ndvi.stops[j].at : undefined);
   const here = ndvi.stops[i].at;
   const prev = at(i - rows);
   const next = at(i + rows);
   let from = prev === undefined ? 0 : (prev + here) / 2;
   let to = next === undefined ? 1 : (here + next) / 2;
+  let markFrom = false;
+  let markTo = false;
   if (rows === 2 && i % 2 === 1) {
-    from = Math.max(from, at(i - 1) ?? 0);
-    to = Math.min(to, at(i + 1) ?? 1);
+    const before = at(i - 1);
+    const after = at(i + 1);
+    if (before !== undefined && before >= from) {
+      from = before;
+      markFrom = true;
+    }
+    if (after !== undefined && after <= to) {
+      to = after;
+      markTo = true;
+    }
   }
-  return { from, to };
+  return { from, to, markFrom, markTo };
 }
 
 /**
  * A label's box in its room (stops sit inside the ramp): the widest stretch centred on the stop,
- * so the label centres on it. A label whose room reaches a ramp edge may run past that box toward
- * its other side, flush against the edge – the first label flush start, the last flush end –
- * instead of crossing it; past its room's width a label wraps.
+ * so the label centres on it, kept CLEAR of an upper-row mark that bounds the room. A label whose
+ * room reaches a ramp edge may run past that box toward its other side, flush against the edge –
+ * the first label flush start, the last flush end – instead of crossing it; past its room's width
+ * a label wraps.
+ *
+ * In one row a label flush against a ramp end may also run on past it, by up to RUN, before it
+ * wraps (at 320px the first label is a few pixels wider than its room). Once it overflows its room
+ * inside the ramp it slides out past the end – a translate in its own width, so the layout keeps
+ * its place – until it centres on its stop, or as far as its room allows; one that fits stays put.
+ * (The last label's stop sits nearer its neighbour than the ramp's end: its box stops short of
+ * the end and it fits there down to 320px.)
  */
-function place(at: number, { from, to }: Span) {
-  const half = Math.min(at - from, to - at);
+function place(at: number, { from, to, markFrom, markTo }: Room, rows: 1 | 2) {
   const edge: Edge = at - from <= to - at ? (from === 0 ? 'start' : null) : to === 1 ? 'end' : null;
+  const run = rows === 1 && edge !== null;
+  const half = Math.min(at - from, to - at);
+  const clear = (side: boolean) => (side ? CLEAR : '0px');
+  const halfClear =
+    markFrom || markTo ? `min(${pct(at - from)} - ${clear(markFrom)}, ${pct(to - at)} - ${clear(markTo)})` : null;
+  let max = edge ? pct((to - from) / (2 * half)) : '100%';
+  if (halfClear && edge) max = `calc(${cq(to - from)} - ${CLEAR})`;
+  else if (run) max = `calc(${max} + ${RUN})`;
+  let slide: string | undefined;
+  if (run) {
+    // from the ramp's end: the stop (a) and the far side of the room (t); ×1000 makes the slide a
+    // step at the room's width, so a label that fits inside the ramp keeps its place
+    const a = cq(edge === 'start' ? at : 1 - at);
+    const t = cq(edge === 'start' ? to : 1 - from);
+    const out = `clamp(0px, min(max(50% - ${a}, 100% - ${t}), (100% - ${t}) * 1000), ${RUN})`;
+    slide = `calc(var(--dir-sign) * ${edge === 'start' ? -1 : 1} * ${out})`;
+  }
   return {
-    start: pct(at - half),
-    end: pct(1 - at - half),
-    max: edge ? pct((to - from) / (2 * half)) : '100%',
+    start: halfClear ? `calc(${pct(at)} - ${halfClear})` : pct(at - half),
+    end: halfClear ? `calc(${pct(1 - at)} - ${halfClear})` : pct(1 - at - half),
+    max,
     edge,
+    // a sliding label is centred once it wraps (from RUN out), so its lines stay over the ramp
+    align: edge && !run ? edge : ('none' as const),
+    slide,
   };
 }
 
@@ -225,8 +311,8 @@ function StopLabels() {
   return (
     <div className="grid min-h-12 grid-cols-1 content-start gap-y-1">
       {ndvi.stops.map((s, i) => {
-        const one = place(s.at, room(i, 1));
-        const two = place(s.at, room(i, 2));
+        const one = place(s.at, room(i, 1), 1);
+        const two = place(s.at, room(i, 2), 2);
         const lower = i % 2 === 1;
         return (
           <Fragment key={s.at}>
@@ -243,10 +329,11 @@ function StopLabels() {
               <span
                 className={cn(
                   'mx-auto max-inline-(--max) shrink-0 font-semibold @max-[12em]:max-inline-(--max-2)',
-                  textAlign[one.edge ?? 'none'],
-                  textAlignTwoRows[two.edge ?? 'none'],
+                  textAlign[one.align],
+                  textAlignTwoRows[two.align],
+                  one.slide && '[translate:var(--slide)] @max-[12em]:[translate:none]',
                 )}
-                style={vars({ '--max': one.max, '--max-2': two.max })}
+                style={vars({ '--max': one.max, '--max-2': two.max, ...(one.slide ? { '--slide': one.slide } : {}) })}
               >
                 {s.label}
               </span>
@@ -285,17 +372,10 @@ function Ndvi() {
                         : 'mx-auto h-2 w-px bg-line-strong'
                   }
                 />
-                {/* a figure gives way before it touches a neighbour – under 16em across the two beside
-                    the end figures, under 11em the middle pair too; every mark stays */}
-                <Num
-                  className={
-                    i === 1 || i === ndvi.ticks.length - 2
-                      ? '@max-[16em]:invisible'
-                      : i > 0 && i < ndvi.ticks.length - 1
-                        ? '@max-[11em]:invisible'
-                        : undefined
-                  }
-                >
+                {/* every figure while all fit – 16em across, where the pair beside the end figures still
+                    keeps half an em from them; narrower, only the two ends, so the row stays even at
+                    every width. Every mark stays */}
+                <Num className={i > 0 && i < ndvi.ticks.length - 1 ? '@max-[16em]:invisible' : undefined}>
                   {t.toFixed(1)}
                 </Num>
               </Pin>
