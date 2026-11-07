@@ -23,7 +23,7 @@ const shadowClass: Record<(typeof elevations)[number]['name'], string> = {
 
 function Radii() {
   return (
-    <ul className="grid grid-cols-2 items-start gap-x-(--gutter) gap-y-8 sm:grid-cols-4 lg:grid-cols-7">
+    <ul className="grid grid-cols-2 items-start gap-x-(--gutter) gap-y-8 [overflow-wrap:anywhere] sm:grid-cols-4 lg:grid-cols-7">
       {(Object.keys(radii) as Array<keyof typeof radii>).map((k) => (
         <li key={k} className="grid gap-3">
           <span
@@ -44,7 +44,7 @@ function Radii() {
 
 function ElevationRow() {
   return (
-    <ul className="grid grid-cols-2 gap-(--gutter) lg:grid-cols-4">
+    <ul className="grid grid-cols-2 gap-(--gutter) [overflow-wrap:anywhere] lg:grid-cols-4">
       {elevations.map((e) => (
         <li key={e.name} className={`grid min-h-36 content-between rounded-lg p-5 ${shadowClass[e.name]}`}>
           <Num className="text-caption font-medium">shadow-{e.name}</Num>
@@ -92,7 +92,15 @@ function Glows() {
               strokeLinecap="round"
             />
             {[40, 100, 160, 220, 280].map((x) => (
-              <circle key={x} cx={x} cy={x === 160 ? 22 : x < 160 ? 20 : 16} r="3" fill="var(--color-paper)" />
+              // paper dots on soil; on the white sun-mode band they would be holes in the line, so ink
+              <circle
+                key={x}
+                cx={x}
+                cy={x === 160 ? 22 : x < 160 ? 20 : 16}
+                r="3"
+                fill="var(--color-paper)"
+                className="sun:fill-(--ink)"
+              />
             ))}
           </svg>
         </div>

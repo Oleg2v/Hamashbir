@@ -56,7 +56,7 @@ export function Section({ id, title, intro, surface = 'paper', className, childr
     >
       <div className="wrap">
         <header className="grid grid-cols-1 gap-x-(--gutter) gap-y-6 lg:grid-cols-12">
-          <div className="flex items-baseline justify-between gap-4 border-t border-line pt-4 lg:col-span-12">
+          <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-t border-line pt-4 lg:col-span-12">
             <Num className="text-caption font-medium text-ink">{r.num}</Num>
             <span className="text-micro text-ink-2">
               {r.branch} · <Num className="whitespace-nowrap">{r.coords}</Num>

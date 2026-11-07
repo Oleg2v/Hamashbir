@@ -133,6 +133,13 @@
     inset-inline-start: var(--x);
     display: grid;
     max-inline-size: var(--w);
+    /* a soil backing, invisible on the bare headland at normal size; at large
+       text the plate reaches over the rows and pipes and stays legible. The
+       negative margin keeps the text exactly where it was. */
+    margin: -0.125rem -0.25rem;
+    padding: 0.125rem 0.25rem;
+    border-radius: var(--radius-xs);
+    background: color-mix(in oklab, var(--color-soil) 86%, transparent);
   }
 
   .plate::before {

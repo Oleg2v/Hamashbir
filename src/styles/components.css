@@ -580,6 +580,8 @@
   }
 
   :root[data-theme='sun'] .chip--demo {
+    /* a label, not a touch target: it keeps a pill's proportions */
+    --chip-h: 2rem;
     border-width: var(--bw);
   }
 

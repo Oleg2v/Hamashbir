@@ -9,7 +9,10 @@ export function TileFooter() {
     <footer data-surface="soil" className="pb-28 pt-16 lg:pb-24 lg:pt-20">
       <div className="wrap grid gap-10 lg:grid-cols-12">
         <div className="grid content-start gap-4 lg:col-span-4">
-          <Wordmark />
+          {/* a bar container, like the header: the name may break only when the column is that narrow */}
+          <div className="@container/bar">
+            <Wordmark />
+          </div>
           <p className="text-caption text-ink-2">
             לוח סגנון · שלב&nbsp;<Num>0</Num> · קונספט ועיצוב: <span lang="en">Kikkey</span>
           </p>
