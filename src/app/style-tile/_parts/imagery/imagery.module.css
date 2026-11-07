@@ -209,6 +209,18 @@
       position: static;
     }
 
+    /* in the key a plate's soil is the soil section's own ground, so its padding would only indent the
+       text: the key lines up with the photo and the caption, the swatch still marks each plate, and the
+       gap takes the two paddings, so the plates stand as far apart as before. On sun mode's white ground
+       the plates read as boxes, and keep their padding */
+    :root:not([data-theme='sun']) .plates {
+      column-gap: 2rem;
+    }
+
+    :root:not([data-theme='sun']) .plates .plate {
+      padding-inline: 0;
+    }
+
     /* in the key a plate has a line of its own: it may wrap */
     .plates .plate > span {
       white-space: normal;

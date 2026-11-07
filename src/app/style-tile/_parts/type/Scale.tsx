@@ -143,6 +143,12 @@ function UseLine({ use, clamp }: { use: string; clamp: string }) {
 const row =
   'grid grid-cols-[minmax(0,1fr)] gap-x-(--gutter) gap-y-2 border-t-(length:--bw) py-4 lg:grid-cols-12 lg:items-baseline lg:gap-y-1 lg:py-3';
 
+/** the sample column: one track no wider than the row, so a long line wraps instead of widening it */
+const sampleCol = 'grid min-w-0 grid-cols-[minmax(0,1fr)] gap-1 lg:col-span-8';
+
+/** 37cqi holds the display sample's longer word („מוכנה.”, 2.6em) at 96% of its column */
+const displayFit = { fontSize: 'min(var(--text-display), 37cqi)' };
+
 function StepRow({ s }: { s: (typeof typeScale)[number] }) {
   const id = `type-sample-${s.name}`;
   return (
@@ -159,11 +165,19 @@ function StepRow({ s }: { s: (typeof typeScale)[number] }) {
         </p>
         <Spec min={s.min} max={s.max} sun={sunTypeFloor[s.name]} leading={s.leading} tracking={s.tracking} />
       </div>
-      <div className="grid min-w-0 gap-1 lg:col-span-8">
+      <div className={sampleCol}>
         <UseLine use={s.use} clamp={fluidClamp(s.min, s.max)} />
-        <p id={id} className={cn(utility[s.name], 'text-pretty')}>
-          {sample[s.name]}
-        </p>
+        {/* a size container: the display sample may shrink to fit it, which only happens at 200% text on a
+            phone – everywhere else the display step wins (and „עכשיו” reads the size that is drawn) */}
+        <div className="@container">
+          <p
+            id={id}
+            className={cn(utility[s.name], 'text-pretty')}
+            style={s.name === 'display' ? displayFit : undefined}
+          >
+            {sample[s.name]}
+          </p>
+        </div>
       </div>
     </li>
   );
@@ -186,7 +200,7 @@ function PosterRow() {
         </p>
         <Spec min={posterType.min} max={posterType.max} leading={posterType.leading} tracking={posterType.tracking} />
       </div>
-      <div className="grid min-w-0 gap-1 lg:col-span-8">
+      <div className={sampleCol}>
         <UseLine use="מחוץ לסולם" clamp={fluidClamp(posterType.min, posterType.max)} />
         <p className="max-w-[68ch] text-caption text-ink-2">
           {/* a probe for the live reading: the poster size itself, invisible */}

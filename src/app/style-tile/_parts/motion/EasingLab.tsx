@@ -414,8 +414,9 @@ export function EasingLab({ title, note }: { title: string; note?: ReactNode }) 
           className={cn(
             s.curveList,
             // phones and tablets: one swipeable row, bleeding to the page edges. No scroll snapping
-            // (it pulled a focused card back off-screen); cards grow with the text (15rem floor)
-            'grid auto-cols-[max(min(85%,22rem),15rem)] grid-flow-col gap-(--gutter) overflow-x-auto overscroll-x-contain',
+            // (it pulled a focused card back off-screen); cards grow with the text (15rem floor), but never
+            // past the row itself (100%: at 200% text the floor is wider than a phone)
+            'grid auto-cols-[max(min(85%,22rem),min(15rem,100%))] grid-flow-col gap-(--gutter) overflow-x-auto overscroll-x-contain',
             '-mx-(--page-margin) px-(--page-margin) scroll-px-(--page-margin) pb-2',
             // desktop: three columns
             'lg:mx-0 lg:grid-flow-row lg:grid-cols-3 lg:overflow-visible lg:px-0 lg:pb-0',

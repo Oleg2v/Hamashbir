@@ -152,9 +152,12 @@ function SansSpecimen() {
           ))}
         </ol>
 
-        <div className="grid min-w-0 content-start gap-3 xl:col-span-3">
+        {/* a size container: under 12em of its own type (a narrow column at 200% text) the button – its bud
+            and padding grow with the text – can be wider than the sample box; it then scrolls inside the box
+            instead of pushing the page sideways, like the figures strip below */}
+        <div className="@container grid min-w-0 content-start gap-3 xl:col-span-3">
           <h5 className="text-caption font-bold">בממשק: תווית, ערך, רמז וכפתור</h5>
-          <div className="grid min-w-0 gap-5 rounded-lg border-(length:--bw) border-line bg-canvas p-4 sm:p-5">
+          <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-5 rounded-lg border-(length:--bw) border-line bg-canvas p-4 @max-[12em]:overflow-x-auto @max-[12em]:overscroll-x-contain sm:p-5">
             {/* size: the field's intrinsic width stays small, so it never pushes a phone layout sideways */}
             <TextField
               id="type-ui-area"
@@ -247,49 +250,69 @@ const guide = 'relative before:absolute before:inset-y-0 before:start-0 before:w
 const unitCol = 'hidden @sm:table-cell';
 const unitPriceCol = 'hidden @lg:table-cell';
 
+/*
+ * Too narrow for the item beside its figures (under 17.5em of the figure's own type: a phone, sun mode's
+ * larger type, 200% text), each line stacks: the item on a line of its own, its quantity and sum under it,
+ * still two columns of figures on their guides. The table is a grid there (its groups and rows are
+ * subgrids), so the markup carries explicit ARIA roles.
+ */
+const stack = {
+  table: '@max-[17.5em]:grid @max-[17.5em]:grid-cols-[minmax(max-content,1fr)_max-content]',
+  /** thead / tbody / tfoot and every row */
+  group: '@max-[17.5em]:col-span-full @max-[17.5em]:grid @max-[17.5em]:grid-cols-subgrid',
+  /** the item (and its column header): a line of its own */
+  item: '@max-[17.5em]:col-span-full @max-[17.5em]:pb-1',
+  /** a figure: sized by the grid, not the table's 1% trick, right under its item, nearer its guide */
+  num: '@max-[17.5em]:w-auto @max-[17.5em]:pt-0 @max-[17.5em]:ps-1',
+  /** the figures' column headers keep their figures' start */
+  head: '@max-[17.5em]:ps-1',
+};
+
 function OrderTable() {
   return (
-    <table className="w-full border-collapse text-micro @sm:text-caption @lg:text-body">
-      <thead>
-        <tr className="text-micro text-ink-2">
-          <th scope="col" className="pb-2 pe-3 text-start font-semibold">
+    <table role="table" className={cn('w-full border-collapse text-micro @sm:text-caption @lg:text-body', stack.table)}>
+      <thead role="rowgroup" className={stack.group}>
+        <tr role="row" className={cn('text-micro text-ink-2', stack.group)}>
+          <th scope="col" role="columnheader" className={cn('pb-2 pe-3 text-start font-semibold', stack.item)}>
             פריט
           </th>
-          <th scope="col" className="pb-2 ps-2 text-start font-semibold">
+          <th scope="col" role="columnheader" className={cn('pb-2 ps-2 text-start font-semibold', stack.head)}>
             כמות
           </th>
-          <th scope="col" className={cn('pb-2 ps-2 text-start font-semibold', unitCol)}>
+          <th scope="col" role="columnheader" className={cn('pb-2 ps-2 text-start font-semibold', unitCol)}>
             <span className="sr-only">יחידה</span>
           </th>
-          <th scope="col" className={cn('pb-2 ps-2 text-start font-semibold', unitPriceCol)}>
+          <th scope="col" role="columnheader" className={cn('pb-2 ps-2 text-start font-semibold', unitPriceCol)}>
             ליח׳
           </th>
-          <th scope="col" className="pb-2 ps-2 text-start font-semibold">
+          <th scope="col" role="columnheader" className={cn('pb-2 ps-2 text-start font-semibold', stack.head)}>
             סכום
           </th>
         </tr>
       </thead>
-      <tbody>
+      <tbody role="rowgroup" className={stack.group}>
         {order.map((l) => (
-          <tr key={l.id} className="border-t-(length:--bw) border-line">
-            <th scope="row" className="py-2 pe-3 text-start font-semibold">
+          <tr key={l.id} role="row" className={cn('border-t-(length:--bw) border-line', stack.group)}>
+            <th scope="row" role="rowheader" className={cn('py-2 pe-3 text-start font-semibold', stack.item)}>
               <NumText>{l.product}</NumText>
             </th>
-            <td className={cn('w-[1%] whitespace-nowrap py-2 ps-2 text-start', guide)}>
+            <td role="cell" className={cn('w-[1%] whitespace-nowrap py-2 ps-2 text-start', guide, stack.num)}>
               <span className="font-medium">
                 <Num>{formatNumber(l.qty!)}</Num>
               </span>
               {/* narrow figure: the unit stays on its number's line (no-break space), never under it */}
-              <span className="text-micro text-ink-2 @sm:hidden">
-                {'\u00a0'}
-                {l.unit}
-              </span>
+              <span className="text-micro text-ink-2 @sm:hidden">{`${NB}${l.unit}`}</span>
             </td>
-            <td className={cn('w-[1%] whitespace-nowrap py-2 ps-2 pe-3 text-start text-ink-2', unitCol)}>{l.unit}</td>
-            <td className={cn('w-[1%] whitespace-nowrap py-2 ps-2 pe-3 text-start text-ink-2', guide, unitPriceCol)}>
+            <td role="cell" className={cn('w-[1%] whitespace-nowrap py-2 ps-2 pe-3 text-start text-ink-2', unitCol)}>
+              {l.unit}
+            </td>
+            <td
+              role="cell"
+              className={cn('w-[1%] whitespace-nowrap py-2 ps-2 pe-3 text-start text-ink-2', guide, unitPriceCol)}
+            >
               <Num>{formatMoney(l.unitPrice!)}</Num>
             </td>
-            <td className={cn('w-[1%] whitespace-nowrap py-2 ps-2 text-start', guide)}>
+            <td role="cell" className={cn('w-[1%] whitespace-nowrap py-2 ps-2 text-start', guide, stack.num)}>
               <span className="font-medium">
                 <Num>{formatMoney(lineTotal(l)!)}</Num>
               </span>
@@ -297,15 +320,15 @@ function OrderTable() {
           </tr>
         ))}
       </tbody>
-      <tfoot>
-        <tr className="border-t-[length:calc(var(--bw)*2)] border-ink">
-          <th scope="row" className="pt-3 pe-3 text-start font-bold">
+      <tfoot role="rowgroup" className={stack.group}>
+        <tr role="row" className={cn('border-t-[length:calc(var(--bw)*2)] border-ink', stack.group)}>
+          <th scope="row" role="rowheader" className={cn('pt-3 pe-3 text-start font-bold', stack.item)}>
             סה״כ להזמנה
           </th>
-          <td className="pt-3" />
-          <td className={cn('pt-3', unitCol)} />
-          <td className={cn('pt-3', unitPriceCol)} />
-          <td className={cn('w-[1%] whitespace-nowrap pt-3 ps-2 text-start', guide)}>
+          <td role="cell" className={cn('pt-3', stack.num)} />
+          <td role="cell" className={cn('pt-3', unitCol)} />
+          <td role="cell" className={cn('pt-3', unitPriceCol)} />
+          <td role="cell" className={cn('w-[1%] whitespace-nowrap pt-3 ps-2 text-start', guide, stack.num)}>
             <span className="font-semibold">
               <Num>{formatMoney(orderTotal)}</Num>
             </span>

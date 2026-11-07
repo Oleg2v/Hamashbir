@@ -53,6 +53,15 @@ export const cliches = [
 ] as const;
 
 /**
+ * A row: the number hangs in its own column beside the text. On a phone the
+ * column and its gap stop growing with the text (at 320px, 15vw is exactly
+ * 3rem and 5vw exactly 1rem), so at 200% text the copy keeps room for its
+ * longest word („טרקטורים,”) instead of pushing the page sideways.
+ */
+const item =
+  'grid grid-cols-[min(3rem,15vw)_minmax(0,1fr)] content-start gap-x-[min(1rem,5vw)] border-t border-line pt-6 lg:pb-10';
+
+/**
  * Decisions and clichés face each other row by row: two real lists (one per
  * column) on a shared subgrid, so their hairlines line up across the gutter.
  */
@@ -62,14 +71,11 @@ export function StanceSection() {
       id="stance"
       intro={<p>חמש החלטות שאנחנו מתחייבים אליהן, וחמש קלישאות שלא ניגע בהן. זה הקו שכל מסך בשלבים הבאים נמדד מולו.</p>}
     >
-      <div className="grid gap-x-(--gutter) gap-y-16 lg:grid-cols-2 lg:grid-rows-[auto_repeat(5,auto)] lg:gap-y-0">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-x-(--gutter) gap-y-16 lg:grid-cols-2 lg:grid-rows-[auto_repeat(5,auto)] lg:gap-y-0">
         <h3 className="text-h3 lg:col-start-1 lg:row-start-1 lg:pb-8">חמש החלטות נועזות</h3>
         <ol className="grid gap-y-10 lg:col-start-1 lg:row-span-5 lg:row-start-2 lg:grid-rows-subgrid lg:gap-y-0">
           {boldDecisions.map((d, i) => (
-            <li
-              key={d.title}
-              className="grid grid-cols-[3rem_1fr] content-start gap-x-4 border-t border-line pt-6 lg:pb-10"
-            >
+            <li key={d.title} className={item}>
               <Num className="text-caption font-medium text-sprout-ink" aria-hidden="true">
                 {String(i + 1).padStart(2, '0')}
               </Num>
@@ -86,10 +92,7 @@ export function StanceSection() {
         <h3 className="text-h3 lg:col-start-2 lg:row-start-1 lg:pb-8">חמש קלישאות שנמנע מהן</h3>
         <ol className="grid gap-y-10 lg:col-start-2 lg:row-span-5 lg:row-start-2 lg:grid-rows-subgrid lg:gap-y-0">
           {cliches.map((c, i) => (
-            <li
-              key={c.title}
-              className="grid grid-cols-[3rem_1fr] content-start gap-x-4 border-t border-line pt-6 lg:pb-10"
-            >
+            <li key={c.title} className={item}>
               <Num className="text-caption font-medium text-harvest-ink" aria-hidden="true">
                 ×{String(i + 1).padStart(2, '0')}
               </Num>

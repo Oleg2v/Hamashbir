@@ -55,14 +55,16 @@ export function Section({ id, title, intro, surface = 'paper', className, childr
       className={cn('py-(--section-y)', className)}
     >
       <div className="wrap">
-        <header className="grid grid-cols-1 gap-x-(--gutter) gap-y-6 lg:grid-cols-12">
+        {/* a size container: the title is capped by its width, so the longest one-word title
+            („טיפוגרפיה”) fits a 320px phone at 200% text; never binds at normal size */}
+        <header className="@container grid grid-cols-1 gap-x-(--gutter) gap-y-6 lg:grid-cols-12">
           <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-t border-line pt-4 lg:col-span-12">
             <Num className="text-caption font-medium text-ink">{r.num}</Num>
             <span className="text-micro text-ink-2">
               {r.branch} · <Num className="whitespace-nowrap">{r.coords}</Num>
             </span>
           </div>
-          <h2 id={`${id}-title`} className="text-h2 lg:col-span-5">
+          <h2 id={`${id}-title`} className="text-h2 lg:col-span-5" style={{ fontSize: 'min(var(--text-h2), 25cqi)' }}>
             {heading}
           </h2>
           <div className="text-lead text-ink-2 lg:col-span-6 lg:col-start-7 lg:pt-3">{intro}</div>

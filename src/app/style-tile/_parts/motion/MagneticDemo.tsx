@@ -7,6 +7,7 @@ import { Magnetic } from '@/components/ui/Magnetic';
 import { Num } from '@/components/ui/Num';
 import { useToast } from '@/components/ui/Toast';
 import { magnet } from '@/design/tokens';
+import { NB } from '@/lib/typography';
 import { FINE_QUERY, REDUCE_QUERY, useMedia } from './hooks';
 import s from './motion.module.css';
 
@@ -121,11 +122,16 @@ export function MagneticDemo() {
           <span ref={rx} className={s.readoutValue}>
             +0.0
           </span>
-          {' · y '}
-          <span ref={ry} className={s.readoutValue}>
-            +0.0
+          {' · '}
+          {/* „px” never wraps alone: Chrome breaks beside the inline-block value even at a no-break
+              space, so the unit and its value (with its „y”) move to the next line as one group */}
+          <span className="whitespace-nowrap">
+            {'y '}
+            <span ref={ry} className={s.readoutValue}>
+              +0.0
+            </span>
+            {`${NB}px`}
           </span>
-          {' px'}
         </Num>
       </span>
     </div>

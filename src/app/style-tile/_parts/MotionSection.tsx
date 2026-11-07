@@ -41,10 +41,15 @@ const principles = [
 
 function Principles() {
   return (
-    <ol className="grid gap-x-(--gutter) gap-y-14 sm:grid-cols-2 lg:gap-y-20">
+    // one track per column, never wider than the list: at 200% text on a phone the glyph (7.5rem wide)
+    // gives way, shrinking to the room beside its number instead of pushing the page sideways
+    <ol className="grid grid-cols-[minmax(0,1fr)] gap-x-(--gutter) gap-y-14 sm:grid-cols-2 lg:gap-y-20">
       {principles.map(({ Glyph, title, body }, i) => (
-        <li key={title} className="grid content-start gap-4 border-t-(length:--bw) border-line pt-5">
-          <div className="flex items-start justify-between gap-4">
+        <li
+          key={title}
+          className="grid grid-cols-[minmax(0,1fr)] content-start gap-4 border-t-(length:--bw) border-line pt-5"
+        >
+          <div className="flex items-start justify-between gap-4 [&>svg]:min-w-0">
             {/* the list already numbers its items for assistive technology */}
             <Num aria-hidden="true" className="text-caption font-medium text-sprout-ink">
               {String(i + 1).padStart(2, '0')}
@@ -111,7 +116,9 @@ function MagnetSpec() {
     { k: 'כבוי', v: 'מגע, מצביע לא מדויק ותנועה מופחתת – הכפתור פשוט נשאר במקומו' },
   ];
   return (
-    <dl className="grid grid-cols-[4.5rem_minmax(0,1fr)] gap-x-4 gap-y-3 text-caption">
+    // the label column stops growing with the text on a phone (at 320px, 22.5vw is exactly 4.5rem), so at
+    // 200% text a token and its mark („ease-spring ·”) keep room beside it
+    <dl className="grid grid-cols-[min(4.5rem,22.5vw)_minmax(0,1fr)] gap-x-4 gap-y-3 text-caption">
       {rows.map((r) => (
         <div key={r.k} className="contents">
           <dt className="text-ink-3">{r.k}</dt>
