@@ -50,7 +50,7 @@ export function ToastDemo() {
           toast({
             tone: 'info',
             title: 'המלאי עודכן',
-            body: `שלוחת טפטוף 16 מ״מ במלאי ב־${dripAvailability.branchesWithStock}${NB}סניפים`,
+            body: `שלוחת טפטוף 16 מ״מ במלאי ב־${dripAvailability.branchesWithStock} מתוך ${dripAvailability.networkPoints}${NB}נקודות`,
           })
         }
       >

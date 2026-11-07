@@ -1,4 +1,4 @@
-import type { CSSProperties } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 import { Num } from '@/components/ui/Num';
 import { NumText } from '@/components/ui/NumText';
 import { ergonomics, layout, space } from '@/design/tokens';
@@ -98,8 +98,9 @@ function GridFrames() {
 
 /** Touch areas: the three sizes, then the real button at each of them. */
 function Targets() {
-  const items = [
-    { px: 24, title: 'מינימום', note: 'WCAG 2.2 · 2.5.8' },
+  const items: Array<{ px: number; title: string; note: ReactNode }> = [
+    // one LTR isolate: through <NumText> the two numbers were isolated apart and the line read „2.5.8 · 2.2 WCAG”
+    { px: 24, title: 'מינימום', note: <Num lang="en">{`WCAG${NB}2.2${NB}· 2.5.8`}</Num> },
     { px: ergonomics.default.target, title: 'ברירת המחדל', note: 'כל כפתור, צ׳יפ ושדה' },
     { px: ergonomics.sun.target, title: 'מצב שמש', note: 'כפפות עבודה, יד רטובה, שמש של צהריים' },
   ];
@@ -120,9 +121,7 @@ function Targets() {
                 <Num>{t.px}</Num>
                 {NB}פיקסלים · {t.title}
               </span>
-              <span className="text-ink-2">
-                <NumText>{t.note}</NumText>
-              </span>
+              <span className="text-ink-2">{typeof t.note === 'string' ? <NumText>{t.note}</NumText> : t.note}</span>
             </span>
           </li>
         ))}

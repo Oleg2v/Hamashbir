@@ -7,6 +7,7 @@ import { demoFarm, dripAvailability, season } from '@/data/demo-farm';
 import { posterType, typeScale } from '@/design/tokens';
 import { cn } from '@/lib/cn';
 import { formatNumber } from '@/lib/format';
+import { NB } from '@/lib/typography';
 import { Code, CodePoint, Mark } from './bits';
 
 type Rule = {
@@ -217,7 +218,8 @@ const rules: Rule[] = [
     good: (
       <div className="grid gap-1">
         <p className="text-caption font-bold text-ink-2">
-          שלב <Num>2</Num> · השקיה
+          שלב <Num>02</Num>
+          {`${NB}· השקיה`}
         </p>
         <p className={cn(sampleSize, 'font-bold')}>
           טפטוף לחלקה <Num mono={false}>3</Num>
@@ -267,7 +269,7 @@ const rules: Rule[] = [
         <NumText>{para}</NumText>
       </p>
     ),
-    goodNote: 'גובה שורה 1.6 · כ־60 תווים בשורה',
+    goodNote: 'גובה שורה 1.6 · עד כ־60 תווים בשורה',
     badNote: 'גובה שורה 1.15 · בלי גבול מידה',
     span: 4,
   },

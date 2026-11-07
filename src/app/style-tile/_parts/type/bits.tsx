@@ -13,16 +13,22 @@ import { NB } from '@/lib/typography';
  * Token role strings ("ממשק וגוף טקסט · 400 / 600 / 700 / 800"): a slash list
  * of weights is one LTR number run, so it reads 400 → 800 like the range
  * beside it; a trailing "+" stays inside its number ("25px+"); a Latin token
- * name ("title") is set as code, like every other token on the page.
+ * name ("title") is set as code, like every other token on the page. A list
+ * separator never opens a line: the space before „·” is a no-break space, the
+ * rule <NumText> applies.
  */
 const ROLE_PARTS = /(\d+(?:\s*\/\s*\d+)+|\d[\d.,]*(?:px)?\+?|\b[a-z][a-z-]*\b)/;
+const SEPARATOR = / ·/g;
 
 export function RoleText({ children }: { children: string }) {
   return (
     <>
       {children.split(ROLE_PARTS).map((p, i) => {
-        if (i % 2 === 0) return p;
+        if (i % 2 === 0) return p.replace(SEPARATOR, `${NB}·`);
         if (/^[a-z]/.test(p)) return <Code key={i}>{p}</Code>;
+        // a single number stays inline: an inline-block would let the line break between it and its
+        // brackets („(” / „25px+)”), which no space allows
+        if (!p.includes('/')) return <Num key={i}>{p}</Num>;
         // a list is one token: it moves to the next line whole (inline-block); only when it is
         // wider than the line (200% text) does it wrap, and then after a slash, never before one
         return (

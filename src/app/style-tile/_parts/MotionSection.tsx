@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import { seasonOpeningMs } from '@/components/illustrations/SeasonParcels';
 import { Num } from '@/components/ui/Num';
 import { durations, magnet, spring, stagger } from '@/design/tokens';
+import { NB } from '@/lib/typography';
 import { ReducedNote } from './motion/controls';
 import { CountUp } from './motion/CountUp';
 import { DurationLab } from './motion/DurationLab';
@@ -93,7 +94,8 @@ function MagnetSpec() {
       k: 'מעקב',
       v: (
         <>
-          <Token>ease-out-quint</Token>&nbsp;· <Num>{durations.fast.ms}ms</Num>
+          <Token after={`${NB}·${NB}`}>ease-out-quint</Token>
+          <Num>{durations.fast.ms}ms</Num>
         </>
       ),
     },
@@ -101,7 +103,8 @@ function MagnetSpec() {
       k: 'חזרה',
       v: (
         <>
-          קפיץ, <Token>ease-spring</Token>&nbsp;· <Num>{spring.durationMs}ms</Num>, ביציאה מהאזור או מהחלון ובגלילה
+          קפיץ, <Token after={`${NB}·${NB}`}>ease-spring</Token>
+          <Num>{spring.durationMs}ms</Num>, ביציאה מהאזור או מהחלון ובגלילה
         </>
       ),
     },
@@ -126,7 +129,7 @@ const policy: Array<{ what: string; full: ReactNode; reduced: string }> = [
     what: 'השדה במסך הפתיחה',
     full: (
       <>
-        החלקות נשרטטות, השתילים צומחים שורה אחר שורה והקרטונים נערמים&nbsp;· <Num>{seasonOpeningMs}ms</Num>
+        קווי החלקות מצטיירים, השתילים צומחים שורה אחר שורה והקרטונים נערמים&nbsp;· <Num>{seasonOpeningMs}ms</Num>
       </>
     ),
     reduced: 'העונה המוגמרת, מיד – בלי שרטוט ובלי השהיות',
@@ -135,7 +138,8 @@ const policy: Array<{ what: string; full: ReactNode; reduced: string }> = [
     what: 'ספירת מספרים',
     full: (
       <>
-        מאפס אל הערך כשהמספר נכנס לתצוגה&nbsp;· <Token>out-expo</Token>&nbsp;· <Num>{durations.season.ms}ms</Num>
+        מאפס אל הערך כשהמספר נכנס לתצוגה&nbsp;· <Token after={`${NB}·${NB}`}>out-expo</Token>
+        <Num>{durations.season.ms}ms</Num>
       </>
     ),
     reduced: 'הערך הסופי, מהרגע הראשון',
@@ -144,7 +148,8 @@ const policy: Array<{ what: string; full: ReactNode; reduced: string }> = [
     what: 'חשיפת מצב שמש',
     full: (
       <>
-        מעגל שמתרחב מהכפתור&nbsp;· <Token>out-expo</Token>&nbsp;· <Num>{durations.grow.ms}ms</Num>
+        מעגל שמתרחב מהכפתור&nbsp;· <Token after={`${NB}·${NB}`}>out-expo</Token>
+        <Num>{durations.grow.ms}ms</Num>
       </>
     ),
     reduced: 'החלפה מיידית של ערכת הנושא',
@@ -154,7 +159,8 @@ const policy: Array<{ what: string; full: ReactNode; reduced: string }> = [
     full: (
       <>
         עולות ב־<Num>{durations.slow.ms}ms</Num>, נסגרות ב־<Num>{durations.fast.ms}ms</Num>&nbsp;
-        <Token>in-quint</Token>, ופס הזמן מתקצר
+        <Token after=",">in-quint</Token>
+        {' ופס הזמן מתקצר'}
       </>
     ),
     reduced: 'מופיעות ונעלמות במקום; פס הזמן מוסתר והטיימר ממשיך',
@@ -172,7 +178,8 @@ const policy: Array<{ what: string; full: ReactNode; reduced: string }> = [
     what: 'מעברי עמוד',
     full: (
       <>
-        תנועת מצלמה&nbsp;· <Token>in-out-quart</Token>&nbsp;· <Num>{durations.grow.ms}ms</Num>
+        תנועת מצלמה&nbsp;· <Token after={`${NB}·${NB}`}>in-out-quart</Token>
+        <Num>{durations.grow.ms}ms</Num>
       </>
     ),
     reduced: 'חיתוך ישיר, בלי תזוזה',
@@ -245,9 +252,9 @@ export function MotionSection() {
       surface="soil"
       intro={
         <p>
-          תנועה אורגנית, אבל מדויקת: בממשק הזה דברים צומחים&nbsp;– לא קופצים ולא מקפצים. שישה משכים, שש עקומות וכלל
-          השהיה אחד, כולם מקובץ הטוקנים, ואותו ערך עובד ב־CSS, ב־WAAPI וב־GSAP. כל לוח כאן אינטראקטיבי: לחצו „הפעלה” או
-          רחפו מעל עקומה.
+          תנועה אורגנית, אבל מדויקת: בממשק הזה דברים צומחים&nbsp;– לא קופצים ולא מקפצים. שישה משכים ועוד קצב לקפיץ, שש
+          עקומות וכלל השהיה אחד, כולם מקובץ הטוקנים, ואותו ערך עובד ב־CSS, ב־WAAPI וב־GSAP. כל לוח כאן אינטראקטיבי: לחצו
+          „הפעלה” או רחפו מעל עקומה.
         </p>
       }
     >
@@ -260,8 +267,11 @@ export function MotionSection() {
           title="משכים"
           note={
             <>
-              <Token>durations</Token>&nbsp;· שישה ערכים על ציר זמן אחד. כל פס מתמלא בזמן אמת, בדיוק במשך שלו; שנתה קטנה
-              כל <Num>{stagger.stepMs}ms</Num>&nbsp;– צעד ההשהיה בין שורות. <ReducedNote />
+              <Token after={`${NB}·`}>durations</Token>
+              {' שישה ערכים על ציר זמן אחד. לקפיץ יש קצב משלו, '}
+              <Num>{spring.durationMs}ms</Num>
+              {', והוא מוצג עם העקומות. כל פס מתמלא בזמן אמת, בדיוק במשך שלו; שנתה קטנה כל '}
+              <Num>{stagger.stepMs}ms</Num>&nbsp;– צעד ההשהיה בין שורות. <ReducedNote />
             </>
           }
         />
@@ -270,8 +280,8 @@ export function MotionSection() {
           title="עקומות"
           note={
             <>
-              <Token>easings</Token>&nbsp;· הזמן זורם מימין לשמאל, כמו הקריאה. כל כרטיס מתנגן גם לבד: בריחוף, במעבר
-              במקלדת או בכפתור שלו.
+              <Token after={`${NB}·`}>easings</Token>
+              {' הזמן זורם מימין לשמאל, כמו הקריאה. כל כרטיס מתנגן גם לבד: בריחוף, במעבר במקלדת או בכפתור שלו.'}
             </>
           }
         />
@@ -282,7 +292,8 @@ export function MotionSection() {
             title="צמיחה שורה אחר שורה"
             note={
               <>
-                <Token>staggerDelay()</Token>&nbsp;· <Num>{stagger.stepMs}ms</Num>&nbsp;לשורה
+                <Token after={`${NB}·${NB}`}>staggerDelay()</Token>
+                <Num>{stagger.stepMs}ms</Num>&nbsp;לשורה
               </>
             }
           />
@@ -291,7 +302,8 @@ export function MotionSection() {
             title="ספירה"
             note={
               <>
-                <Token>out-expo</Token>&nbsp;· <Num>{durations.season.ms}ms</Num>&nbsp;· פעם אחת, כשהמספר נכנס לתצוגה
+                <Token after={`${NB}·${NB}`}>out-expo</Token>
+                <Num>{durations.season.ms}ms</Num>&nbsp;· פעם אחת, כשהמספר נכנס לתצוגה
               </>
             }
           />
@@ -307,7 +319,8 @@ export function MotionSection() {
             title="תנועה מופחתת"
             note={
               <>
-                <Token>prefers-reduced-motion: reduce</Token>&nbsp;· לא פחות מידע, רק פחות תזוזה
+                <Token after={`${NB}·`}>prefers-reduced-motion: reduce</Token>
+                {' לא פחות מידע, רק פחות תזוזה'}
               </>
             }
             action={<MotionPreference />}

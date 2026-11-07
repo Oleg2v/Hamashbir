@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, type CSSProperties, type ReactNode } from 'react';
 import { Num } from '@/components/ui/Num';
 import { bezierCss, durations, easings, stagger, type DurationKey } from '@/design/tokens';
+import { cn } from '@/lib/cn';
 import { Block } from '../Section';
 import { PlayButton } from './controls';
 import { cancelAll, prefersReducedMotion } from './hooks';
@@ -114,7 +115,9 @@ export function DurationLab({ title, note }: { title: string; note?: ReactNode }
               </span>
               <span className={s.zone}>חשיפה וסיפור</span>
             </div>
-            <span className={s.ruler}>
+            {/* a size container in label em: where the labels would meet (200% text) they thin out by the
+                ruler's own width – a label every 400ms below 32em, then the ends and the UI ceiling below 15em */}
+            <span className={cn(s.ruler, '@container text-micro')}>
               {ticks.map((ms) => (
                 <span
                   key={ms}
@@ -126,7 +129,12 @@ export function DurationLab({ title, note }: { title: string; note?: ReactNode }
               {labels.map((ms, i) => (
                 <span
                   key={ms}
-                  className={`${s.rulerLabel} text-micro leading-none`}
+                  className={cn(
+                    s.rulerLabel,
+                    'text-micro leading-none',
+                    ms % (LABEL_EVERY * 2) !== 0 && '@max-[32em]:hidden',
+                    i > 0 && i < labels.length - 1 && ms !== CEILING && '@max-[15em]:hidden',
+                  )}
                   data-edge={i === 0 ? 'start' : i === labels.length - 1 ? 'end' : undefined}
                   data-minor={ms % (LABEL_EVERY * 2) === 0 ? undefined : ''}
                   style={{ '--at': pct(ms) } as CSSProperties}

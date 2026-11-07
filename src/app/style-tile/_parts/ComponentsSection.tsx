@@ -278,11 +278,14 @@ function StageCard() {
               <span className="size-2 rounded-full bg-ink" aria-hidden="true" />
               <span>
                 במלאי ב־<Num>{dripAvailability.branchesWithStock}</Num>
-                {NB}סניפים
+                {' מתוך '}
+                <Num>{dripAvailability.networkPoints}</Num>
+                {NB}נקודות
               </span>
             </span>
             <span className="text-ink-2">
-              כיסוי&nbsp;<Num>{Math.round(coverage * 100)}%</Num>
+              {/* what the bar measures: planned demand covered, not the share of points with stock */}
+              כיסוי הביקוש&nbsp;<Num>{Math.round(coverage * 100)}%</Num>
             </span>
           </div>
           <div className="h-2 overflow-hidden rounded-full bg-sunken" aria-hidden="true">
@@ -324,15 +327,21 @@ function BranchCard() {
             {NB}ק״מ ממך · <Num>{`${lat.toFixed(2)}°N ${lon.toFixed(2)}°E`}</Num>
           </p>
         </div>
-        <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-caption">
-          <dt className="text-ink-2">א׳–ה׳</dt>
-          <dd>
-            <Num>07:00–16:00</Num>
-          </dd>
-          <dt className="text-ink-2">ו׳</dt>
-          <dd>
-            <Num>07:00–12:00</Num>
-          </dd>
+        {/* each day/hours pair wraps as a unit: when narrow the hours drop under their day,
+            and neither range breaks after its dash */}
+        <dl className="grid gap-y-1 text-caption">
+          <div className="flex flex-wrap gap-x-4">
+            <dt className="min-w-[3em] whitespace-nowrap text-ink-2">א׳–ה׳</dt>
+            <dd>
+              <Num className="whitespace-nowrap">07:00–16:00</Num>
+            </dd>
+          </div>
+          <div className="flex flex-wrap gap-x-4">
+            <dt className="min-w-[3em] whitespace-nowrap text-ink-2">ו׳</dt>
+            <dd>
+              <Num className="whitespace-nowrap">07:00–12:00</Num>
+            </dd>
+          </div>
         </dl>
         <div className="flex flex-wrap gap-2">
           <Chip tone="in">עשושית · במלאי</Chip>
@@ -368,11 +377,12 @@ function Chips() {
         <p className="flex flex-wrap items-center gap-3 text-caption font-bold">
           <span className="inline-flex flex-wrap items-center gap-x-2 gap-y-1">
             <span>מלאי בסניף · צורה, לא צבע:</span>
-            {(['in', 'low', 'out'] as const).map((l, i) => (
+            {/* the separator ends its item, so a wrapped item never opens its line with „·” */}
+            {(['in', 'low', 'out'] as const).map((l, i, all) => (
               <span key={l} className="inline-flex items-center gap-1.5">
-                {i > 0 ? <span aria-hidden="true">·</span> : null}
                 <span className="level-dot" data-level={l} aria-hidden="true" />
                 {l === 'in' ? 'במלאי' : l === 'low' ? 'נמוך' : 'אזל'}
+                {i < all.length - 1 ? <span aria-hidden="true">·</span> : null}
               </span>
             ))}
           </span>
@@ -543,7 +553,7 @@ function PlanTable() {
         rowKey={(r) => r.id}
         rowState={(r) => (r.id === 'seedlings' ? { selected: true } : r.id === 'drip' ? { force: 'hover' } : undefined)}
         footer={{
-          label: 'סה״כ לשלבים מתומחרים · ללא הגנת הצומח',
+          label: `סה״כ לשלבים מתומחרים${NB}· ללא הגנת הצומח`,
           value: <Num className="cell-num">{formatMoney(pricedTotal)}</Num>,
         }}
       />
@@ -587,7 +597,7 @@ function Toasts() {
               isStatic
               tone="info"
               title="המלאי עודכן"
-              body={`שלוחת טפטוף 16 מ״מ במלאי ב־${dripAvailability.branchesWithStock}${NB}סניפים`}
+              body={`שלוחת טפטוף 16 מ״מ במלאי ב־${dripAvailability.branchesWithStock} מתוך ${dripAvailability.networkPoints}${NB}נקודות`}
               progress={0.3}
             />
           </li>
@@ -611,7 +621,7 @@ function Toasts() {
         </div>
         <p className="max-w-[62ch] text-caption text-ink-2">
           <NumText>
-            {`הודעה פשוטה נעלמת אחרי ${toastLifetime / 1000} שניות ועוצרת בריחוף או בפוקוס. הודעה עם פעולה, ושגיאה, נשארות עד שסוגרים אותן – אף אחד לא צריך להתחרות בשעון כדי ללחוץ „ביטול”. ההכרזה לקורא המסך יוצאת מאזור חי קבוע, והסגירה מחזירה את הפוקוס למקום שבו הייתם.`}
+            {`הודעה פשוטה נעלמת אחרי ${toastLifetime / 1000} שניות, והטיימר שלה נעצר בריחוף או בפוקוס. הודעה עם פעולה, ושגיאה, נשארות עד שסוגרים אותן – אף אחד לא צריך להתחרות בשעון כדי ללחוץ „ביטול”. ההכרזה לקורא המסך יוצאת מאזור חי קבוע, והסגירה מחזירה את הפוקוס למקום שבו הייתם.`}
           </NumText>
         </p>
       </div>

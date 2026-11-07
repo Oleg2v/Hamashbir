@@ -1,5 +1,6 @@
 import type { ComponentPropsWithoutRef, ReactNode } from 'react';
 import { cn } from '@/lib/cn';
+import { NB } from '@/lib/typography';
 import { ShieldIcon } from './icons';
 import { Num } from './Num';
 
@@ -69,9 +70,10 @@ export function StockChip({
         {`${stockCopy[status]} ${branch}`}
         {km != null ? (
           <>
-            {' · '}
+            {/* the separator stays at the line end; the distance keeps its unit */}
+            {`${NB}· `}
             <Num>{km.toLocaleString('he-IL')}</Num>
-            {'\u00a0'}ק״מ ממך
+            {`${NB}ק״מ ממך`}
           </>
         ) : null}
       </span>

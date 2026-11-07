@@ -59,7 +59,9 @@ export function ViewportGauge({ minLabel, maxLabel }: { minLabel: React.ReactNod
         </div>
       </div>
 
-      <div aria-hidden="true">
+      {/* a size container in label em: where the breakpoint labels would meet (200% text on a phone),
+          every second one drops to a line of its own under its tick */}
+      <div aria-hidden="true" className="@container text-micro">
         <div className="relative h-4">
           {/* track */}
           <span className={cn('absolute inset-x-0 top-1/2 -translate-y-1/2 rounded-full bg-line-strong', rule)} />
@@ -90,12 +92,16 @@ export function ViewportGauge({ minLabel, maxLabel }: { minLabel: React.ReactNod
             style={{ insetInlineStart: `calc(${pct}% - 0.5rem)` }}
           />
         </div>
-        <div className="relative mt-2 h-5">
-          {marks.map((m) => (
+        <div className="relative mt-2 h-5 @max-[13em]:h-[2.5em]">
+          {marks.map((m, i) => (
             // the positioned wrapper keeps the page direction; the <bdi> inside is LTR
             <span
               key={m.from}
-              className={cn('absolute top-0 text-micro leading-none text-ink-3', centred)}
+              className={cn(
+                'absolute top-0 text-micro leading-none text-ink-3',
+                centred,
+                i % 2 === 1 && '@max-[13em]:top-[1.5em]',
+              )}
               style={{ insetInlineStart: `${at(m.from) * 100}%` }}
             >
               <Num>{m.from}</Num>

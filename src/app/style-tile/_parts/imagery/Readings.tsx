@@ -13,7 +13,7 @@ import { coverScale, Credit, Photo, sizesFor, type Treatment } from './photo';
 
 const bands: ReadonlyArray<{ n: string; name: string; treatment?: Treatment }> = [
   { n: '01', name: 'צילום' },
-  { n: '02', name: 'דרגת אדמה', treatment: 'soil' },
+  { n: '02', name: 'גוון אדמה', treatment: 'soil' },
   { n: '03', name: 'NDVI', treatment: 'ndvi' },
 ];
 
@@ -50,11 +50,13 @@ function Bands() {
   return (
     <div
       role="img"
-      aria-label={`${p.title} באותו צילום, בשלוש רצועות: מימין הצילום כמו שהוא; באמצע דרגת אדמה – גווני חום כהה עד שמנת; משמאל NDVI – המדבר באדום, החלקות המושקות בירוק ובצהוב.`}
+      aria-label={`${p.title} באותו צילום, בשלוש רצועות: מימין הצילום כמו שהוא; באמצע גוון אדמה – מחום כהה עד שמנת; משמאל NDVI – המדבר באדום, החלקות המושקות בירוק ובצהוב.`}
       className={cn(css.frame, css.bands, 'aspect-[4/3] md:aspect-[21/9]')}
     >
       {bands.map((b, i) => (
-        <div key={b.n} className={css.band} style={{ '--band': i } as CSSProperties}>
+        // a size container in micro-text em: a band narrower than its tag at large text (a phone at 200%)
+        // tucks the tag closer to the corner, so the tag wraps inside its band instead of being cut
+        <div key={b.n} className={cn(css.band, '@container text-micro')} style={{ '--band': i } as CSSProperties}>
           <Image
             src={p.src}
             width={p.width}
@@ -70,6 +72,7 @@ function Bands() {
               css.tag,
               css.tagStart,
               'max-w-[calc(100%-1.5rem)] flex-wrap whitespace-normal text-micro font-bold',
+              '@max-[5.5em]:start-1 @max-[5.5em]:top-1 @max-[5.5em]:max-w-[calc(100%-0.5rem)] @max-[5.5em]:gap-1 @max-[5.5em]:px-1',
             )}
           >
             <Num className={css.tagMuted}>{b.n}</Num>
@@ -91,7 +94,7 @@ function Specs() {
         </p>
       </div>
       <div className="grid content-start gap-3 border-t-(length:--bw) border-line pt-4">
-        <SpecTitle n="02">דרגת אדמה</SpecTitle>
+        <SpecTitle n="02">גוון אדמה</SpecTitle>
         <p className="text-body text-ink-2">
           בהירות בלבד: הצללים נופלים לאדמה והאורות לנייר. לרקע מאחורי טקסט ולמשטחי אדמה{NB}– הצילום נשאר, בצבעי המותג.
         </p>
@@ -136,11 +139,18 @@ function Specs() {
         </div>
         <p className="text-micro text-ink-2">
           {'לצילום רגיל אין ערוץ אינפרא־אדום, ולכן כאן המדד מחושב מהפיקסלים: '}
-          {/* inline-block: the formula moves to the next line whole; it wraps inside only at 200% text */}
-          <Num className="inline-block">
-            {ndviProxy.k} × (2G − R − B) + {ndviProxy.c}
-          </Num>
-          , מכויל כך שאדמה חשופה יושבת סביב <Num>{bareSoil.at}</Num> וחופה צפופה סביב{NB}
+          {/* inline-block: the formula moves to the next line whole; it wraps inside only at 200% text.
+              Its comma sits inside the box (Chrome breaks beside an inline-block even at a word joiner),
+              so the comma never opens a line */}
+          <span className="inline-block">
+            <Num>
+              {ndviProxy.k} × (2G − R − B) + {ndviProxy.c}
+            </Num>
+            ,
+          </span>
+          {' מכויל כך שאדמה חשופה יושבת סביב '}
+          <Num>{bareSoil.at}</Num>
+          {`${NB}וחופה צפופה סביב${NB}`}
           <Num>{canopy.at}</Num>
           {'. במוצר: NDVI אמיתי מלוויין '}
           <bdi lang="en" dir="ltr">

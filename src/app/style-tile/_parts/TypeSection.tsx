@@ -1,3 +1,4 @@
+import { DemoTag } from '@/components/ui/Chip';
 import { Rules } from './type/Rules';
 import { Scale } from './type/Scale';
 import { Specimens } from './type/Specimens';
@@ -15,8 +16,8 @@ export function TypeSection() {
       id="type"
       intro={
         <p>
-          שלוש משפחות, ולכל אחת תפקיד: אחת מכריזה, אחת מסבירה ואחת סופרת. סולם נזיל של תשעה שלבים שנושם עם המסך ועולה
-          לרצפות קריאוּת בשמש של צהריים&nbsp;– וכללי סדר שמכבדים את העברית עד הגרש האחרון.
+          שלוש משפחות, ולכל אחת תפקיד: אחת מכריזה, אחת מסבירה ואחת סופרת. סולם נזיל של תשעה שלבים שנושם עם המסך ולא יורד
+          מתחת לסף הקריאוּת גם בשמש של צהריים&nbsp;– וכללי סדר שמכבדים את העברית עד הגרש האחרון.
         </p>
       }
     >
@@ -36,7 +37,8 @@ export function TypeSection() {
           <Scale />
         </Block>
 
-        <Block title="כללי סדר עבריים" note="שמונה כללים · נכון מול שגוי, כפי שהדפדפן מציג אותם">
+        {/* the examples print the demo farm's figures: the tag sits under the note */}
+        <Block title="כללי סדר עבריים" note="שמונה כללים · נכון מול שגוי, כפי שהדפדפן מציג אותם" action={<DemoTag />}>
           <Rules />
         </Block>
       </div>

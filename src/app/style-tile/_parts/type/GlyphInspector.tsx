@@ -147,12 +147,14 @@ export function GlyphInspector({ lead }: { lead?: ReactNode }) {
           lead != null && 'border-t-(length:--bw) border-line pt-6 xl:border-t-0 xl:pt-0',
         )}
       >
-        <div className="relative">
+        {/* a size container in micro-text em: where the drawing is too short for its labels (200% text on a
+            phone, or 200% text in sun mode) the labels leave the lines and form a key under it */}
+        <div className="@container relative text-micro">
           <svg
             viewBox={`0 0 ${W} ${H}`}
             className={cn(styles.anatomy, 'block h-auto w-full overflow-visible')}
             role="img"
-            aria-label={`אנטומיה של ${letter ? `האות ${letter.name}` : 'המילה שלך'} על ארבעה קווים מנחים: עולה, קו עליון, קו בסיס ויורדת.`}
+            aria-label={`אנטומיה של ${letter ? `האות ${letter.name}` : 'המילה „שלך”'} על ארבעה קווים מנחים: עולה, קו עליון, קו בסיס ויורדת.`}
           >
             {/* the body zone: where every Hebrew letter lives */}
             <rect x={0} y={Y.top} width={W} height={BASE - Y.top} className="fill-tint-hover" />
@@ -188,7 +190,8 @@ export function GlyphInspector({ lead }: { lead?: ReactNode }) {
             </g>
           </svg>
 
-          {/* line labels: HTML so they stay readable at every width */}
+          {/* line labels: HTML so they stay readable at every width. In the key (a narrow container) each one
+              is a row under the drawing, top line first, led by a sample of its line */}
           {lines.map((l) => {
             const on = hot.includes(l.key);
             return (
@@ -199,9 +202,18 @@ export function GlyphInspector({ lead }: { lead?: ReactNode }) {
                   'pointer-events-none absolute inset-x-0 flex justify-between text-micro leading-none',
                   // the descender's label hangs under its line; the others stand on theirs
                   l.key === 'desc' ? 'items-start pt-1' : '-translate-y-full items-end pb-1',
+                  '@max-[16em]:static @max-[16em]:mt-2 @max-[16em]:translate-none @max-[16em]:items-center @max-[16em]:justify-start @max-[16em]:gap-2 @max-[16em]:p-0',
                 )}
                 style={{ top: `${(Y[l.key] / H) * 100}%` }}
               >
+                <span
+                  className={cn(
+                    'hidden w-6 shrink-0 transition-[border-color] duration-(--dur-fast) ease-out-quint @max-[16em]:block',
+                    l.strong ? 'border-t-[length:calc(var(--bw)*2)]' : 'border-t-(length:--bw)',
+                    l.dash && 'border-dashed',
+                    on ? 'border-sprout-ink' : 'border-line-strong',
+                  )}
+                />
                 <span className={cn(styles.lineLabel, on ? 'font-bold text-sprout-ink' : 'text-ink-2')}>{l.label}</span>
                 <Num className={cn('hidden sm:inline', on ? 'text-sprout-ink' : 'text-ink-3')}>{l.em}</Num>
               </div>
@@ -247,7 +259,7 @@ export function GlyphInspector({ lead }: { lead?: ReactNode }) {
             האלף־בית: <Num>22</Num>&nbsp;אותיות ו־<Num>5</Num>&nbsp;סופיות
           </h5>
           <p className="text-micro text-ink-2">
-            בחרו אות&nbsp;– בעכבר, במגע או בחצים במקלדת. השם של אות סופית מסומן בקו תחתון.
+            בחרו אות&nbsp;– בעכבר, במגע או בחצים במקלדת. אות סופית מסומנת במילה „סופית” בקו תחתון.
           </p>
         </div>
 
@@ -262,7 +274,7 @@ export function GlyphInspector({ lead }: { lead?: ReactNode }) {
               checked={sel === WORD}
               onChange={() => setSel(WORD)}
               className="sr-only"
-              aria-label="המילה שלך"
+              aria-label="המילה „שלך”"
             />
             <span aria-hidden="true" className={cn(styles.cellGlyph, 'font-display text-h3 leading-none')}>
               שלך

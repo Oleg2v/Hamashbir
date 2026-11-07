@@ -1,4 +1,5 @@
 import type { CSSProperties, ReactNode } from 'react';
+import { DemoTag } from '@/components/ui/Chip';
 import { Num } from '@/components/ui/Num';
 import { demoFarm } from '@/data/demo-farm';
 import {
@@ -46,7 +47,7 @@ const utility: Record<TypeStepName, string> = {
 const sample: Record<TypeStepName, ReactNode> = {
   micro: (
     <>
-      מחירי דמו&nbsp;· כולל מע״מ&nbsp;· עודכן ב־<Num>{formatDate(new Date(2026, 10, 6))}</Num>
+      מחירי דמו&nbsp;· לפני מע״מ&nbsp;· עודכן ב־<Num>{formatDate(new Date(2026, 10, 6))}</Num>
     </>
   ),
   caption: (
@@ -234,7 +235,7 @@ function SunStrip() {
       <p className="text-caption text-ink-2 lg:col-span-6">
         כך נראה מצב שמש: לבן, דיו שחור, קווים של <Num>{ergonomics.sun.borderWidth}px</Num>&nbsp;
         {'וגוף טקסט במשקל '}
-        <Num>500</Num>. הפעילו אותו בסרגל העליון, וערכי „עכשיו” בסולם יעלו לרצפות „בשמש”.
+        <Num>500</Num>. הפעילו אותו בסרגל העליון, וערכי „עכשיו” בסולם יעלו לערכי „בשמש”.
       </p>
     </div>
   );
@@ -259,7 +260,7 @@ export function Scale() {
               &nbsp;בשלב <Code>title</Code>, <Num>{top.leading}</Num>&nbsp;בתצוגה.
             </li>
             <li className="border-t-(length:--bw) border-line py-2">
-              {'שני השלבים הקטנים מוגבהים לרצפת קריאוּת: '}
+              {'שני השלבים הקטנים מוגדלים עד סף הקריאוּת: '}
               {floored.map((s, i) => (
                 <span key={s.name}>
                   {i > 0 ? ' ו־' : null}
@@ -304,10 +305,14 @@ export function Scale() {
       </div>
 
       <div className="grid gap-3">
-        <p className="text-caption text-ink-2">
-          מהקטן לגדול, כמו צמח: <Num>{typeScale.length}</Num>&nbsp;שלבים, כל אחד עם טקסט אמיתי מהמוצר בגודל האמיתי שלו.
-          הערך „בשמש” הוא הרצפה של השלב במצב שמש.
-        </p>
+        {/* the samples print demo prices, a date and a distance: the caption carries the demo tag */}
+        <div className="flex flex-wrap items-baseline gap-x-6 gap-y-2">
+          <p className="max-w-[72ch] text-caption text-ink-2">
+            מהקטן לגדול, כמו צמח: <Num>{typeScale.length}</Num>&nbsp;שלבים, כל אחד עם טקסט אמיתי מהמוצר בגודל האמיתי
+            שלו. הערך „בשמש” הוא הגודל המינימלי של השלב במצב שמש.
+          </p>
+          <DemoTag />
+        </div>
         <div>
           <ol aria-label="תשעת שלבי הסולם, מהקטן לגדול">
             {typeScale.map((s) => (

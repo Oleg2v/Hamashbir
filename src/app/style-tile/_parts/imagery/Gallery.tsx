@@ -35,8 +35,8 @@ function Sources() {
     <div className="grid gap-3 border-t-(length:--bw) border-line pt-5">
       <p className="max-w-[72ch] text-caption text-ink-2">
         <span className="font-bold text-ink">מקורות ורישיונות. </span>
-        דוגמאות זמניות מספריות פתוחות. שני הרישיונות מתירים שימוש מסחרי בלי חובת קרדיט, ונתנו קרדיט בכל זאת; בשלב הבא –
-        צילומי לוויין ורחפן של המשקים עצמם.
+        דוגמאות זמניות מספריות פתוחות. שני הרישיונות מתירים שימוש מסחרי בלי חובת קרדיט, ובכל זאת אנחנו מציינים את
+        הצלמים; בשלב הבא – צילומי לוויין ורחפן של המשקים עצמם.
       </p>
       <ul className="grid gap-x-(--gutter) sm:grid-cols-3">
         {aerialPhotos.map((p) => (

@@ -30,7 +30,7 @@ The bare `transition` utilities default to `--dur-fast` + `ease-out-quint`.
 | Radius                                    | `rounded-none` `-xs` (4) `-sm` (8) `-md` (12) `-lg` (20) `-xl` (32) `-full`                                                                                                                                                                                                                                 |
 | Shadow                                    | `shadow-raised` `shadow-float` `shadow-overlay` `shadow-inset` `shadow-glow-sprout` `shadow-glow-water`                                                                                                                                                                                                     |
 | Easing                                    | `ease-out-quint` (UI default) `ease-out-expo` `ease-in-out-quart` `ease-in-quint` (exits) `ease-growth` `ease-spring`                                                                                                                                                                                       |
-| Duration                                  | `duration-(--dur-instant                                                                                                                                                                                                                                                                                    | fast | base | slow | grow | season)` — 80/160/240/400/720/1200 ms |
+| Duration                                  | `duration-(--dur-instant \| fast \| base \| slow \| grow \| season)` — 80/160/240/400/720/1200 ms: six durations, plus the spring's own pace, `--dur-spring` (800 ms), used with `ease-spring` only                                                                                                         |
 | Space                                     | Tailwind integer steps only (`p-1` = 4px … `p-40` = 160px). Layout vars: `--page-margin`, `--gutter`, `--section-y`, `--target`, `--target-lg`                                                                                                                                                              |
 
 Use `.wrap` for the page container (max 1440px, responsive margins).
@@ -98,6 +98,13 @@ specimens. Anything that reads as a heading is marked up as one.
   „בסניףעין תמר”. Write `{'… במשקל '}<Num>500</Num>`; Prettier re-wraps plain
   text back into `{' '}`, so only a literal survives. `npm run lint:rtl`
   flags it.
+- Punctuation after an inline-block (a `<Token>`, a formula box) goes inside
+  the box, after the isolate: `<Token after=",">in-quint</Token>`. Chrome
+  allows a line break on both sides of an inline-block even beside a no-break
+  space or a word joiner, so outside the box a comma or „·” can open a line.
+  A number right after the token takes its space inside too, as a no-break
+  space (``after={`${NB}·${NB}`}``): a lone space beside an inline-block is
+  dropped from the accessibility tree.
 - An inch mark stays inside the number's isolate, like `%`: `<Num>3/4״</Num>`,
   `<NumText>{'מסנן 2״'}</NumText>`. Outside it, bidi moves the mark to the
   other side of the digits (״2).

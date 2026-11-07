@@ -298,14 +298,14 @@ export const radii = {
   xs: { px: 4, use: 'תגיות, קוד' },
   sm: { px: 8, use: 'תפריטים, תאים' },
   md: { px: 12, use: 'שדות קלט' },
-  lg: { px: 20, use: 'כרטיסים, טוסטים' },
+  lg: { px: 20, use: 'כרטיסים, הודעות' },
   xl: { px: 32, use: 'גיליונות, מודאלים' },
   full: { px: 9999, use: 'כפתורים, צ׳יפים' },
 } as const;
 
 export const elevations = [
   { name: 'raised', varName: 'elevRaised', he: 'מורם', use: 'כרטיסים, שורות פעילות' },
-  { name: 'float', varName: 'elevFloat', he: 'צף', use: 'תפריטים, טוסטים, כפתור מגנטי' },
+  { name: 'float', varName: 'elevFloat', he: 'צף', use: 'תפריטים, הודעות, כפתור מגנטי' },
   { name: 'overlay', varName: 'elevOverlay', he: 'שכבה', use: 'מודאלים, גיליונות' },
   { name: 'inset', varName: 'elevInset', he: 'שקוע', use: 'שדות קלט, תאים שקועים' },
 ] as const;
@@ -373,7 +373,7 @@ export const easings = {
     bezier: [0.64, 0, 0.78, 0] as Bezier,
     gsap: 'power4.in',
     he: 'יציאה בלבד',
-    use: 'סגירת טוסט, הסתרה – תמיד קצר',
+    use: 'סגירת הודעה, הסתרה – תמיד קצר',
   },
   growth: {
     pace: 'grow' as DurationKey,

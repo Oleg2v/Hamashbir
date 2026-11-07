@@ -1,9 +1,11 @@
+import { DemoTag } from '@/components/ui/Chip';
 import { Num } from '@/components/ui/Num';
 import { NumText } from '@/components/ui/NumText';
 import { NB } from '@/lib/typography';
 import { Section } from './Section';
 
-export const boldDecisions = [
+/** `demo`: the statement prints invented figures, so it carries a demo tag */
+export const boldDecisions: ReadonlyArray<{ title: string; body: string; demo?: boolean }> = [
   {
     title: 'הגלילה היא העונה',
     body: `מטפורה אחת מקצה לקצה: השדה במסך הפתיחה עובר עונה שלמה בגלילה${NB}– אדמה חשופה, שתילה, טפטוף, חופה, NDVI, פרי, קרטונים${NB}– ואותו עמוד שדרה של חמישה שלבים מארגן את המתכנן, הקטלוג והניווט. אין תפריט מחלקות ענק.`,
@@ -11,6 +13,7 @@ export const boldDecisions = [
   {
     title: 'שלט מורשת מול מכשיר מדידה',
     body: `Suez One בגודל פוסטר מול IBM Plex Mono לכל כמות. המספרים במרכז${NB}– 40 דונם, 50,000 מ׳${NB}– והם צומחים כמו יבול, לא קופצים כמו מונה.`,
+    demo: true,
   },
   {
     title: 'NDVI – שפת הנתונים',
@@ -24,7 +27,7 @@ export const boldDecisions = [
     title: 'אור הוא מידע',
     body: `קנבס אדמה מט שבו רק שני דברים זוהרים: מים (קווי הטפטוף) ופעולה (נבט). כל השאר חומר${NB}– אדמה, נייר, קרטון. אם משהו מאיר, יש לו סיבה.`,
   },
-] as const;
+];
 
 export const cliches = [
   {
@@ -75,6 +78,7 @@ export function StanceSection() {
                 <p className="max-w-[56ch] text-body text-ink-2">
                   <NumText>{d.body}</NumText>
                 </p>
+                {d.demo ? <DemoTag className="justify-self-start" /> : null}
               </div>
             </li>
           ))}

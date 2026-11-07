@@ -84,7 +84,9 @@ function SoilCore() {
               </div>
               <div className="col-span-2 sm:col-span-2 lg:col-span-4">
                 <dt className="sr-only">תפקיד</dt>
-                <dd className="text-caption font-semibold">{c.role}</dd>
+                <dd className="text-caption font-semibold">
+                  <NumText>{c.role}</NumText>
+                </dd>
               </div>
               <div className="col-span-2 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 sm:col-span-2 lg:col-span-2 lg:grid lg:justify-items-end lg:gap-1">
                 <dt className="sr-only">היקף שימוש וניגודיות</dt>
@@ -313,10 +315,7 @@ function Ndvi() {
       <div className="grid gap-x-(--gutter) gap-y-12 lg:grid-cols-12">
         <figure className="grid content-start gap-3 lg:col-span-7">
           <figcaption className="flex flex-wrap items-baseline justify-between gap-2">
-            <span className="text-caption font-bold">
-              שימוש: מפת חום שבועית · חלקה{NB}
-              <Num>3</Num> · תפוח אדמה, שדה פתוח, אביב
-            </span>
+            <span className="text-caption font-bold">{`שימוש: מפת חום שבועית${NB}· משק אחר: תפוח אדמה, שדה פתוח, אביב`}</span>
             <DemoTag />
           </figcaption>
           {/* 5 then 7 per row (sun-mode type floors included), but never a tile narrower than its

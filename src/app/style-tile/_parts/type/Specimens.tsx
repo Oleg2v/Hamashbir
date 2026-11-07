@@ -9,6 +9,7 @@ import { demoFarm, lineTotal, planLines, prices, season } from '@/data/demo-farm
 import { fonts } from '@/design/tokens';
 import { formatDate, formatMoney, formatNumber } from '@/lib/format';
 import { cn } from '@/lib/cn';
+import { NB, WJ } from '@/lib/typography';
 import { Code, Range, RoleText } from './bits';
 import { GlyphInspector } from './GlyphInspector';
 
@@ -62,7 +63,10 @@ function DisplaySpecimen() {
         role={fonts.display.role}
         credit={
           <>
-            מיכל סהר · משקל אחד, <Num>400</Num> · עברית ולטינית · <span lang="en">SIL OFL</span>
+            {`מיכל סהר${NB}· משקל אחד, `}
+            <Num>400</Num>
+            {`${NB}· עברית ולטינית${NB}· `}
+            <span lang="en">SIL OFL</span>
           </>
         }
       />
@@ -120,8 +124,11 @@ function SansSpecimen() {
         role={fonts.sans.role}
         credit={
           <>
-            בן נתן · עברית לצד <span lang="en">Source Sans</span> · גופן משתנה <Range from={200} to={800} />
-            {' · '}
+            {`בן נתן${NB}· עברית לצד `}
+            <span lang="en">Source Sans</span>
+            {`${NB}· גופן משתנה `}
+            <Range from={200} to={800} />
+            {`${NB}· `}
             <span lang="en">SIL OFL</span>
           </>
         }
@@ -322,8 +329,10 @@ function MonoSpecimen() {
         role={fonts.mono.role}
         credit={
           <>
-            <span lang="en">Mike Abbink, Bold Monday</span> · לטינית וספרות בלבד, משקלים <Num>400/500/600</Num>
-            {' · '}
+            <span lang="en">Mike Abbink, Bold Monday</span>
+            {`${NB}· לטינית וספרות בלבד, משקלים `}
+            <Num>400/500/600</Num>
+            {`${NB}· `}
             <span lang="en">SIL OFL</span>
           </>
         }
@@ -370,10 +379,16 @@ function MonoSpecimen() {
             <span className="text-caption font-bold">למה מונו: אותם מספרים, שני גופנים</span>
             <span className="text-micro text-ink-2">
               באסיסטנט הספרות פרופורציונליות&nbsp;– במדידה <Num>1111</Num>&nbsp;צר בכ־<Num>8%</Num>&nbsp;מ־
-              <Num>8888</Num>,
-              {/* the token moves to the next line whole; it breaks at its hyphen only when wider than a line */}
-              ו־<Code className="inline-block">tabular-nums</Code> לא משנה דבר: אין לגופן ספרות טבלאיות. לכן כל מספר
-              עובר לפלקס מונו.
+              <Num>8888</Num>
+              {', '}
+              {/* ו־ and the token move to the next line together, as one box; only a box wider than the line
+                  (200% text on a phone) wraps inside, at the token's hyphen. The word joiner keeps the maqaf
+                  from ending a line („ו־tabular-” is still narrower than „בכ־8% מ־8888,” above it) */}
+              <span className="inline-block">
+                {`ו־${WJ}`}
+                <Code>tabular-nums</Code>
+              </span>
+              {' לא משנה דבר: אין לגופן ספרות טבלאיות. לכן כל מספר עובר לפלקס מונו.'}
             </span>
           </figcaption>
           {/* side by side while both lists fit at their own width, stacked otherwise (sun mode, 200% text) */}
