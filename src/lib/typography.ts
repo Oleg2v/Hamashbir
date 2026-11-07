@@ -13,7 +13,9 @@ export const NNBSP = '\u202f';
 
 /**
  * Word joiner (zero width, silent for screen readers): forbids a line break
- * where there is no space to protect, e.g. between an inline-block token or
- * formula and the comma after it, so the comma never opens a line.
+ * between two characters where there is no space to protect, e.g. after a
+ * maqaf („ו־” + the next word). It does NOT hold beside an inline-block in
+ * Chromium: punctuation after an inline-block token goes inside its box
+ * (Token's `after`, or one shared inline-block) – see docs/design-system.md.
  */
 export const WJ = '\u2060';
