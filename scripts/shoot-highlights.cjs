@@ -50,6 +50,10 @@ const moments = [
     await page.waitForTimeout(2800); // let the opening sequence finish
     const file = path.join(out, `${name}.jpg`);
     if (clip) {
+      // fixed chrome renders at its first-screen position in a full-page capture: keep it out
+      await page.addStyleTag({
+        content: 'header[data-page-header], .demo-badge, .skip-link { visibility: hidden !important; }',
+      });
       const top = await page.evaluate(
         (sel) => document.querySelector(sel).getBoundingClientRect().top + scrollY,
         selector,
