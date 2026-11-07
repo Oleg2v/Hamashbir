@@ -43,3 +43,8 @@ next-env.d.ts
 # review screenshots
 /shots/
 *.log
+
+# static export, pre-cut images, wrangler state
+/out/
+/public/images/aerial/_w/
+.wrangler/

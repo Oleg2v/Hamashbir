@@ -10,7 +10,8 @@ import { TypeSection } from '../../style-tile/_parts/TypeSection';
 /**
  * Dev-only isolation bench: /lab/<part> renders one piece of the style tile
  * on its own so it can be screenshotted without the rest of the page.
- * Returns 404 in production builds.
+ * Named page.dev.tsx: next.config.ts includes that extension in `next dev`
+ * only, so production builds have no /lab at all.
  */
 const parts: Record<string, () => React.ReactNode> = {
   parcels: () => (
@@ -69,6 +70,13 @@ const parts: Record<string, () => React.ReactNode> = {
   motion: () => <MotionSection />,
   type: () => <TypeSection />,
 };
+
+/** The static export needs the parts listed up front (dev only: this file is page.dev.tsx). */
+export function generateStaticParams() {
+  return Object.keys(parts).map((part) => ({ part }));
+}
+
+export const dynamicParams = false;
 
 export default async function LabPage({ params }: { params: Promise<{ part: string }> }) {
   if (process.env.NODE_ENV === 'production') notFound();

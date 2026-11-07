@@ -1,21 +1,27 @@
 import type { NextConfig } from 'next';
+import { deviceSizes, imageSizes } from './src/lib/image-widths';
 
+const dev = process.env.NODE_ENV !== 'production';
+
+/**
+ * A static export (out/), served on Cloudflare by an assets-only Worker
+ * (wrangler.jsonc). What a server would otherwise do lives in public/:
+ * _headers (noindex, nosniff, caching) and _redirects (/ → /style-tile).
+ * Images are pre-cut to every srcset width (npm run images) and picked by a
+ * custom loader, so next/image stays responsive without an optimiser.
+ */
 const nextConfig: NextConfig = {
+  output: 'export',
   reactStrictMode: true,
   poweredByHeader: false,
   devIndicators: false,
-  async headers() {
-    return [
-      {
-        // Demo hygiene: unlisted concept, never indexed.
-        source: '/:path*',
-        headers: [
-          { key: 'X-Robots-Tag', value: 'noindex, nofollow, noarchive, nosnippet, noimageindex' },
-          { key: 'Referrer-Policy', value: 'no-referrer' },
-          { key: 'X-Content-Type-Options', value: 'nosniff' },
-        ],
-      },
-    ];
+  // the /lab bench (page.dev.tsx) exists in `next dev` only
+  pageExtensions: dev ? ['dev.tsx', 'tsx', 'ts'] : ['tsx', 'ts'],
+  images: {
+    loader: 'custom',
+    loaderFile: './src/lib/image-loader.ts',
+    deviceSizes,
+    imageSizes,
   },
 };
 

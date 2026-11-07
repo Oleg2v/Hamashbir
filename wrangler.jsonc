@@ -1,0 +1,18 @@
+{
+  // Static export (next build → out/) served by an assets-only Worker on the
+  // agency account, like the other concept demos: <client>.kikkey.com.
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "hamashbir",
+  "account_id": "be9447e281c6e9198712ade2d0241029",
+  "compatibility_date": "2026-11-01",
+  "assets": {
+    "directory": "./out",
+    // /style-tile is served from style-tile.html
+    "html_handling": "auto-trailing-slash",
+    "not_found_handling": "404-page",
+  },
+  // unlisted: only the custom domain, no workers.dev or preview URLs
+  "workers_dev": false,
+  "preview_urls": false,
+  "routes": [{ "pattern": "hamashbir.kikkey.com", "custom_domain": true }],
+}
