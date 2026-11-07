@@ -41,6 +41,10 @@ npm run build && npm run preview   # the export on http://localhost:3100, same h
 ```
 
 ```bash
+npm run qa         # against the preview: horizontal overflow, axe (WCAG A/AA) and console errors, 320–1440, normal and sun
+```
+
+```bash
 npm run deploy     # build + wrangler deploy; needs CLOUDFLARE_API_TOKEN in the environment
 ```
 
