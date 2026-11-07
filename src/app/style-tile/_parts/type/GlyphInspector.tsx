@@ -17,7 +17,8 @@ const METRICS = { asc: 0.766, top: 0.594, desc: 0.156 } as const;
 /* SVG drawing space. The glyph is centred a little toward inline-end, so the
    line labels at inline-start (right) never collide with the word. */
 const W = 720;
-const H = 270;
+/* room under the descender line for its label, which sits below it (above, it touched the baseline) */
+const H = 304;
 const FS = 250;
 const BASE = 225;
 const CX = 316;
@@ -93,6 +94,29 @@ export const letters: Array<{ ch: string; name: string; zone: Zone; final?: bool
 
 const WORD = 'word';
 
+/** the word's caption; the no-break spaces keep each one-letter word with the word that follows it */
+const WORD_CAPTION =
+  'שלוש אותיות, שלושה אזורים: ש\u00A0בגוף האות, ל\u00A0עולה מעל הקו העליון, ך\u00A0יורדת מתחת לקו הבסיס.';
+
+/** every caption the inspector can show: stacked invisibly, they reserve the tallest one's height */
+const ALL_CAPTIONS = [WORD_CAPTION, ...new Set(Object.values(zoneCopy))];
+
+/** the caption's title line: the letter (or the word) and its code points */
+function NameLine({ letter }: { letter?: (typeof letters)[number] }) {
+  return (
+    <>
+      <span className="text-body font-extrabold">{letter ? letter.name : 'המילה „שלך”'}</span>
+      {letter ? (
+        <CodePoint ch={letter.ch} className="text-caption text-ink-2" />
+      ) : (
+        <span className="text-caption text-ink-2">
+          <CodePoint ch="ש" /> <CodePoint ch="ל" /> <CodePoint ch="ך" />
+        </span>
+      )}
+    </>
+  );
+}
+
 /**
  * Letter anatomy, live. Hebrew has no capitals and no x-height: letters hang
  * from a top line, one letter ascends and five descend. Pick any of the 27
@@ -109,10 +133,7 @@ export function GlyphInspector({ lead }: { lead?: ReactNode }) {
   const hot = emphasis[zone ?? 'word'];
 
   // the name is already the caption's title; the line below it says only where the letter lives
-  const caption = letter
-    ? zoneCopy[letter.zone]
-    : // no-break spaces keep each one-letter word with the word that follows it
-      'שלוש אותיות, שלושה אזורים: ש\u00A0בגוף האות, ל\u00A0עולה מעל הקו העליון, ך\u00A0יורדת מתחת לקו הבסיס.';
+  const caption = letter ? zoneCopy[letter.zone] : WORD_CAPTION;
 
   return (
     <div className="grid gap-x-(--gutter) gap-y-6 lg:grid-cols-12">
@@ -174,7 +195,11 @@ export function GlyphInspector({ lead }: { lead?: ReactNode }) {
               <div
                 key={l.key}
                 aria-hidden="true"
-                className="pointer-events-none absolute inset-x-0 flex -translate-y-full items-end justify-between pb-1 text-micro leading-none"
+                className={cn(
+                  'pointer-events-none absolute inset-x-0 flex justify-between text-micro leading-none',
+                  // the descender's label hangs under its line; the others stand on theirs
+                  l.key === 'desc' ? 'items-start pt-1' : '-translate-y-full items-end pb-1',
+                )}
                 style={{ top: `${(Y[l.key] / H) * 100}%` }}
               >
                 <span className={cn(styles.lineLabel, on ? 'font-bold text-sprout-ink' : 'text-ink-2')}>{l.label}</span>
@@ -184,20 +209,30 @@ export function GlyphInspector({ lead }: { lead?: ReactNode }) {
           })}
         </div>
 
+        {/* Each line keeps the height of its longest version (the word's title, the tallest caption),
+            stacked invisibly in the same cell: picking a letter never moves what sits below. */}
         <figcaption className="grid gap-1 border-t-(length:--bw) border-line pt-3">
-          <p className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-            <span className="text-body font-extrabold">{letter ? letter.name : 'המילה „שלך”'}</span>
-            {letter ? (
-              <CodePoint ch={letter.ch} className="text-caption text-ink-2" />
-            ) : (
-              <span className="text-caption text-ink-2">
-                <CodePoint ch="ש" /> <CodePoint ch="ל" /> <CodePoint ch="ך" />
-              </span>
-            )}
-          </p>
-          <p className="max-w-[60ch] text-caption text-ink-2" aria-live="polite">
-            {caption}
-          </p>
+          <div className="grid">
+            <p
+              aria-hidden="true"
+              className="invisible col-start-1 row-start-1 flex flex-wrap items-baseline gap-x-3 gap-y-1"
+            >
+              <NameLine />
+            </p>
+            <p className="col-start-1 row-start-1 flex flex-wrap items-baseline gap-x-3 gap-y-1">
+              <NameLine letter={letter} />
+            </p>
+          </div>
+          <div className="grid max-w-[60ch] text-caption text-ink-2">
+            {ALL_CAPTIONS.map((c) => (
+              <p key={c} aria-hidden="true" className="invisible col-start-1 row-start-1">
+                {c}
+              </p>
+            ))}
+            <p className="col-start-1 row-start-1" aria-live="polite">
+              {caption}
+            </p>
+          </div>
         </figcaption>
       </figure>
 

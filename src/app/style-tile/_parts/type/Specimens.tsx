@@ -216,8 +216,9 @@ const tiles: Array<{ label: string; value: ReactNode; span: string }> = [
   { label: 'עלות הטפטוף', value: <Num>{formatMoney(dripCost)}</Num>, span: 'col-span-2 lg:@min-[54rem]:col-span-4' },
   { label: 'מדד צמחייה · מתחת לרשת', value: <Num>0.78</Num>, span: 'lg:@min-[54rem]:col-span-2' },
   { label: 'ממטיר העשושית', value: <Num>AR044</Num>, span: 'lg:@min-[54rem]:col-span-2' },
-  // ״ is a strong RTL character: the LRM after it keeps "× 2" on its LTR side
-  { label: 'מסנן דיסקים', value: <Num>{'2״\u200E × 2'}</Num>, span: 'lg:@min-[54rem]:col-span-2' },
+  // ״ is a strong RTL character: the LRM after it keeps "× 2" on its LTR side; no-break spaces keep
+  // the product whole (values wrap only at a real space, like the coordinates below)
+  { label: 'מסנן דיסקים', value: <Num>{'2״\u200E\u00a0×\u00a02'}</Num>, span: 'lg:@min-[54rem]:col-span-2' },
   // the section's own route stamp (03): the Jezreel Valley branch shares the Migdal HaEmek site
   { label: 'סניף עמק יזרעאל', value: <Num>32.67°N 35.24°E</Num>, span: 'col-span-2 lg:@min-[54rem]:col-span-5' },
   // the demo farm's branch and the hero's promise: ordered in the morning, picked up today
@@ -341,9 +342,9 @@ function MonoSpecimen() {
           the strip scrolls sideways inside its frame instead of clipping (WCAG 1.4.4) */}
       <dl className="mt-4 grid grid-flow-row-dense grid-cols-[repeat(2,minmax(min-content,1fr))] gap-(--bw) overflow-x-auto overflow-y-hidden overscroll-x-contain rounded-lg border-(length:--bw) border-line bg-line lg:@min-[54rem]:grid-cols-[repeat(12,minmax(min-content,1fr))]">
         {tiles.map((t) => (
-          <div key={t.label} className={cn('grid min-w-0 content-between gap-3 bg-surface p-4', t.span)}>
+          <div key={t.label} className={cn('grid min-w-0 content-between gap-3 bg-surface p-3 sm:p-4', t.span)}>
             <dt className="text-caption text-ink-2">{t.label}</dt>
-            <dd className="whitespace-nowrap text-title">{t.value}</dd>
+            <dd className="text-title">{t.value}</dd>
           </div>
         ))}
       </dl>
@@ -372,15 +373,15 @@ function MonoSpecimen() {
               עובר לפלקס מונו.
             </span>
           </figcaption>
-          {/* side by side while both columns fit, stacked when the text is large */}
-          <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,9rem),1fr))] gap-4">
+          {/* side by side while both lists fit at their own width, stacked otherwise (sun mode, 200% text) */}
+          <div className="flex flex-wrap gap-4">
             {(
               [
                 { name: 'Assistant', mono: false, ok: false },
                 { name: 'IBM Plex Mono', mono: true, ok: true },
               ] as const
             ).map((f) => (
-              <div key={f.name} className="grid min-w-0 content-start gap-3 overflow-x-auto">
+              <div key={f.name} className="grid min-w-0 grow basis-[max-content] content-start gap-3 overflow-x-auto">
                 <p className="grid justify-items-start gap-2 text-micro">
                   <span lang="en" className="font-semibold">
                     {f.name}

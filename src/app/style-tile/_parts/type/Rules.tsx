@@ -241,7 +241,9 @@ const rules: Rule[] = [
     title: (
       <>
         {/* Assistant digits in a heading: Plex's full-cell period reads "1 . 6" at this size */}
-        גובה שורה <Num mono={false}>1.6</Num>, ושורות של{' '}
+        {/* one text node up to the number: a lone {' '} before a <bdi> drops out of Chrome's accessible name */}
+        גובה שורה <Num mono={false}>1.6</Num>
+        {', ושורות של '}
         <Num mono={false} className="whitespace-nowrap">
           45–75
         </Num>
@@ -294,7 +296,7 @@ function Pane({ ok, note, children }: { ok: boolean; note: ReactNode; children: 
  * closed card spends no height on it and an open one shows the text right
  * under the title it explains.
  */
-function Why({ children }: { children: ReactNode }) {
+function Why({ topic, children }: { topic: ReactNode; children: ReactNode }) {
   return (
     <details className="group">
       <summary
@@ -306,7 +308,8 @@ function Why({ children }: { children: ReactNode }) {
         )}
       >
         למה
-        <span className="sr-only">&nbsp;– ההסבר המלא</span>
+        {/* the rule's title makes each of the eight names unique („למה – ההסבר המלא: …”) */}
+        <span className="sr-only">&nbsp;– ההסבר המלא: {topic}</span>
         <ChevronDownIcon
           size={16}
           strokeWidth={2}
@@ -345,7 +348,7 @@ export function Rules() {
               </span>
               <span>{r.title}</span>
             </h4>
-            <Why>{typeof r.why === 'string' ? <NumText>{r.why}</NumText> : r.why}</Why>
+            <Why topic={r.title}>{typeof r.why === 'string' ? <NumText>{r.why}</NumText> : r.why}</Why>
             {/* wide rules compare side by side; the measure rule gives the bad pane the long line it needs.
                 The panes stretch to the card's height, so a taller neighbour leaves no hole above the coda. */}
             <div

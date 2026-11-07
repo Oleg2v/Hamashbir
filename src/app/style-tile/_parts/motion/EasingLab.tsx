@@ -150,7 +150,8 @@ function revealFocused(e: React.FocusEvent<HTMLUListElement>) {
   const cr = card.getBoundingClientRect();
   const r = cr.width <= hi - lo ? cr : (e.target as HTMLElement).getBoundingClientRect();
   const dx = r.left < lo ? r.left - lo : r.right > hi ? r.right - hi : 0;
-  if (dx) row.scrollBy({ left: dx, behavior: prefersReducedMotion() ? 'auto' : 'smooth' });
+  // rtl-ok: getBoundingClientRect and scrollBy are both physical, so the offset is too
+  if (dx) row.scrollBy({ left: dx, behavior: prefersReducedMotion() ? 'auto' : 'smooth' }); // rtl-ok
 }
 
 function CurveCard({ c, signal, pace }: { c: CurveSpec; signal: Signal; pace: Pace }) {
